@@ -76,4 +76,4 @@ ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);
 
 -- 6. Update logo di database
 -- Logo di halaman ScanQR dan Dashboard dibaca dari tabel ini
-UPDATE `t_setting_aplikasi` SET `file` = 'logosmkHD.png';
+UPDATE `t_setting_aplikasi` SET `file` = 'logo_smkn2.png';

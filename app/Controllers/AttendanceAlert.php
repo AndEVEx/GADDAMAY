@@ -87,6 +87,28 @@ class AttendanceAlert extends Controller
     }
 
     /**
+     * Settings page for attendance alert configuration
+     */
+    public function settings()
+    {
+        $data = [
+            'title' => 'Pengaturan Peringatan Kehadiran',
+            'settings' => $this->getSettings(),
+            'rombels' => $this->getRombels(),
+        ];
+
+        echo view('index/sidebar');
+        echo view('func');
+        echo view('index/navbar', [
+            'nama' => session()->get('nama'),
+            'title' => 'Pengaturan Peringatan',
+            'nav' => 'Pengaturan'
+        ]);
+        echo view('attendance/settings', $data);
+        echo view('index/footer');
+    }
+
+    /**
      * Scan for new alerts - run daily via cron or after weekly report
      */
     public function scan()
