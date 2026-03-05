@@ -12,13 +12,13 @@
             <div class="">
                 <div class="main-menu-header">
                     <?php if (session()->get('level') == 1 || session()->get('level') == 4) { ?>
-                        <img class="img-radius" src="<?= base_url() ?>/image/<?= session()->get('foto'); ?>"
+                        <img class="img-radius" src="<?= base_url() ?>image/<?= session()->get('foto'); ?>"
                             alt="User-Profile-Image">
                     <?php } elseif (session()->get('level') == 2) { ?>
-                        <img class="img-radius" src="<?= base_url() ?>/image/guru/<?= session()->get('foto'); ?>"
+                        <img class="img-radius" src="<?= base_url() ?>image/guru/<?= session()->get('foto'); ?>"
                             alt="User-Profile-Image">
                     <?php } else { ?>
-                        <img class="img-radius" src="<?= base_url() ?>/image/siswa/<?= session()->get('foto'); ?>"
+                        <img class="img-radius" src="<?= base_url() ?>image/siswa/<?= session()->get('foto'); ?>"
                             alt="User-Profile-Image">
                     <?php } ?>
                     <div class="user-details">
@@ -234,7 +234,7 @@
                             </ul>
                         </li>
 
-                    <?php
+                        <?php
                     }
                     ?>
                 <?php } elseif (session()->get('level') != 4) { ?>

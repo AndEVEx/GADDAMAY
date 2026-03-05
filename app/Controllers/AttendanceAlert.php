@@ -44,8 +44,13 @@ class AttendanceAlert extends Controller
             'currentStatus' => $status,
         ];
 
+        echo view('index/sidebar');
         echo view('func');
-        echo view('index/sidebar', $data);
+        echo view('index/navbar', [
+            'nama' => session()->get('nama'),
+            'title' => 'Peringatan Kehadiran',
+            'nav' => 'Peringatan'
+        ]);
         echo view('attendance/alerts', $data);
         echo view('index/footer');
     }
@@ -70,8 +75,13 @@ class AttendanceAlert extends Controller
             'filters' => $filters,
         ];
 
+        echo view('index/sidebar');
         echo view('func');
-        echo view('index/sidebar', $data);
+        echo view('index/navbar', [
+            'nama' => session()->get('nama'),
+            'title' => 'Laporan Peringatan Kehadiran',
+            'nav' => 'Laporan'
+        ]);
         echo view('attendance/report', $data);
         echo view('index/footer');
     }

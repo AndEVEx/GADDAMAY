@@ -61,7 +61,7 @@
       <!-- HEADER -->
       <header class="header-section d-flex flex-column flex-md-row align-items-center justify-content-between">
         <div class="d-flex align-items-center mb-3 mb-md-0">
-          <img src="<?= base_url() ?>/image/<?= $getLogo ?>" alt="Logo Sekolah" class="logo-sekolah me-4" />
+          <img src="<?= base_url() ?>image/<?= $getLogo ?>" alt="Logo Sekolah" class="logo-sekolah me-4" />
           <div>
             <h3 class="school-name mb-0">SMKN 2 Indramayu</h3>
             <span class="school-subtitle">Absensi Digital</span>
@@ -106,8 +106,8 @@
   </div>
 
   <!-- AUDIO -->
-  <audio id="audioSuccess" src="<?= base_url() ?>/file/berhasil.mp3" preload="auto"></audio>
-  <audio id="audioError" src="<?= base_url() ?>/file/gagal.mp3" preload="auto"></audio>
+  <audio id="audioSuccess" src="<?= base_url() ?>file/berhasil.mp3" preload="auto"></audio>
+  <audio id="audioError" src="<?= base_url() ?>file/gagal.mp3" preload="auto"></audio>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>

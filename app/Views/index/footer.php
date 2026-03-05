@@ -5,16 +5,16 @@
 </footer>
 
 <!-- Required Js -->
-<script src="<?= base_url() ?>/template/assets/js/vendor-all.min.js"></script>
-<script src="<?= base_url() ?>/template/assets/js/plugins/bootstrap.min.js"></script>
-<script src="<?= base_url() ?>/template/assets/js/ripple.js"></script>
-<script src="<?= base_url() ?>/template/assets/js/pcoded.min.js"></script>
-<script src="<?= base_url() ?>/template/assets/js/plugins/apexcharts.min.js"></script>
+<script src="<?= base_url() ?>template/assets/js/vendor-all.min.js"></script>
+<script src="<?= base_url() ?>template/assets/js/plugins/bootstrap.min.js"></script>
+<script src="<?= base_url() ?>template/assets/js/ripple.js"></script>
+<script src="<?= base_url() ?>template/assets/js/pcoded.min.js"></script>
+<script src="<?= base_url() ?>template/assets/js/plugins/apexcharts.min.js"></script>
 
-<script src="<?= base_url() ?>/template/assets/js/webcamjs/webcam.min.js"></script>
+<script src="<?= base_url() ?>template/assets/js/webcamjs/webcam.min.js"></script>
 
 <!-- prism Js -->
-<script src="<?= base_url() ?>/template/assets/js/plugins/prism.js"></script>
+<script src="<?= base_url() ?>template/assets/js/plugins/prism.js"></script>
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/js/bootstrap.min.js"></script>
