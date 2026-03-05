@@ -73,3 +73,7 @@ INSERT INTO `wa_settings` (`key`, `value`) VALUES
 ('notification_paused', '0'),
 ('notification_pause_reason', '')
 ON DUPLICATE KEY UPDATE `value` = VALUES(`value`);
+
+-- 6. Update logo di database
+-- Logo di halaman ScanQR dan Dashboard dibaca dari tabel ini
+UPDATE `t_setting_aplikasi` SET `file` = 'logosmkHD.png';

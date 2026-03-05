@@ -369,7 +369,6 @@ class WaNotification extends Controller
                 ", [$field, $value, $value]);
             }
         }
-
         return redirect()->to('/WaNotification/settings')->with('success', 'Pengaturan berhasil disimpan');
     }
 
@@ -383,9 +382,18 @@ class WaNotification extends Controller
         $status1 = $waGateway->checkStatus(0);
         $status2 = $waGateway->checkStatus(1);
 
+        // Save connection status to wa_settings
+        $isConnected = ($status1['connected'] ?? false) && ($status1['logged_in'] ?? false);
+        $statusValue = $isConnected ? 'connected' : 'disconnected';
+        $this->db->query("
+            INSERT INTO wa_settings (`key`, value) VALUES ('gateway_status', ?)
+            ON DUPLICATE KEY UPDATE value = ?
+        ", [$statusValue, $statusValue]);
+
         return $this->response->setJSON([
             'success' => true,
             'gateway_url' => $waGateway->getBaseUrl(),
+            'gateway_connected' => $isConnected,
             'sender_1' => [
                 'connected' => $status1['connected'] ?? false,
                 'logged_in' => $status1['logged_in'] ?? false,

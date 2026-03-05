@@ -356,41 +356,62 @@
             method: 'GET',
             headers: { 'Accept': 'application/json' }
         })
-        .then(response => response.json())
-        .then(data => {
-            let message = 'Status Gateway:\n\n';
-            message += 'URL: ' + data.gateway_url + '\n\n';
-            
-            message += 'Pengirim 1:\n';
-            if (data.sender_1.connected && data.sender_1.logged_in) {
-                message += '✅ Terhubung & Login\n';
-            } else if (data.sender_1.connected) {
-                message += '⚠️ Terhubung tapi belum login\n';
-            } else {
-                message += '❌ Tidak terhubung\n';
-                if (data.sender_1.error) message += '   Error: ' + data.sender_1.error + '\n';
-            }
-            
-            message += '\nPengirim 2:\n';
-            if (data.sender_2.connected && data.sender_2.logged_in) {
-                message += '✅ Terhubung & Login\n';
-            } else if (data.sender_2.connected) {
-                message += '⚠️ Terhubung tapi belum login\n';
-            } else if (data.sender_2.error && !data.sender_2.error.includes('not found')) {
-                message += '❌ Tidak terhubung\n';
-                message += '   Error: ' + data.sender_2.error + '\n';
-            } else {
-                message += '➖ Tidak dikonfigurasi\n';
-            }
-            
-            alert(message);
-        })
-        .catch(error => {
-            alert('Gagal memeriksa gateway:\n' + error.message);
-        })
-        .finally(() => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-        });
+            .then(response => response.json())
+            .then(data => {
+                // Update visual status icon
+                const statusIcon = document.querySelector('.status-icon');
+                const statusTitle = statusIcon.parentElement.querySelector('h5');
+                const statusDesc = statusIcon.parentElement.querySelector('p');
+                const iconEl = statusIcon.querySelector('i');
+
+                if (data.gateway_connected) {
+                    statusIcon.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+                    iconEl.className = 'feather icon-wifi text-white';
+                    statusTitle.className = 'text-success';
+                    statusTitle.textContent = 'Terhubung';
+                    statusDesc.textContent = 'Gateway siap mengirim pesan';
+                } else {
+                    statusIcon.style.background = 'linear-gradient(135deg, #636e72, #b2bec3)';
+                    iconEl.className = 'feather icon-wifi-off text-white';
+                    statusTitle.className = 'text-muted';
+                    statusTitle.textContent = 'Tidak Terhubung';
+                    statusDesc.textContent = 'Pastikan server gateway berjalan';
+                }
+
+                // Show detail alert
+                let message = 'Status Gateway:\n\n';
+                message += 'URL: ' + data.gateway_url + '\n\n';
+
+                message += 'Pengirim 1:\n';
+                if (data.sender_1.connected && data.sender_1.logged_in) {
+                    message += '✅ Terhubung & Login\n';
+                } else if (data.sender_1.connected) {
+                    message += '⚠️ Terhubung tapi belum login\n';
+                } else {
+                    message += '❌ Tidak terhubung\n';
+                    if (data.sender_1.error) message += '   Error: ' + data.sender_1.error + '\n';
+                }
+
+                message += '\nPengirim 2:\n';
+                if (data.sender_2.connected && data.sender_2.logged_in) {
+                    message += '✅ Terhubung & Login\n';
+                } else if (data.sender_2.connected) {
+                    message += '⚠️ Terhubung tapi belum login\n';
+                } else if (data.sender_2.error && !data.sender_2.error.includes('not found')) {
+                    message += '❌ Tidak terhubung\n';
+                    message += '   Error: ' + data.sender_2.error + '\n';
+                } else {
+                    message += '➖ Tidak dikonfigurasi\n';
+                }
+
+                alert(message);
+            })
+            .catch(error => {
+                alert('Gagal memeriksa gateway:\n' + error.message);
+            })
+            .finally(() => {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
     }
 </script>
