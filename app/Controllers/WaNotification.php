@@ -357,7 +357,9 @@ class WaNotification extends Controller
             'distribution_days',
             'schedule_day',
             'schedule_time',
-            'message_template'
+            'message_template',
+            'channel_jid_1',
+            'channel_jid_2'
         ];
 
         foreach ($fields as $field) {

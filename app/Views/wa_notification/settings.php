@@ -215,6 +215,44 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <!-- WA Channel Settings -->
+                                    <div class="card shadow-sm mt-4" style="border-radius: 15px; border: none;">
+                                        <div class="card-header bg-white border-0"
+                                            style="border-radius: 15px 15px 0 0;">
+                                            <h5 class="mb-0"><i class="feather icon-message-circle mr-2 text-success"></i>WA Channel
+                                                - Notifikasi Harian Siswa Tidak Hadir</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-success" style="border-radius: 10px;">
+                                                <i class="feather icon-info mr-2"></i>
+                                                Daftar siswa tidak hadir akan dikirim ke WA Channel setiap <strong>jam 10 pagi</strong> (Senin-Sabtu).
+                                                <br>Buat channel WA dari masing-masing nomor pengirim, lalu isi Channel JID di bawah.
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label><i class="feather icon-hash mr-1"></i> Channel JID Pengirim 1</label>
+                                                <input type="text" name="channel_jid_1" class="form-control"
+                                                    style="border-radius: 10px;" placeholder="120363xxxxxxxxx@newsletter"
+                                                    value="<?= $settings['channel_jid_1'] ?? '' ?>">
+                                                <small class="text-muted">JID channel yang dibuat dari Nomor Pengirim 1</small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label><i class="feather icon-hash mr-1"></i> Channel JID Pengirim 2</label>
+                                                <input type="text" name="channel_jid_2" class="form-control"
+                                                    style="border-radius: 10px;" placeholder="120363xxxxxxxxx@newsletter (opsional)"
+                                                    value="<?= $settings['channel_jid_2'] ?? '' ?>">
+                                                <small class="text-muted">JID channel yang dibuat dari Nomor Pengirim 2</small>
+                                            </div>
+
+                                            <div class="alert alert-warning mt-3" style="border-radius: 10px;">
+                                                <h6 class="alert-heading"><i class="feather icon-terminal mr-2"></i>Cron Setup</h6>
+                                                <code>0 10 * * 1-6 curl -s <?= base_url('DailyAbsentNotification/send') ?></code>
+                                                <br><small>Untuk test: <a href="<?= base_url('DailyAbsentNotification/preview') ?>" target="_blank">Preview Pesan</a></small>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Message Template -->

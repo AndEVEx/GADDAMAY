@@ -52,20 +52,6 @@
                     <li class="nav-item pcoded-hasmenu">
                         <a href="#!" class="nav-link "><span class="pcoded-micon"><i
                                     class="feather icon-airplay"></i></span><span class="pcoded-mtext">Info Absensi
-                                Guru</span></a>
-                        <ul class="pcoded-submenu">
-                            <li><a href="<?= base_url('Absensi/perpegawai'); ?>">Per Pegawai</a></li>
-                            <li><a href="<?= base_url('Absensi'); ?>">Harian</a></li>
-                            <li><a href="<?= base_url('Absensi/pertanggal'); ?>">Per tanggal</a></li>
-                            <li><a href="<?= base_url('Absensi/pertanggaluser'); ?>">Per tanggal User</a></li>
-                            <li><a href="<?= base_url('Absensi/bulanan'); ?>">Bulanan</a></li>
-                            <li><a href="<?= base_url('Point'); ?>">Point</a></li>
-                            <li><a href="<?= base_url('Absensi/chart'); ?>">Chart Absen</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item pcoded-hasmenu">
-                        <a href="#!" class="nav-link "><span class="pcoded-micon"><i
-                                    class="feather icon-airplay"></i></span><span class="pcoded-mtext">Info Absensi
                                 Siswa</span></a>
                         <ul class="pcoded-submenu">
                             <li><a href="<?= base_url('Absensisiswa/persiswa'); ?>">Per Siswa</a></li>
@@ -73,6 +59,7 @@
                             <li><a href="<?= base_url('Absensisiswa/pertanggal'); ?>">Per tanggal</a></li>
                             <li><a href="<?= base_url('Absensisiswa/pertanggalsiswa'); ?>">Per tanggal User</a></li>
                             <li><a href="<?= base_url('Absensisiswa/bulanan'); ?>">Bulanan</a></li>
+                            <li><a href="<?= base_url('Absensisiswa/biweekly'); ?>">Biweekly</a></li>
                             <li><a href="<?= base_url('Pointsiswa'); ?>">Point</a></li>
                             <li><a href="<?= base_url('Absensisiswa/chart'); ?>">Chart Absen</a></li>
                         </ul>
@@ -173,6 +160,7 @@
                             <li><a href="<?= base_url('Absensisiswa/pertanggal'); ?>">Per tanggal</a></li>
                             <li><a href="<?= base_url('Absensisiswa/pertanggalsiswa'); ?>">Per tanggal User</a></li>
                             <li><a href="<?= base_url('Absensisiswa/bulanan'); ?>">Bulanan</a></li>
+                            <li><a href="<?= base_url('Absensisiswa/biweekly'); ?>">Biweekly</a></li>
                             <li><a href="<?= base_url('Pointsiswa'); ?>">Point</a></li>
                             <li><a href="<?= base_url('Absensisiswa/chart'); ?>">Chart Absen</a></li>
                         </ul>
@@ -226,6 +214,7 @@
                             <a href="#!" class="nav-link "><span class="pcoded-micon"><i
                                         class="feather icon-airplay"></i></span><span class="pcoded-mtext">Wali Kelas</span></a>
                             <ul class="pcoded-submenu">
+                                <li><a href="<?= base_url('MuridMonitoring'); ?>">Dashboard Monitoring</a></li>
                                 <li><a href="<?= base_url('Absensisiswa/koreksiwali'); ?>">Koreksi</a></li>
                                 <li><a href="<?= base_url('Reportwal/persiswa'); ?>">Per Siswa</a></li>
                                 <li><a href="<?= base_url('Reportwal'); ?>">Harian</a></li>
@@ -235,6 +224,20 @@
                         </li>
 
                         <?php
+                    } else {
+                        // Check if guru is BK (not walikelas but assigned as guru_bk)
+                        $builder_bk = $db->table('t_rombel');
+                        $builder_bk->where('id_guru_bk', session()->get('id_user'));
+                        $builder_bk->where('id_tapel', session()->get('id_tapel'));
+                        $all_bk = $builder_bk->countAllResults();
+                        if ($all_bk > 0) {
+                        ?>
+                        <li class="nav-item">
+                            <a href="<?= base_url('MuridMonitoring'); ?>" class="nav-link "><span class="pcoded-micon"><i
+                                        class="feather icon-alert-triangle"></i></span><span class="pcoded-mtext">Monitoring Murid</span></a>
+                        </li>
+                        <?php
+                        }
                     }
                     ?>
                 <?php } elseif (session()->get('level') != 4) { ?>

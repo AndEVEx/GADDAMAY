@@ -260,50 +260,30 @@ public function addabsensi()
 
 private function sendWA($nomor, $pesan)
 {
-    $token = '$2y$10$yTn8zkPgCMi1GgTlGkepiusjx7A6ZmiF1UDijT3ZN3l7m6Yx3wuqa';
-
-    // ===============================
     // Normalisasi nomor (08 -> 628)
-    // ===============================
     $nomor = preg_replace('/[^0-9]/', '', $nomor);
     if (substr($nomor, 0, 1) == '0') {
         $nomor = '62' . substr($nomor, 1);
     }
-
-    // ===============================
-    // Kirim ke API NotificationWA
-    // ===============================
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://notificationwa.com/api/post',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => array(
-            'isi_pesan'     => $pesan,
-            'nomor_recieved'=> $nomor
-        ),
-        CURLOPT_HTTPHEADER => array(
-            "Authorization: $token"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-    if (curl_errno($curl)) {
-        log_message('error', 'WA Error: ' . curl_error($curl));
-    } else {
-        log_message('info', 'WA Response: ' . $response);
+    if (substr($nomor, 0, 2) !== '62') {
+        $nomor = '62' . $nomor;
     }
 
-    curl_close($curl);
+    try {
+        $waGateway = new \App\Libraries\WaGatewayService();
+        $result = $waGateway->sendMessage($nomor, $pesan, 0);
 
-    return $response;
+        if (!$result['success']) {
+            log_message('error', 'WA GOWA Error: ' . ($result['error'] ?? 'Unknown'));
+        } else {
+            log_message('info', 'WA GOWA Sent to: ' . $nomor);
+        }
+
+        return $result;
+    } catch (\Exception $e) {
+        log_message('error', 'WA GOWA Exception: ' . $e->getMessage());
+        return null;
+    }
 }
 
 

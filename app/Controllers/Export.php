@@ -249,7 +249,7 @@ class Export extends BaseController
         }
 
         $writer = new Xlsx($spreadsheet);
-        $filename = date('Y-m-d-His'). '-Data-Absensi-Harian';
+        $filename = 'Guru_Absensi-Harian_' . date('Y-m-d');
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');
@@ -581,7 +581,7 @@ class Export extends BaseController
         }
 
         $writer = new Xlsx($spreadsheet);
-        $filename = date('Y-m-d-His'). '-Data-Absensi';
+        $filename = 'Guru_Absensi-Bulanan_' . date('Y-m-d');
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');
@@ -891,7 +891,7 @@ class Export extends BaseController
         }
 
         $writer = new Xlsx($spreadsheet);
-        $filename = date('Y-m-d-His'). '-Data-Absensi';
+        $filename = 'Guru_Absensi-PerTanggal_' . date('Y-m-d');
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');
@@ -1141,7 +1141,7 @@ class Export extends BaseController
         }
 
         $writer = new Xlsx($spreadsheet);
-        $filename = date('Y-m-d-His'). '-Data-Absensi';
+        $filename = 'Guru_Absensi-PerUser_' . date('Y-m-d');
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');
@@ -1184,7 +1184,7 @@ class Export extends BaseController
         }
  
         $writer = new Xlsx($spreadsheet);
-        $filename = date('Y-m-d-His'). '-Data-Lembur';
+        $filename = 'Guru_Data-Lembur_' . date('Y-m-d');
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');
@@ -1242,7 +1242,71 @@ class Export extends BaseController
         }
 
         $writer = new Xlsx($spreadsheet);
-        $filename = date('Y-m-d-His'). '-Data-Gaji';
+        $filename = 'Guru_Data-Gaji_' . date('Y-m-d');
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
+
+    public function biweeklyrombel()
+    {
+        $id_rombel = $this->request->getPost('id_rombel');
+        $tgl1 = $this->request->getPost('tgl1');
+        $tgl2 = $this->request->getPost('tgl2');
+        $id_tapel = session()->get('id_tapel');
+
+        // Get rombel name
+        $db = \Config\Database::connect();
+        $query = $db->query("SELECT nm_rombel FROM t_rombel WHERE id_rombel='$id_rombel'");
+        $row = $query->getRow();
+        $nm_rombel = $row ? $row->nm_rombel : 'Rombel';
+
+        // Get students in rombel
+        $students = $db->table('t_siswa_rombel')
+            ->select('t_siswa.id_siswa, t_siswa.no_induk, t_siswa.nm_siswa')
+            ->join('t_siswa', 't_siswa.id_siswa = t_siswa_rombel.id_siswa')
+            ->where('t_siswa_rombel.id_rombel', $id_rombel)
+            ->where('t_siswa_rombel.id_tapel', $id_tapel)
+            ->orderBy('t_siswa.nm_siswa', 'ASC')
+            ->get()->getResultArray();
+
+        echo view('func_siswa');
+
+        $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->setActiveSheetIndex(0)
+            ->setCellValue('A1', 'No')
+            ->setCellValue('B1', 'No. Induk')
+            ->setCellValue('C1', 'Nama Siswa')
+            ->setCellValue('D1', 'Masuk')
+            ->setCellValue('E1', 'Terlambat')
+            ->setCellValue('F1', 'Sakit')
+            ->setCellValue('G1', 'Izin')
+            ->setCellValue('H1', 'Alpha');
+
+        $column = 2;
+        $no = 0;
+        foreach ($students as $data) {
+            $no++;
+            $id = $data['id_siswa'];
+            $spreadsheet->setActiveSheetIndex(0)
+                ->setCellValue('A' . $column, $no)
+                ->setCellValue('B' . $column, $data['no_induk'])
+                ->setCellValue('C' . $column, $data['nm_siswa'])
+                ->setCellValue('D' . $column, jummasukpertanggal($id, $tgl1, $tgl2))
+                ->setCellValue('E' . $column, jumterlambatpertanggal($id, $tgl1, $tgl2))
+                ->setCellValue('F' . $column, jumsakitpertanggal($id, $tgl1, $tgl2))
+                ->setCellValue('G' . $column, jumizinpertanggal($id, $tgl1, $tgl2))
+                ->setCellValue('H' . $column, jumalphapertanggal($id, $tgl1, $tgl2));
+
+            $column++;
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = str_replace(' ', '-', $nm_rombel) . '_Biweekly_' . date('Y-m-d');
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename=' . $filename . '.xlsx');

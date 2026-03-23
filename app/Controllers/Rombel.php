@@ -48,7 +48,8 @@ class Rombel extends Controller
             'nm_rombel' => $this->request->getPost('nama'),
             'id_tingkat_kelas' => $this->request->getPost('tingkat'),
             'id_tapel' => session()->get('id_tapel'),
-            'id_walikelas' => $this->request->getPost('id_ptk')
+            'id_walikelas' => $this->request->getPost('id_ptk'),
+            'id_guru_bk' => $this->request->getPost('id_guru_bk') ?: null
         );
 
         //validasi input
@@ -75,7 +76,8 @@ class Rombel extends Controller
         $id = $this->request->getPost('id');
         $data = array(
             'nm_Rombel' => $this->request->getPost('nama'),
-            'id_walikelas' => $this->request->getPost('id_ptk')
+            'id_walikelas' => $this->request->getPost('id_ptk'),
+            'id_guru_bk' => $this->request->getPost('id_guru_bk') ?: null
         );
 
         //update data

@@ -595,6 +595,68 @@
                                         </div>
                                     </div>
                             
+                            <!-- [ Murid on Watch ] start -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <h5><i class="feather icon-alert-triangle"></i> Murid on Watch - Monitoring Aktif</h5>
+                                                </div>
+                                                <div class="col-md-auto">
+                                                    <span class="badge badge-warning" style="font-size:14px;"><?= isset($monitorList) ? count($monitorList) : 0 ?> siswa</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body table-border-style">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>No</th>
+                                                            <th>NIS</th>
+                                                            <th>Nama</th>
+                                                            <th>Kelas</th>
+                                                            <th>No. Orangtua</th>
+                                                            <th>Wali Kelas</th>
+                                                            <th>Guru BK</th>
+                                                            <th>Progress</th>
+                                                            <th>Alasan</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php if(!isset($monitorList) || empty($monitorList)) { ?>
+                                                        <tr><td colspan="9" class="text-center text-muted">Tidak ada murid dalam monitoring</td></tr>
+                                                        <?php } else { $no = 0; foreach ($monitorList as $m) { $no++; ?>
+                                                        <tr>
+                                                            <td><?= $no ?></td>
+                                                            <td><?= $m['no_induk'] ?></td>
+                                                            <td><?= $m['nm_siswa'] ?></td>
+                                                            <td><?= $m['nm_rombel'] ?></td>
+                                                            <td><?= $m['hp_siswa'] ?: '-' ?></td>
+                                                            <td><?= $m['nm_walikelas'] ?: '-' ?></td>
+                                                            <td><?= $m['nm_guru_bk'] ?: '-' ?></td>
+                                                            <td>
+                                                                <?php foreach ($m['progress'] as $p) { ?>
+                                                                    <span class="badge badge-<?= $p['is_done'] ? 'success' : 'danger' ?>" 
+                                                                          style="font-size:13px; margin:1px; min-width:26px; display:inline-block;">
+                                                                        <?= $p['step'] ?>
+                                                                    </span>
+                                                                <?php } ?>
+                                                            </td>
+                                                            <td><small><?= substr($m['alasan'], 0, 60) ?><?= strlen($m['alasan']) > 60 ? '...' : '' ?></small></td>
+                                                        </tr>
+                                                        <?php } } ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- [ Murid on Watch ] end -->
+
                         </div>
                     </div>
                 </div>

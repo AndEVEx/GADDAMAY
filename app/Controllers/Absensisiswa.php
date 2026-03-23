@@ -745,4 +745,76 @@ class Absensisiswa extends Controller
             return redirect()->to('/Absensisiswa/koreksiwali/?tgl='.$tgl);
         }
     }
+
+    public function biweekly()
+    {
+        if(empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+        $m_rombel = new Rombel_model;
+        $m_siswarombel = new Siswarombel_model;
+        $id_tapel = session()->get('id_tapel');
+        $id_rombel = $this->request->getPost('id_rombel');
+        
+        echo view('func_siswa');
+
+        $datanav = array(
+            'nama' => session()->get('nama'),
+            'title' => 'Laporan Biweekly Siswa',
+            'nav' => 'Absensisiswa/biweekly'
+        );
+
+        if(empty($this->request->getPost('id_rombel'))){
+            $bln = date('m');
+            $periode = (date('d') <= 15) ? 1 : 2;
+            $thn = date('Y');
+            
+            if($periode == 1){
+                $tgl1 = $thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-01';
+                $tgl2 = $thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-15';
+            } else {
+                $tgl1 = $thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-16';
+                $tgl2 = date('Y-m-t', strtotime($thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-01'));
+            }
+            
+            $data = array(
+                'getRombel' => $m_rombel->getRombel($id_tapel),
+                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
+                'getBulan' => $bln,
+                'getPeriode' => $periode,
+                'getTanggal1' => $tgl1,
+                'getTanggal2' => $tgl2,
+                'idRombel' => $id_rombel,
+                'nmRombel' => ""
+            );
+        } else {
+            $bln = $this->request->getPost('bln');
+            $periode = $this->request->getPost('periode');
+            $thn = date('Y');
+            
+            if($periode == 1){
+                $tgl1 = $thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-01';
+                $tgl2 = $thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-15';
+            } else {
+                $tgl1 = $thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-16';
+                $tgl2 = date('Y-m-t', strtotime($thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-01'));
+            }
+            
+            $data = array(
+                'getRombel' => $m_rombel->getRombel($id_tapel),
+                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
+                'getBulan' => $bln,
+                'getPeriode' => $periode,
+                'getTanggal1' => $tgl1,
+                'getTanggal2' => $tgl2,
+                'idRombel' => $id_rombel,
+                'nmRombel' => nmrombel($id_rombel)
+            );
+        }
+
+        echo view('index/sidebar');
+        echo view('index/navbar', $datanav);
+        echo view('report/biweeklyrombel', $data);
+        echo view('index/footer');
+    }
 }

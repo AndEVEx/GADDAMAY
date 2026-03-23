@@ -51,6 +51,7 @@
                                                             <th>Tingkat Kelas</th>
                                                             <th>Nama Rombel</th>
                                                             <th>Wali Kelas</th>
+                                                            <th>Guru BK</th>
                                                             <th>Aksi</th>
                                                         </tr>
                                                     </thead>
@@ -67,6 +68,7 @@
                                                             <td><?= $data['nm_tingkat_kelas'] ?></td>
                                                             <td><?= $data['nm_rombel'] ?></td>
                                                             <td><?= $data['nama_ptk'] ?></td>
+                                                            <td><?= $data['nm_guru_bk'] ?: '-' ?></td>
                                                             <td>
                                                                 <button class="btn btn-warning btn-sm" type="submit" data-toggle="modal" data-target="#edit<?=$id;?>"><i class="feather icon-edit-2"></i></button>
                                                                 <button class="btn btn-danger btn-sm" type="submit" data-toggle="modal" data-target="#delete<?=$id;?>"><i class="feather icon-trash"></i></button>
@@ -100,6 +102,17 @@
                                                                                             <option selected disabled value="">Pilih</option>
                                                                                             <?php foreach ($getGuru as $data_ptk) { ?>
                                                                                             <option value="<?=$data_ptk['id_ptk'] ?>" <?php if($data_ptk['id_ptk']==$data['id_walikelas']){ ?> selected="" <?php } ?>><?=$data_ptk['nama_ptk'] ?></option>
+                                                                                            <?php } ?>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-sm-12">
+                                                                                    <div class="form-group">
+                                                                                        <label>Guru BK</label>
+                                                                                        <select class="form-control" name="id_guru_bk">
+                                                                                            <option value="">-- Tidak Ada --</option>
+                                                                                            <?php foreach ($getGuru as $data_bk) { ?>
+                                                                                            <option value="<?=$data_bk['id_ptk'] ?>" <?php if(isset($data['id_guru_bk']) && $data_bk['id_ptk']==$data['id_guru_bk']){ ?> selected="" <?php } ?>><?=$data_bk['nama_ptk'] ?></option>
                                                                                             <?php } ?>
                                                                                         </select>
                                                                                     </div>
@@ -201,6 +214,17 @@
                     <label>Wali Kelas</label>
                     <select class="form-control" name="id_ptk" required>
                         <option selected disabled value="">Pilih</option>
+                        <?php foreach ($getGuru as $data) { ?>
+                        <option value="<?=$data['id_ptk'] ?>"><?=$data['nama_ptk'] ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>Guru BK</label>
+                    <select class="form-control" name="id_guru_bk">
+                        <option value="">-- Tidak Ada --</option>
                         <?php foreach ($getGuru as $data) { ?>
                         <option value="<?=$data['id_ptk'] ?>"><?=$data['nama_ptk'] ?></option>
                         <?php } ?>
