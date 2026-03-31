@@ -4,8 +4,7 @@
 -- ===========================================
 
 -- Add Guru BK column to t_rombel
-ALTER TABLE `t_rombel` ADD `id_guru_bk` INT(11) DEFAULT NULL AFTER `id_walikelas`;
-
+-- ALTER TABLE `t_rombel` ADD `id_guru_bk` INT(11) DEFAULT NULL AFTER `id_walikelas`;
 -- Student monitoring cases
 CREATE TABLE `t_murid_monitoring` (
   `id_monitoring` INT(11) NOT NULL AUTO_INCREMENT,

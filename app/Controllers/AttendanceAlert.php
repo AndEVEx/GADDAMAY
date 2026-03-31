@@ -86,27 +86,7 @@ class AttendanceAlert extends Controller
         echo view('index/footer');
     }
 
-    /**
-     * Settings page for attendance alert configuration
-     */
-    public function settings()
-    {
-        $data = [
-            'title' => 'Pengaturan Peringatan Kehadiran',
-            'settings' => $this->getSettings(),
-            'rombels' => $this->getRombels(),
-        ];
 
-        echo view('index/sidebar');
-        echo view('func');
-        echo view('index/navbar', [
-            'nama' => session()->get('nama'),
-            'title' => 'Pengaturan Peringatan',
-            'nav' => 'Pengaturan'
-        ]);
-        echo view('attendance/settings', $data);
-        echo view('index/footer');
-    }
 
     /**
      * Scan for new alerts - run daily via cron or after weekly report
@@ -330,6 +310,8 @@ class AttendanceAlert extends Controller
      */
     public function settings()
     {
+        if (empty(session()->get('logged_in'))) return redirect()->to('Cpanel');
+
         $data = [
             'title' => 'Pengaturan Peringatan Kehadiran',
             'settings' => $this->getSettings(),
@@ -337,8 +319,13 @@ class AttendanceAlert extends Controller
             'teachers' => $this->getTeachers(),
         ];
 
+        echo view('index/sidebar');
         echo view('func');
-        echo view('index/sidebar', $data);
+        echo view('index/navbar', [
+            'nama' => session()->get('nama'),
+            'title' => 'Pengaturan Peringatan',
+            'nav' => 'Pengaturan'
+        ]);
         echo view('attendance/settings', $data);
         echo view('index/footer');
     }
