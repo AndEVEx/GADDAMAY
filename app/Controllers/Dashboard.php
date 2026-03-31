@@ -54,11 +54,24 @@ class Dashboard extends Controller
     $kelas = null;
 
     if (!empty($rfid)) {
+        $rfid = trim($rfid);
         $row_siswa = $db->table('t_siswa')
             ->select('nm_siswa, file, id_siswa')
             ->where('rfid', $rfid)
             ->get()
             ->getRow();
+
+        // Retry without leading zeros
+        if (!$row_siswa) {
+            $rfidTrimmed = ltrim($rfid, '0');
+            if ($rfidTrimmed !== $rfid) {
+                $row_siswa = $db->table('t_siswa')
+                    ->select('nm_siswa, file, id_siswa')
+                    ->where('rfid', $rfidTrimmed)
+                    ->get()
+                    ->getRow();
+            }
+        }
 
         if ($row_siswa) {
             $foto = !empty($row_siswa->file)
@@ -103,7 +116,7 @@ public function addabsensi()
     $model = new Absensisiswa_model;
     $m_absenguru = new Absensiguru_model;
    
-    $rfid = $this->request->getPost('rfid');
+    $rfid = trim($this->request->getPost('rfid'));
     $tgl = date('Y-m-d');
     $jamnow = date('H:i:s');
 
@@ -130,8 +143,14 @@ public function addabsensi()
         return redirect()->to('/Dashboard');
     }
 
-    // cek apakah RFID terdaftar
+    // cek apakah RFID terdaftar (try exact match, then without leading zeros)
     $siswaRow = $db->table('t_siswa')->select('id_siswa')->where('rfid', $rfid)->get()->getRow();
+    if (!$siswaRow) {
+        $rfidTrimmed = ltrim($rfid, '0');
+        if ($rfidTrimmed !== $rfid) {
+            $siswaRow = $db->table('t_siswa')->select('id_siswa')->where('rfid', $rfidTrimmed)->get()->getRow();
+        }
+    }
 
     if (!$siswaRow) {
         session()->setFlashdata('error','Nomor RFID tidak terdaftar');
