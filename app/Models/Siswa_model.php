@@ -7,6 +7,9 @@ use CodeIgniter\Model;
 class Siswa_model extends Model
 {
     protected $table = 't_siswa';
+    protected $primaryKey = 'id_siswa';
+    protected $returnType = 'array';
+    protected $allowedFields = ['no_induk', 'nm_siswa', 'nisn', 'rfid', 'jk', 'tempat_lahir', 'tgl_lahir', 'alamat', 'hp', 'file', 'sts_siswa'];
 
     public function getSiswa()
     {

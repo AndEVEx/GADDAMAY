@@ -107,7 +107,10 @@ class ScanQr extends Controller
     $id_rombel = $kelas ? $kelas->id_rombel : null;
 
     if (!$id_rombel) {
-        return $this->response->setJSON(['status' => false, 'message' => 'Rombel tidak ditemukan']);
+        return $this->response->setJSON([
+            'status' => false, 
+            'message' => 'Siswa "' . ($siswa['nm_siswa'] ?? '-') . '" tidak terdaftar di kelas manapun untuk tahun pelajaran aktif. Silakan tambahkan siswa ke rombel terlebih dahulu.'
+        ]);
     }
 
     // 🔹 Ambil jadwal dari r_hari
