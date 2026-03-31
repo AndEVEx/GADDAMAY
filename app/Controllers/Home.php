@@ -22,7 +22,7 @@ class Home extends Controller
         $m_tingkat = new Tingkatkelas_model;
         $id_tapel = session()->get('id_tapel');
 
-        if ((session()->get('level') == 1 || session()->get('level')) == 4) {
+        if (session()->get('level') == 1 || session()->get('level') == 4) {
             $nmdashboard = "Dashboard Administrator";
         } elseif ((session()->get('level')) == 2) {
             // Check if guru is walikelas or BK
