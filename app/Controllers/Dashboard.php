@@ -67,15 +67,15 @@ class Dashboard extends Controller
             $nama = $row_siswa->nm_siswa;
 
             // ambil nama kelas (optional)
-            $kelasRow = $db->table('t_rombel_siswa')
-                ->select('r_rombel.nama_rombel')
-                ->join('r_rombel', 'r_rombel.id_rombel = t_rombel_siswa.id_rombel', 'left')
-                ->where('t_rombel_siswa.id_siswa', $row_siswa->id_siswa)
-                ->where('t_rombel_siswa.id_tapel', $id_tapel)
+            $kelasRow = $db->table('t_siswa_rombel')
+                ->select('t_rombel.nm_rombel')
+                ->join('t_rombel', 't_rombel.id_rombel = t_siswa_rombel.id_rombel', 'left')
+                ->where('t_siswa_rombel.id_siswa', $row_siswa->id_siswa)
+                ->where('t_siswa_rombel.id_tapel', $id_tapel)
                 ->get()
                 ->getRow();
 
-            $kelas = $kelasRow->nama_rombel ?? '-';
+            $kelas = $kelasRow->nm_rombel ?? '-';
         } else {
             session()->setFlashdata('error', 'RFID tidak ditemukan');
             return redirect()->to('/Dashboard');

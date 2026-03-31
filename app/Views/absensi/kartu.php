@@ -109,7 +109,7 @@
         <div class="clock mb-4" id="digitalClock">--:--:--</div>
 
         <form method="post" action="<?= base_url('Dashboard/addabsensi'); ?>">
-            <input type="number" name="rfid" class="rfid-input w-100 mb-3"
+            <input type="text" name="rfid" class="rfid-input w-100 mb-3"
                 placeholder="Tempelkan Kartu / Masukkan RFID / Scan Qr" autofocus required>
             <input type="hidden" name="hari" value="<?= $getHari; ?>">
             <input type="hidden" name="sts" value="<?= $stsAbsen; ?>">
