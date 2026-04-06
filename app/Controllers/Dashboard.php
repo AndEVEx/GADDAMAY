@@ -223,7 +223,12 @@ public function addabsensi()
         $stshadir = 'Pulang';
         $pesanDoa = '*MOHON DO`A SELAMAT SAMPAI DI RUMAH*';
     } else {
-        // Absen masuk
+        // Absen masuk - cek batas waktu 08:00
+        if ($jamnow > '08:00:00') {
+            session()->setFlashdata('error', 'Batas waktu absen pagi telah lewat (08:00)');
+            return redirect()->to('/Dashboard');
+        }
+
         $data = [
             'id_siswa'  => $id_siswa,
             'id_tapel'  => $id_tapel,
@@ -234,7 +239,6 @@ public function addabsensi()
         $model->saveAbsensi($data);
 
         $stshadir = ($jamnow > $jammasuk) ? 'Terlambat' : 'Hadir';
-        $pesanDoa = '*MOHON DO`A DIBERIKAN KEMUDAHAN DALAM BELAJAR*';
     }
 
     // 🧩 siapkan foto
@@ -248,62 +252,13 @@ public function addabsensi()
     session()->setFlashdata('Fotoabsen', $foto);
     session()->setFlashdata('Jamabsen', $jamnow);
 
-    // ============================
-    // KIRIM NOTIFIKASI WHATSAPP
-    // ============================
-    if (!empty($rowsiswa->hp)) {
-
-        $pesanWA =
-    "🏫 *SMKN 2 INDRAMAYU*\n\n" .
-    "📋 *Notifikasi Absensi Siswa*\n\n" .
-    "Halo Bapak/Ibu 👋\n" .
-    "Kami informasikan bahwa kehadiran siswa berikut telah tercatat dalam sistem:\n\n" .
-    "👤 *Nama*   : {$rowsiswa->nm_siswa}\n" .
-    "🆔 *NIS*    : {$rowsiswa->no_induk}\n" .
-    "🏫 *Kelas*  : {$rowsiswa->nm_rombel}\n" .
-    "📅 *Hari*   : {$hari}\n" .
-    "📆 *Tanggal*: " . date('d-m-Y') . "\n" .
-    "⏰ *Jam*    : {$jamnow}\n" .
-    "📌 *Status* : *{$stshadir}*\n\n" .
-    $pesanDoa . "\n\n" .
-    "Terima kasih atas perhatian dan kerja samanya 🙏\n" .
-    "Semoga ananda selalu sehat dan semangat belajar.\n\n" .
-    "— *Sistem Absensi Digital*\n" .
-    "*SMKN 2 INDRAMAYU*";
-
-        $this->sendWA($rowsiswa->hp, $pesanWA);
-    }
+    // WA TIDAK dikirim saat scan.
+    // Notifikasi ke orangtua HANYA via WeeklyReport (Jumat sore)
 
     return redirect()->to('/Dashboard');
 }
 
-private function sendWA($nomor, $pesan)
-{
-    // Normalisasi nomor (08 -> 628)
-    $nomor = preg_replace('/[^0-9]/', '', $nomor);
-    if (substr($nomor, 0, 1) == '0') {
-        $nomor = '62' . substr($nomor, 1);
-    }
-    if (substr($nomor, 0, 2) !== '62') {
-        $nomor = '62' . $nomor;
-    }
-
-    try {
-        $waGateway = new \App\Libraries\WaGatewayService();
-        $result = $waGateway->sendMessage($nomor, $pesan, 0);
-
-        if (!$result['success']) {
-            log_message('error', 'WA GOWA Error: ' . ($result['error'] ?? 'Unknown'));
-        } else {
-            log_message('info', 'WA GOWA Sent to: ' . $nomor);
-        }
-
-        return $result;
-    } catch (\Exception $e) {
-        log_message('error', 'WA GOWA Exception: ' . $e->getMessage());
-        return null;
-    }
-}
+// sendWA removed - WA notifications are now ONLY sent via WeeklyReport (Fridays)
 
 
  

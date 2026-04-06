@@ -274,4 +274,33 @@ class Siswa extends Controller
     }
 
 
+    /**
+     * Bulk delete students by IDs
+     */
+    public function bulkDelete()
+    {
+        if (empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+
+        $ids = $this->request->getPost('ids');
+        if (empty($ids) || !is_array($ids)) {
+            session()->setFlashdata('error', 'Tidak ada siswa yang dipilih');
+            return redirect()->to('Siswa');
+        }
+
+        $db = \Config\Database::connect();
+        $deleted = 0;
+        foreach ($ids as $id) {
+            // Delete from siswa_rombel first
+            $db->table('t_siswa_rombel')->where('id_siswa', $id)->delete();
+            // Delete from siswa
+            $db->table('t_siswa')->where('id_siswa', $id)->delete();
+            $deleted++;
+        }
+
+        session()->setFlashdata('success', "$deleted siswa berhasil dihapus");
+        return redirect()->to('Siswa');
+    }
+
 }

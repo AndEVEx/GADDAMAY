@@ -93,16 +93,47 @@ class MuridMonitoring extends Controller
         }
         unset($m);
 
-        // Count stats
+        // Count stats & build attendance data
         $totalSiswa = count($students);
         $hadirCount = 0;
+        $terlambatCount = 0;
+        $pulangList = [];
         foreach ($students as $s) {
             $check = $db->table('t_siswa_hadir')
                 ->where('id_siswa', $s['id_siswa'])
                 ->where('tgl_hadir', $tgl)
                 ->where('sts_hadir', 0)
                 ->countAllResults();
-            if ($check > 0) $hadirCount++;
+            if ($check > 0) {
+                $hadirCount++;
+                // Check terlambat
+                $masukRow = $db->table('t_siswa_hadir')
+                    ->select('jam')
+                    ->where('id_siswa', $s['id_siswa'])
+                    ->where('tgl_hadir', $tgl)
+                    ->where('sts_hadir', 0)
+                    ->get()->getRow();
+                $hariIni = date('N');
+                $jamMasukHari = $db->table('r_hari')->where('nm_hari', ['1'=>'Senin','2'=>'Selasa','3'=>'Rabu','4'=>'Kamis','5'=>'Jumat','6'=>'Sabtu'][$hariIni] ?? 'Senin')->get()->getRow();
+                if ($masukRow && $jamMasukHari && $masukRow->jam > $jamMasukHari->jammasuk) {
+                    $terlambatCount++;
+                }
+            }
+            // Check pulang
+            $pulangRow = $db->table('t_siswa_hadir')
+                ->select('jam')
+                ->where('id_siswa', $s['id_siswa'])
+                ->where('tgl_hadir', $tgl)
+                ->where('sts_hadir', 1)
+                ->get()->getRow();
+            if ($pulangRow) {
+                $pulangList[] = [
+                    'nm_siswa' => $s['nm_siswa'],
+                    'no_induk' => $s['no_induk'],
+                    'nm_rombel' => $s['nm_rombel'],
+                    'jam_pulang' => $pulangRow->jam
+                ];
+            }
         }
 
         $data = array(
@@ -111,7 +142,9 @@ class MuridMonitoring extends Controller
             'myRombels' => $myRombels,
             'totalSiswa' => $totalSiswa,
             'hadirCount' => $hadirCount,
+            'terlambatCount' => $terlambatCount,
             'tidakHadirCount' => $totalSiswa - $hadirCount,
+            'pulangList' => $pulangList,
             'monitorCount' => count($monitorList),
             'tgl' => $tgl
         );
@@ -331,5 +364,57 @@ class MuridMonitoring extends Controller
         unset($m);
 
         return $monitorList;
+    }
+
+    /**
+     * Walikelas: Update student data (limited fields)
+     */
+    public function updateSiswa()
+    {
+        if (empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+
+        $id_siswa = $this->request->getPost('id_siswa');
+        $id_tapel = session()->get('id_tapel');
+        $id_user = session()->get('id_user');
+
+        // Verify this teacher is walikelas/BK for this student's rombel
+        $db = \Config\Database::connect();
+        $studentRombel = $db->table('t_siswa_rombel sr')
+            ->select('sr.id_rombel')
+            ->join('t_rombel r', 'r.id_rombel = sr.id_rombel')
+            ->where('sr.id_siswa', $id_siswa)
+            ->where('sr.id_tapel', $id_tapel)
+            ->groupStart()
+                ->where('r.id_walikelas', $id_user)
+                ->orWhere('r.id_guru_bk', $id_user)
+            ->groupEnd()
+            ->get()->getRow();
+
+        if (!$studentRombel) {
+            session()->setFlashdata('error', 'Anda tidak memiliki akses untuk mengedit siswa ini');
+            return redirect()->to('MuridMonitoring');
+        }
+
+        $data = [
+            'hp' => $this->request->getPost('hp'),
+            'alamat' => $this->request->getPost('alamat'),
+            'tempat_lahir' => $this->request->getPost('tempat_lahir'),
+            'tgl_lahir' => $this->request->getPost('tgl_lahir'),
+        ];
+
+        // Handle photo upload
+        $file = $this->request->getFile('file');
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            $fileName = $file->getRandomName();
+            $file->move(FCPATH . 'image/siswa/', $fileName);
+            $data['file'] = $fileName;
+        }
+
+        $db->table('t_siswa')->where('id_siswa', $id_siswa)->update($data);
+
+        session()->setFlashdata('success', 'Data siswa berhasil diupdate');
+        return redirect()->to('MuridMonitoring');
     }
 }

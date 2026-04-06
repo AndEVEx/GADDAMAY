@@ -41,6 +41,15 @@ class WeeklyReport extends Controller
             $monday = date('Y-m-d', strtotime('last monday', strtotime($friday)));
         }
 
+        // Check WA kill switch
+        $waEnabledRow = $this->db->table('wa_settings')->where('key', 'wa_enabled')->get()->getRow();
+        if ($waEnabledRow && $waEnabledRow->value == '0') {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Pengiriman WA dinonaktifkan oleh admin'
+            ]);
+        }
+
         // Check if already queued for this week
         if ($this->waQueue->isWeekAlreadyQueued($monday, $friday)) {
             return $this->response->setJSON([
@@ -95,6 +104,16 @@ class WeeklyReport extends Controller
             if (empty($phone))
                 continue;
 
+            // Determine sender index based on tingkat
+            // Tingkat 10 uses sender 0, tingkat 11+ uses sender 1
+            $senderIndex = 0;
+            if (isset($student['nm_tingkat_kelas'])) {
+                $tingkat = $student['nm_tingkat_kelas'];
+                if (stripos($tingkat, '10') === false && stripos($tingkat, 'X') !== 0) {
+                    $senderIndex = 1;
+                }
+            }
+
             // Queue the message
             $this->waQueue->insert([
                 'id_siswa' => $student['id_siswa'],
@@ -104,6 +123,7 @@ class WeeklyReport extends Controller
                 'scheduled_date' => $scheduledDate,
                 'week_start' => $monday,
                 'week_end' => $friday,
+                'sender_index' => $senderIndex,
             ]);
 
             $queuedCount++;
@@ -223,9 +243,10 @@ class WeeklyReport extends Controller
     private function getActiveStudentsWithPhone($id_tapel)
     {
         return $this->db->table('t_siswa s')
-            ->select('s.id_siswa, s.nm_siswa, s.no_induk, s.nisn, s.hp, r.nm_rombel')
+            ->select('s.id_siswa, s.nm_siswa, s.no_induk, s.nisn, s.hp, r.nm_rombel, tk.nm_tingkat_kelas')
             ->join('t_siswa_rombel sr', 'sr.id_siswa = s.id_siswa')
             ->join('t_rombel r', 'r.id_rombel = sr.id_rombel')
+            ->join('r_tingkat_kelas tk', 'tk.id_tingkat_kelas = r.id_tingkat_kelas')
             ->where('sr.id_tapel', $id_tapel)
             ->where('s.sts_siswa', 1)
             ->where('s.hp !=', '')

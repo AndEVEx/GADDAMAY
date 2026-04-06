@@ -107,13 +107,11 @@ class Pegawai_model extends Model
     }
     public function getPegawaiwalikelas($idtapel)
     {
-        $db = \Config\Database::connect();
-        $subQuery = $db->table('t_rombel')->select('id_walikelas')->where('id_tapel', $idtapel);
         return $this->db->table($this->table)
         ->select('t_ptk.id_jenis_ptk as id_jenis_ptk,t_ptk.id_ptk as id_ptk,nip,nama_ptk,nama_jenis_ptk')
         ->join('r_jenis_ptk', 'r_jenis_ptk.id_jenis_ptk = t_ptk.id_jenis_ptk')
-        ->orWhereNotIn('t_ptk.id_ptk', $subQuery)
-        ->where('t_ptk.id_jenis_ptk',1)
+        ->where('status_ptk', 1)
+        ->orderBy('nama_ptk')
         ->get()->getResultArray();
     }
 

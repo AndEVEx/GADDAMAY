@@ -49,7 +49,7 @@
                                                             <th>#</th>
                                                             <th>Aksi</th>
                                                             <th>Foto</th>
-                                                            <th>Nomor Finger</th>
+                                                            <th>NIP</th>
                                                             <th>Nama Pegawai</th>
                                                             <th>Nama Panggilan</th>
                                                             <th>Jenis Kerja</th>
@@ -261,10 +261,12 @@
                                                                     <img class="img-thumbnail" src="<?=base_url()?>/image/guru/<?=$data['photo'];?>" width="50">
                                                                 <?php } ?>
                                                             </td> 
-                                                            <td><?= $data['nomor_absensi'] ?></td>
                                                             <td>
-                                                                <?= $data['nama_ptk']; ?><br>
-                                                                <small class="text-muted"><?= $data['nip'] ?? '-' ?></small>
+                                                                <?= $data['nip'] ?? '-' ?><br>
+                                                                <small class="text-muted">Finger: <?= $data['nomor_absensi'] ?></small>
+                                                            </td>
+                                                            <td>
+                                                                <?= $data['nama_ptk']; ?>
                                                             </td>
 
                                                             <td><?= $data['nama_panggilan'] ?></td>

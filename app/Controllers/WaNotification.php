@@ -590,4 +590,23 @@ class WaNotification extends Controller
     {
         return $this->response->setJSON($this->getStats());
     }
+
+    /**
+     * Toggle WA on/off (kill switch)
+     */
+    public function toggleWa()
+    {
+        $this->ensureSettingsTable();
+        $enabled = $this->request->getPost('wa_enabled') ? '1' : '0';
+        
+        $existing = $this->db->table('wa_settings')->where('key', 'wa_enabled')->get()->getRow();
+        if ($existing) {
+            $this->db->table('wa_settings')->where('key', 'wa_enabled')->update(['value' => $enabled]);
+        } else {
+            $this->db->table('wa_settings')->insert(['key' => 'wa_enabled', 'value' => $enabled]);
+        }
+
+        session()->setFlashdata('success', $enabled == '1' ? 'Pengiriman WA diaktifkan' : 'Pengiriman WA DINONAKTIFKAN');
+        return redirect()->to('WaNotification/settings');
+    }
 }

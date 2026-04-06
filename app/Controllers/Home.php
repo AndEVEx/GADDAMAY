@@ -1,10 +1,6 @@
 <?php
 
 namespace App\Controllers;
-use App\Models\Point_model;
-use App\Models\Totalpoint_model;
-use App\Models\Pointsiswa_model;
-use App\Models\Totalpointsiswa_model;
 use App\Models\Tingkatkelas_model;
 use App\Models\MuridMonitoring_model;
 
@@ -17,8 +13,6 @@ class Home extends Controller
         if (empty(session()->get('logged_in'))) {
             return redirect()->to('Cpanel');
         }
-        $model = new Totalpoint_model;
-        $m_pointsis = new Totalpointsiswa_model;
         $m_tingkat = new Tingkatkelas_model;
         $id_tapel = session()->get('id_tapel');
 
@@ -55,8 +49,6 @@ class Home extends Controller
         );
 
         $data = array(
-            'getPointkaryawan' => $model->getTotalpointterbaik(date('m'), date('Y')),
-            'getPointsiswa' => $m_pointsis->getTotalpointsiswaterbaik(date('m'), $id_tapel),
             'getTingkat' => $m_tingkat->getTingkat()
         );
 

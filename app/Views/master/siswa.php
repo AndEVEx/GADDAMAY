@@ -47,10 +47,17 @@
                                       
                                         </div>
                                         <div class="card-body table-border-style">
+                                            <form id="formBulkDelete" method="post" action="<?= base_url('Siswa/bulkDelete') ?>">
+                                            <div class="mb-3">
+                                                <button type="submit" class="btn btn-danger btn-sm" id="btnBulkDelete" style="display:none" onclick="return confirm('Yakin ingin menghapus siswa terpilih?')">
+                                                    <i class="feather icon-trash-2"></i> Hapus Terpilih (<span id="selectedCount">0</span>)
+                                                </button>
+                                            </div>
                                             <div class="table-responsive">
                                                 <table id="example" class="table table-striped table-hover">
                                                     <thead>
                                                         <tr>
+                                                            <th><input type="checkbox" id="selectAll"></th>
                                                             <th>#</th>
                                                             <th>Aksi</th>
                                                             <th>Foto</th>
@@ -75,6 +82,7 @@
                                                         $no++;
                                                         ?>
                                                         <tr>
+                                                            <td><input type="checkbox" name="ids[]" value="<?=$id;?>" class="row-select"></td>
                                                             <td><?= $no ?></td>
                                                             <td>
                                                                 <button class="btn btn-warning btn-sm" type="submit" data-toggle="modal" data-target="#edit<?=$id;?>"><i class="feather icon-edit-2"></i></button>
@@ -290,11 +298,30 @@
                                                     </tbody>
                                                 </table>
                                             </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
                                 <!-- [ static-layout ] end -->
                             </div>
+
+                            <script>
+                            // Select All checkbox
+                            document.getElementById('selectAll').addEventListener('change', function() {
+                                var checkboxes = document.querySelectorAll('.row-select');
+                                checkboxes.forEach(function(cb) { cb.checked = this.checked; }.bind(this));
+                                updateBulkButton();
+                            });
+                            // Individual checkboxes
+                            document.addEventListener('change', function(e) {
+                                if (e.target.classList.contains('row-select')) updateBulkButton();
+                            });
+                            function updateBulkButton() {
+                                var checked = document.querySelectorAll('.row-select:checked').length;
+                                document.getElementById('selectedCount').textContent = checked;
+                                document.getElementById('btnBulkDelete').style.display = checked > 0 ? 'inline-block' : 'none';
+                            }
+                            </script>
                             <!-- [ Main Content ] end -->
                            
                             

@@ -156,6 +156,14 @@ class ScanQr extends Controller
     }
 
     if (!$absenMasuk) {
+        // 🔹 Cek batas waktu absen pagi 08:00
+        if ($jamnow > '08:00:00') {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Batas waktu absen pagi telah lewat (08:00)'
+            ]);
+        }
+
         // 🔹 Catat absen masuk
         $data = [
             'id_siswa' => $id_siswa,
@@ -167,21 +175,6 @@ class ScanQr extends Controller
         $model->saveAbsensi($data);
 
         $terlambat = ($jamnow > $jamMasuk) ? ' (Terlambat)' : '';
-
-        // 🔹 Kirim notifikasi WA (Masuk)
-        $pesan = "
-📢 *Pemberitahuan Absensi Masuk*
-Tanggal: *" . formatTanggal($tanggal) . "*
-No. Induk: *{$rowsiswa->no_induk}*
-Nama: *{$rowsiswa->nm_siswa}*
-Kelas: *{$rowsiswa->nm_rombel}*
-Status: *Masuk{$terlambat}*
-Jam: *{$jamnow}*
-
-Terima kasih 🙏
-*SMKN 2 INDRAMAYU*
-        ";
-        if ($nomorWA) $this->kirimWA($nomorWA, $pesan);
 
         return $this->response->setJSON([
             'status' => true,
@@ -223,20 +216,7 @@ Terima kasih 🙏
             ];
             $model->saveAbsensi($data);
 
-            // 🔹 Kirim notifikasi WA (Pulang)
-            $pesan = "
-📢 *Pemberitahuan Absensi Pulang*
-Tanggal: *" . formatTanggal($tanggal) . "*
-No. Induk: *{$rowsiswa->no_induk}*
-Nama: *{$rowsiswa->nm_siswa}*
-Kelas: *{$rowsiswa->nm_rombel}*
-Status: *Pulang*
-Jam: *{$jamnow}*
-
-Terima kasih 🙏
-*SMKN 2 INDRAMAYU*
-            ";
-            if ($nomorWA) $this->kirimWA($nomorWA, $pesan);
+            // WA tidak dikirim saat scan - hanya via WeeklyReport
 
             return $this->response->setJSON([
                 'status' => true,

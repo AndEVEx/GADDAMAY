@@ -39,6 +39,16 @@ class WaQueueWorker extends Controller
      */
     public function process($limit = 10)
     {
+        // Check WA kill switch
+        $waEnabledRow = $this->db->table('wa_settings')->where('key', 'wa_enabled')->get()->getRow();
+        if ($waEnabledRow && $waEnabledRow->value == '0') {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'WA sending is disabled by admin',
+                'processed' => 0,
+            ]);
+        }
+
         // Get pending messages scheduled for today or earlier
         $today = date('Y-m-d');
 
@@ -66,8 +76,8 @@ class WaQueueWorker extends Controller
         $failCount = 0;
 
         foreach ($messages as $index => $msg) {
-            // Round-robin sender selection
-            $senderIndex = $index % $senderCount;
+            // Use stored sender_index (per-tingkat), fallback to round-robin
+            $senderIndex = isset($msg['sender_index']) ? (int)$msg['sender_index'] : ($index % $senderCount);
 
             // Mark as processing
             $this->waQueue->update($msg['id'], [
@@ -162,9 +172,9 @@ class WaQueueWorker extends Controller
             ]);
         }
 
-        // Determine sender (based on message ID for consistent distribution)
+        // Use stored sender_index (per-tingkat), fallback to ID-based
         $senderCount = $this->waGateway->getSenderCount();
-        $senderIndex = $msg['id'] % $senderCount;
+        $senderIndex = isset($msg['sender_index']) ? (int)$msg['sender_index'] : ($msg['id'] % $senderCount);
 
         // Mark as processing
         $this->waQueue->update($msg['id'], [

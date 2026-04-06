@@ -78,7 +78,7 @@
                                 <div class="col-sm-12">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h5><i class="feather icon-calendar"></i> Absensi Harian - <?= tgl_indo($tgl) ?></h5>
+                                            <h5><i class="feather icon-calendar"></i> Absensi Masuk - <?= tgl_indo($tgl) ?></h5>
                                         </div>
                                         <div class="card-body table-border-style">
                                             <div class="table-responsive">
@@ -89,8 +89,10 @@
                                                             <th>NIS</th>
                                                             <th>Nama Siswa</th>
                                                             <th>Kelas</th>
+                                                            <th>No. Orangtua</th>
                                                             <th>Jam Masuk</th>
                                                             <th>Status</th>
+                                                            <th>Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -100,6 +102,7 @@
                                                             <td><?= $s['no_induk'] ?></td>
                                                             <td><?= $s['nm_siswa'] ?></td>
                                                             <td><?= $s['nm_rombel'] ?></td>
+                                                            <td><?= $s['hp'] ?: '-' ?></td>
                                                             <td><?= jammasuk($s['id_siswa'], $tgl) ?></td>
                                                             <td>
                                                                 <?php 
@@ -112,7 +115,59 @@
                                                                 ?>
                                                                 <span class="badge badge-<?= $badge ?>"><?= $sts ?></span>
                                                             </td>
+                                                            <td>
+                                                                <?php if (!empty($s['hp'])) { ?>
+                                                                <a href="tel:<?= $s['hp'] ?>" class="btn btn-success btn-sm" title="Telepon Orangtua">
+                                                                    <i class="feather icon-phone"></i>
+                                                                </a>
+                                                                <?php } ?>
+                                                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editSiswa<?= $s['id_siswa'] ?>" title="Edit Data Siswa">
+                                                                    <i class="feather icon-edit-2"></i>
+                                                                </button>
+                                                            </td>
                                                         </tr>
+
+                                                        <!-- Edit Siswa Modal -->
+                                                        <div class="modal fade" id="editSiswa<?= $s['id_siswa'] ?>">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Edit Data: <?= $s['nm_siswa'] ?></h5>
+                                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                    </div>
+                                                                    <form method="post" action="<?= base_url('MuridMonitoring/updateSiswa') ?>" enctype="multipart/form-data">
+                                                                        <div class="modal-body">
+                                                                            <input type="hidden" name="id_siswa" value="<?= $s['id_siswa'] ?>">
+                                                                            <div class="form-group">
+                                                                                <label>Nomor HP Orangtua</label>
+                                                                                <input type="text" class="form-control" name="hp" value="<?= $s['hp'] ?>">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Alamat</label>
+                                                                                <input type="text" class="form-control" name="alamat" value="">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Tempat Lahir</label>
+                                                                                <input type="text" class="form-control" name="tempat_lahir" value="">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Lahir</label>
+                                                                                <input type="date" class="form-control" name="tgl_lahir" value="">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Foto (opsional)</label>
+                                                                                <input type="file" name="file" class="form-control-file">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
                                                         <?php } ?>
                                                     </tbody>
                                                 </table>
@@ -122,6 +177,91 @@
                                 </div>
                             </div>
                             <!-- [ Daily Attendance ] end -->
+
+                            <!-- [ Absen Pulang Table ] start -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="feather icon-log-out"></i> Absensi Pulang - <?= tgl_indo($tgl) ?></h5>
+                                        </div>
+                                        <div class="card-body table-border-style">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>NIS</th>
+                                                            <th>Nama Siswa</th>
+                                                            <th>Kelas</th>
+                                                            <th>Jam Pulang</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php if(empty($pulangList)) { ?>
+                                                        <tr><td colspan="5" class="text-center text-muted">Belum ada siswa yang pulang</td></tr>
+                                                        <?php } else { $no = 0; foreach ($pulangList as $p) { $no++; ?>
+                                                        <tr>
+                                                            <td><?= $no ?></td>
+                                                            <td><?= $p['no_induk'] ?></td>
+                                                            <td><?= $p['nm_siswa'] ?></td>
+                                                            <td><?= $p['nm_rombel'] ?></td>
+                                                            <td><?= substr($p['jam_pulang'], 0, 5) ?></td>
+                                                        </tr>
+                                                        <?php } } ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- [ Absen Pulang Table ] end -->
+
+                            <!-- [ Attendance Chart ] start -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="feather icon-pie-chart"></i> Chart Kehadiran Hari Ini</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="attendanceChart" height="200"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5><i class="feather icon-info"></i> Ringkasan</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table">
+                                                <tr><td>Total Siswa</td><td><strong><?= $totalSiswa ?></strong></td></tr>
+                                                <tr><td>Hadir Tepat Waktu</td><td><span class="badge badge-success"><?= $hadirCount - ($terlambatCount ?? 0) ?></span></td></tr>
+                                                <tr><td>Terlambat</td><td><span class="badge badge-warning"><?= $terlambatCount ?? 0 ?></span></td></tr>
+                                                <tr><td>Tidak Hadir</td><td><span class="badge badge-danger"><?= $tidakHadirCount ?></span></td></tr>
+                                                <tr><td>Sudah Pulang</td><td><span class="badge badge-info"><?= count($pulangList) ?></span></td></tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                            <script>
+                            new Chart(document.getElementById('attendanceChart'), {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['Hadir', 'Terlambat', 'Tidak Hadir'],
+                                    datasets: [{
+                                        data: [<?= $hadirCount - ($terlambatCount ?? 0) ?>, <?= $terlambatCount ?? 0 ?>, <?= $tidakHadirCount ?>],
+                                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                                    }]
+                                },
+                                options: { responsive: true }
+                            });
+                            </script>
+                            <!-- [ Attendance Chart ] end -->
 
                             <!-- [ Monitoring Table ] start -->
                             <div class="row">
