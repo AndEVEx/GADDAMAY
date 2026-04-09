@@ -817,4 +817,90 @@ class Absensisiswa extends Controller
         echo view('report/biweeklyrombel', $data);
         echo view('index/footer');
     }
+
+    public function bulkUpdateGlobal()
+    {
+        if (empty(session()->get('logged_in')) || !in_array(session()->get('level'), [1, 4])) {
+            return redirect()->to('Cpanel');
+        }
+
+        $id_tapel = session()->get('id_tapel');
+        $status = $this->request->getPost('status');
+        $jam = $this->request->getPost('jam') ?: date('H:i');
+        $tgl = $this->request->getPost('tgl') ?: date('Y-m-d');
+
+        $db = \Config\Database::connect();
+        
+        // Get all active students for this tapel
+        $students = $db->table('t_siswa_rombel sr')
+            ->select('sr.id_siswa')
+            ->join('t_siswa s', 's.id_siswa = sr.id_siswa')
+            ->where('sr.id_tapel', $id_tapel)
+            ->where('s.sts_siswa', 1)
+            ->get()->getResultArray();
+
+        if (empty($students)) {
+            session()->setFlashdata('error', 'Tidak ada siswa aktif ditemukan di tapel ini.');
+            return redirect()->back();
+        }
+
+        $type_kedatangan = ($status == 'Pulang') ? 1 : 0;
+        $sts_code = ($status == 'Masuk' || $status == 'Terlambat') ? 1 : 
+                   (($status == 'Sakit') ? 2 : 
+                   (($status == 'Izin') ? 3 : 
+                   (($status == 'Alpha') ? 4 : 0)));
+
+        // Get existing records for this date
+        $existing = $db->table('t_siswa_hadir')
+            ->select('id_siswa_hadir, id_siswa')
+            ->where('tgl_hadir', $tgl)
+            ->where('sts_hadir', $type_kedatangan)
+            ->get()->getResultArray();
+        
+        $existingMap = [];
+        foreach ($existing as $e) {
+            $existingMap[$e['id_siswa']] = $e['id_siswa_hadir'];
+        }
+
+        $updateData = [];
+        $insertData = [];
+
+        foreach ($students as $s) {
+            $id_siswa = $s['id_siswa'];
+
+            if (isset($existingMap[$id_siswa])) {
+                $updateData[] = [
+                    'id_siswa_hadir' => $existingMap[$id_siswa],
+                    'jam' => $jam,
+                    'status' => ($type_kedatangan == 1 ? 1 : $sts_code)
+                ];
+            } else {
+                $insertData[] = [
+                    'id_siswa' => $id_siswa,
+                    'tgl_hadir' => $tgl,
+                    'sts_hadir' => $type_kedatangan,
+                    'jam' => $jam,
+                    'status' => ($type_kedatangan == 1 ? 1 : $sts_code)
+                ];
+            }
+        }
+
+        // Processing arrays
+        $db->transStart();
+        if (!empty($updateData)) {
+            $db->table('t_siswa_hadir')->updateBatch($updateData, 'id_siswa_hadir');
+        }
+        if (!empty($insertData)) {
+            $db->table('t_siswa_hadir')->insertBatch($insertData);
+        }
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            session()->setFlashdata('error', 'Terjadi kesalahan sistem saat memproses ' . count($students) . ' data.');
+        } else {
+            session()->setFlashdata('success', 'Koreksi masal GLOBAL berhasil diproses untuk ' . count($students) . ' siswa.');
+        }
+
+        return redirect()->back();
+    }
 }

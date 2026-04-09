@@ -9,19 +9,67 @@
                             <div class="page-header">
                                 <div class="page-block">
                                     <div class="row align-items-center">
-                                        <div class="col-md-12">
-                                            <div class="page-header-title">
-                                                <h5 class="m-b-10"><?=$title;?></h5>
+                                        <div class="col-md-12 d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <div class="page-header-title">
+                                                    <h5 class="m-b-10"><?=$title;?></h5>
+                                                </div>
+                                                <ul class="breadcrumb">
+                                                    <li class="breadcrumb-item"><a href="<?= base_url('Home'); ?>"><i class="feather icon-home"></i></a></li>
+                                                </ul>
                                             </div>
-                                            <ul class="breadcrumb">
-                                                <li class="breadcrumb-item"><a href="<?= base_url('Home'); ?>"><i class="feather icon-home"></i></a></li>
-                                            </ul>
+                                            <div>
+                                                <a href="<?= base_url('Absensisiswa/koreksi') ?>" class="btn btn-warning"><i class="feather icon-check-square"></i> Koreksi Masal Absensi</a>
+                                                <button class="btn btn-danger" data-toggle="modal" data-target="#modalGlobalKoreksi"><i class="feather icon-alert-triangle"></i> Koreksi Masal Sesekolah (Force Majeure)</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <!-- [ breadcrumb ] end -->
                             
+                            <!-- Modal Global Koreksi -->
+                            <div class="modal fade" id="modalGlobalKoreksi">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title text-danger"><i class="feather icon-alert-triangle"></i> Koreksi Masal Sesekolah</h5>
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                        </div>
+                                        <form action="<?= base_url('Absensisiswa/bulkUpdateGlobal') ?>" method="post">
+                                            <div class="modal-body">
+                                                <div class="alert alert-danger">
+                                                    <strong>Peringatan!</strong> Aksi ini akan segera mengubah status absensi <strong>SELURUH SISWA AKTIF</strong> secara masal untuk tanggal yang ditentukan. Gunakan hanya pada kondisi <i>Force Majeure</i> (misal: Bencana, Mati Lampu Total, atau Libur Mendadak).
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Tanggal</label>
+                                                    <input type="date" name="tgl" class="form-control" value="<?= date('Y-m-d') ?>" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Ubah Status Menjadi:</label>
+                                                    <select name="status" class="form-control" required>
+                                                        <option value="Sakit">Sakit</option>
+                                                        <option value="Izin">Izin</option>
+                                                        <option value="Alpha">Alpha</option>
+                                                        <option value="Masuk">Masuk</option>
+                                                        <option value="Terlambat">Terlambat</option>
+                                                        <option value="Pulang">Pulang</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Jam Rekam (Opsional, Default sekarang)</label>
+                                                    <input type="time" name="jam" class="form-control" value="<?= date('H:i') ?>">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-danger" onclick="return confirm('APAKAH ANDA YAKIN? Aksi ini akan menimpa seluruh data absen sekolah pada tanggal yang dipilih!')">Proses Semua Siswa</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                                     <!-- [ Main Content ] start -->
                                     <div class="row">
                                         <div class="col-lg-7 col-md-12">
