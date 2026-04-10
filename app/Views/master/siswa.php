@@ -86,7 +86,6 @@
                                                             <td><?= $no ?></td>
                                                             <td>
                                                                 <button class="btn btn-warning btn-sm" type="submit" data-toggle="modal" data-target="#edit<?=$id;?>"><i class="feather icon-edit-2"></i></button>
-                                                                <button class="btn btn-info btn-sm" type="submit" data-toggle="modal" data-target="#editpass<?=$id;?>"><i class="feather icon-lock"></i></button>
                                                                 <button class="btn btn-danger btn-sm" type="submit" data-toggle="modal" data-target="#delete<?=$id;?>"><i class="feather icon-trash"></i></button>
                                                             
                                                                 <!-- Edit The Modal -->
@@ -182,49 +181,6 @@
                                                                                         </div>
                                                                                     </div>
                                                                             </div>
-                                                                            </div>
-                                                                            <input type="hidden" class="form-control" name="id" value="<?=$id;?>" required>   
-                                                                            <button type="submit" class="btn btn-danger">Save</button>
-                                                                        </div>
-                                                                    </form>
-                                                                </div>
-                                                                </div>
-                                                                </div>
-
-                                                              <!-- Edit The Modal -->
-                                                              <div class="modal fade" id="editpass<?=$id;?>">
-                                                                    <div class="modal-dialog">
-                                                                    <div class="modal-content">
-                                                                                
-                                                                    <!-- Modal Header -->
-                                                                    <div class="modal-header">
-                                                                    <h4 class="modal-title">Edit Data Password</h4>
-                                                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                                    </div>
-                                                                                    
-                                                                    <!-- Modal body -->
-                                                                    <form method="post" action="<?= base_url('Siswa/updatepassword'); ?>">
-                                                                        <div class="modal-body">
-                                                                            <div class="row">
-                                                                                
-                                                                                <div class="col-sm-12">
-                                                                                    <div class="form-group">
-                                                                                        <label>Nama</label>
-                                                                                        <input type="text" class="form-control" readonly value="<?=$data['nm_siswa']?>" required>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-sm-12">
-                                                                                    <div class="form-group">
-                                                                                        <label>Password</label>
-                                                                                        <input type="text" class="form-control" name="password1" required>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-sm-12">
-                                                                                    <div class="form-group">
-                                                                                        <label>Ulangi Password</label>
-                                                                                        <input type="text" class="form-control" name="password2" required>
-                                                                                    </div>
-                                                                                </div>
                                                                             </div>
                                                                             <input type="hidden" class="form-control" name="id" value="<?=$id;?>" required>   
                                                                             <button type="submit" class="btn btn-danger">Save</button>
@@ -407,12 +363,7 @@
                     <input type="number" class="form-control" name="hp">
                 </div>
             </div>
-            <div class="col-sm-6">
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" class="form-control" name="password" required>
-                </div>
-            </div>
+
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Status Siswa</label>

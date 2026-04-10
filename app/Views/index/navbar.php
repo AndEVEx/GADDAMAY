@@ -86,7 +86,7 @@
                         <ul class="pcoded-submenu">
                             <li><a href="<?= base_url('Jeniskerja'); ?>">Jenis Ketenagaan</a></li>
                             <li><a href="<?= base_url('Shift'); ?>">Shift</a></li>
-                            <li><a href="<?= base_url('Jadwalkhusus'); ?>">Jadwal Khusus</a></li>
+
                             <li><a href="<?= base_url('Pegawai'); ?>">Data Guru & Karyawan</a></li>
 
                         </ul>

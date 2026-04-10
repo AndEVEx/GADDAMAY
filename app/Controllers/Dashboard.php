@@ -262,4 +262,77 @@ public function addabsensi()
 
 
  
+    public function getDetailKelasAjax($id_rombel)
+    {
+        $db = \Config\Database::connect();
+        $tgl = date('Y-m-d');
+        $id_tapel = session()->get('id_tapel');
+        
+        $nmhari = date ("D");
+        switch($nmhari){
+            case 'Sun': $hari_ini = "Minggu"; break;
+            case 'Mon': $hari_ini = "Senin"; break;
+            case 'Tue': $hari_ini = "Selasa"; break;
+            case 'Wed': $hari_ini = "Rabu"; break;
+            case 'Thu': $hari_ini = "Kamis"; break;
+            case 'Fri': $hari_ini = "Jumat"; break;
+            case 'Sat': $hari_ini = "Sabtu"; break;
+            default: $hari_ini = "Tidak di ketahui"; break;
+        }
+
+        $query_jam = $db->query("SELECT jammasuk FROM r_hari where nm_hari='$hari_ini'");
+        $row_jam = $query_jam->getRow();
+        $jammasuk = $row_jam->jammasuk ?? '07:10:00';
+
+        // Get all students for this class
+        $querySiswa = $db->query("
+            SELECT s.id_siswa, s.nm_siswa 
+            FROM t_siswa_rombel sr
+            JOIN t_siswa s ON s.id_siswa = sr.id_siswa
+            WHERE sr.id_rombel = '$id_rombel' 
+            AND sr.id_tapel = '$id_tapel'
+            AND s.sts_siswa = 1
+            ORDER BY s.nm_siswa ASC
+        ");
+        
+        $siswaList = $querySiswa->getResult();
+        $result = [];
+
+        foreach($siswaList as $siswa) {
+            $id = $siswa->id_siswa;
+            $res = [
+                'id_siswa' => $id,
+                'nm_siswa' => $siswa->nm_siswa,
+                'jam_masuk' => null,
+                'jam_pulang' => null,
+                'status' => 'Alpha'
+            ];
+
+            // Cek hadir
+            $qHadir = $db->query("SELECT sts_hadir, jam FROM t_siswa_hadir WHERE id_siswa = '$id' AND tgl_hadir = '$tgl' ORDER BY sts_hadir ASC");
+            $absens = $qHadir->getResult();
+            if(count($absens) > 0) {
+                foreach($absens as $absen) {
+                    if($absen->sts_hadir == 0) {
+                        $res['jam_masuk'] = substr($absen->jam, 0, 5);
+                        $res['status'] = ($absen->jam > $jammasuk) ? 'Terlambat' : 'Hadir';
+                    } else if($absen->sts_hadir == 1) {
+                        $res['jam_pulang'] = substr($absen->jam, 0, 5);
+                        if($res['status'] == 'Alpha') $res['status'] = 'Pulang'; 
+                    }
+                }
+            } else {
+                // Cek sakit/izin
+                $qIzin = $db->query("SELECT sts_absen FROM t_siswa_absen WHERE id_siswa = '$id' AND tgl_absen = '$tgl'");
+                $izin = $qIzin->getRow();
+                if($izin) {
+                    if($izin->sts_absen == 2) $res['status'] = 'Sakit';
+                    else if($izin->sts_absen == 3) $res['status'] = 'Izin';
+                }
+            }
+            $result[] = $res;
+        }
+
+        return $this->response->setJSON($result);
+    }
 }

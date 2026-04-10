@@ -75,13 +75,13 @@ class Cpanel extends Controller
         }else{
             //cek guru
             $builder_gr = $db->table('t_ptk');
-            $builder_gr -> where('nomor_absensi', $email);
+            $builder_gr -> where('nip', $email);
             $query_gr =  $builder_gr->get();
             $user_gr = $query_gr->getRow();
             if($user_gr){
                 if (password_verify($pass, $user_gr->password)) {
                     session()->set([
-                        'username' => $user_gr->nomor_absensi,
+                        'username' => $user_gr->nip,
                         'id_user' => $user_gr->id_ptk,
                         'nama' => $user_gr->nama_ptk,
                         'level' => 2,
@@ -105,24 +105,18 @@ class Cpanel extends Controller
                 $user_sis = $query_sis->getRow();
 
                 if($user_sis){
-                    if (password_verify($pass, $user_sis->password)) {
-                        session()->set([
-                            'username' => $user_sis->no_induk,
-                            'id_user' => $user_sis->id_siswa,
-                            'nama' => $user_sis->nm_siswa,
-                            'level' => 3,
-                            'foto' => $user_sis->file,
-                            'tapel' => $tapel->nm_tapel, 
-                            'id_tapel' => $id_tapel,
-                            'logged_in' => true
-                            
-                        ]);
-                      
-                        return redirect()->to(base_url('Home'));
-                    } else {
-                        session()->setFlashdata('error', 'Password Salah');
-                        return redirect()->back();
-                    }
+                    session()->set([
+                        'username' => $user_sis->no_induk,
+                        'id_user' => $user_sis->id_siswa,
+                        'nama' => $user_sis->nm_siswa,
+                        'level' => 3,
+                        'foto' => $user_sis->file,
+                        'tapel' => $tapel->nm_tapel, 
+                        'id_tapel' => $id_tapel,
+                        'logged_in' => true
+                    ]);
+                    
+                    return redirect()->to(base_url('Home'));
                 }else{
                 session()->setFlashdata('error', 'Username Tidak Terdaftar');
                 return redirect()->back();

@@ -350,8 +350,164 @@
                                         
                                     </div>
                                     <!-- [ Main Content ] end -->
-                                    <!-- [ Guru/Point sections removed ] -->
-                            
+                                    
+                                    <!-- [ Cards Per Kelas ] start -->
+                                    <div class="row mt-4 mb-2">
+                                        <div class="col-sm-12">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5><i class="feather icon-grid"></i> Rekap Absen Kehadiran Per Kelas Hari Ini</h5>
+                                            </div>
+                                            <hr>
+                                        </div>
+                                        <?php 
+                                            // Call the helper function to get all rombel
+                                            $rombelList = getAllRombelForChart(); 
+                                            foreach($rombelList as $rombel):
+                                                $id_rombel = $rombel->id_rombel;
+                                                $rekap = getRekapKelasHariIni($id_rombel);
+                                        ?>
+                                        <div class="col-md-4 col-xl-3 mb-4">
+                                            <div class="card shadow-sm h-100" style="cursor:pointer; border-radius: 12px; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'" onclick="showDetailKelasAjax(<?=$id_rombel?>, '<?=$rombel->nm_rombel?>')">
+                                                <div class="card-body p-3">
+                                                    <div class="text-center mb-3">
+                                                        <h5 class="mb-1 font-weight-bold text-primary"><?=$rombel->nm_rombel?></h5>
+                                                        <span class="badge badge-light border" style="font-size: 12px;">Total: <?= $rekap['total'] ?> Siswa</span>
+                                                    </div>
+                                                    <div class="row text-center mt-3">
+                                                        <div class="col-6 border-right">
+                                                            <h6 class="text-success mb-1" style="font-size: 11px; text-transform: uppercase; font-weight: bold;">Hadir</h6>
+                                                            <h4 class="mb-0 font-weight-bold"><?=$rekap['hadir']?></h4>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <h6 class="text-danger mb-1" style="font-size: 11px; text-transform: uppercase; font-weight: bold;">S/I/A</h6>
+                                                            <h4 class="mb-0 font-weight-bold"><?= $rekap['sakit'] + $rekap['izin'] + $rekap['alfa'] ?></h4>
+                                                            <small class="text-muted" style="font-size: 9px;">S:<?=$rekap['sakit']?> I:<?=$rekap['izin']?> A:<?=$rekap['alfa']?></small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <!-- [ Cards Per Kelas ] end -->
+
+                                    <!-- [ Charts Per Jurusan ] start -->
+                                    <div class="row mt-4 mb-2">
+                                        <div class="col-sm-12">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5><i class="feather icon-bar-chart-2"></i> Grafik Kehadiran Per Jurusan</h5>
+                                            </div>
+                                            <hr>
+                                        </div>
+                                        <div class="col-sm-12" id="chart-jurusan-container">
+                                            <div class="row">
+                                            <?php 
+                                            // Extract jurusans for div containers
+                                            $jurusanList = [];
+                                            foreach($rombelList as $rombel) {
+                                                $parts = explode(" ", trim($rombel->nm_rombel));
+                                                // Pattern normally "X TKJ 1" -> parts[1] is TKJ
+                                                $jur = isset($parts[1]) ? $parts[1] : 'Lainnya';
+                                                if(count($parts) > 3) $jur = $parts[1]; // fallback
+                                                if(!in_array($jur, $jurusanList)) $jurusanList[] = $jur;
+                                            }
+                                            foreach($jurusanList as $jur) {
+                                                echo '<div class="col-md-6 mb-4">';
+                                                echo '<div class="card shadow-sm"><div class="card-header bg-light pb-2 pt-3"><h5 class="mb-0 text-primary">Jurusan '.htmlspecialchars($jur).'</h5></div>';
+                                                echo '<div class="card-body"><div id="chart-jurusan-'.htmlspecialchars($jur).'"></div></div></div></div>';
+                                            }
+                                            ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- [ Charts Per Jurusan ] end -->
+
+                                    <!-- Modal Detail Kelas -->
+                                    <div class="modal fade" id="modalDetailKelas" tabindex="-1">
+                                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                                            <div class="modal-content" style="border-radius: 15px;">
+                                                <div class="modal-header bg-primary text-white" style="border-radius: 15px 15px 0 0;">
+                                                    <h5 class="modal-title"><i class="feather icon-list mr-2"></i> Detail Absen Kelas: <span id="mdlKelasNama"></span></h5>
+                                                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                                </div>
+                                                <div class="modal-body p-0">
+                                                    <div class="text-center p-4" id="mdlKelasLoading">
+                                                        <div class="spinner-border text-primary" role="status">
+                                                            <span class="sr-only">Loading...</span>
+                                                        </div>
+                                                        <p class="mt-2 text-muted">Memuat data absensi...</p>
+                                                    </div>
+                                                    <div class="table-responsive" id="mdlKelasTableContainer" style="display: none; max-height: 400px;">
+                                                        <table class="table table-hover table-striped mb-0">
+                                                            <thead class="thead-light">
+                                                                <tr>
+                                                                    <th class="sticky-top bg-light">No</th>
+                                                                    <th class="sticky-top bg-light">Nama Siswa</th>
+                                                                    <th class="sticky-top bg-light">Masuk</th>
+                                                                    <th class="sticky-top bg-light">Pulang</th>
+                                                                    <th class="sticky-top bg-light">Keterangan</th>
+                                                                    <th class="sticky-top bg-light text-center">Aksi</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="mdlKelasBody">
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                    function showDetailKelasAjax(idRombel, nmRombel) {
+                                        $('#mdlKelasNama').text(nmRombel);
+                                        $('#mdlKelasLoading').show();
+                                        $('#mdlKelasTableContainer').hide();
+                                        $('#modalDetailKelas').modal('show');
+
+                                        // Fetch data
+                                        $.ajax({
+                                            url: '<?= base_url('Dashboard/getDetailKelasAjax') ?>/' + idRombel,
+                                            method: 'GET',
+                                            dataType: 'json',
+                                            success: function(res) {
+                                                $('#mdlKelasLoading').hide();
+                                                let html = '';
+                                                if(res.length === 0) {
+                                                    html = '<tr><td colspan="6" class="text-center text-muted">Tidak ada data siswa untuk kelas ini.</td></tr>';
+                                                } else {
+                                                    res.forEach((item, index) => {
+                                                        let badgeClass = 'secondary';
+                                                        let sts = item.status;
+                                                        if(sts === 'Hadir' || sts === 'Pulang') badgeClass = 'success';
+                                                        else if(sts === 'Terlambat') badgeClass = 'warning';
+                                                        else if(sts === 'Sakit' || sts === 'Izin') badgeClass = 'info';
+                                                        else if(sts === 'Alpha') badgeClass = 'danger';
+
+                                                        html += `<tr>
+                                                            <td>${index + 1}</td>
+                                                            <td><span class="font-weight-bold">${item.nm_siswa}</span></td>
+                                                            <td><span class="badge ${item.jam_masuk ? 'badge-light' : ''} border">${item.jam_masuk || '-'}</span></td>
+                                                            <td><span class="badge ${item.jam_pulang ? 'badge-light' : ''} border">${item.jam_pulang || '-'}</span></td>
+                                                            <td><span class="badge badge-${badgeClass}">${sts}</span></td>
+                                                            <td class="text-center">
+                                                                <a href="<?= base_url('Absensisiswa/detail') ?>/${item.id_siswa}" target="_blank" class="btn btn-sm btn-outline-primary" style="margin:0; padding:2px 8px; border-radius:15px;" title="Lihat Riwayat Absen">
+                                                                    <i class="feather icon-calendar m-0"></i> Riwayat
+                                                                </a>
+                                                            </td>
+                                                        </tr>`;
+                                                    });
+                                                }
+                                                $('#mdlKelasBody').html(html);
+                                                $('#mdlKelasTableContainer').show();
+                                            },
+                                            error: function() {
+                                                $('#mdlKelasLoading').html('<p class="text-danger mt-2">Gagal memuat data. Silahkan coba lagi.</p>');
+                                            }
+                                        });
+                                    }
+                                    </script>
+
                             <!-- [ Murid on Watch ] start -->
                             <div class="row">
                                 <div class="col-sm-12">

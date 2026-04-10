@@ -592,6 +592,15 @@ class WaNotification extends Controller
     }
 
     /**
+     * Delete all messages from queue
+     */
+    public function deleteAllQueue()
+    {
+        $this->db->table('wa_message_queue')->truncate();
+        return redirect()->to('/WaNotification/queue')->with('success', 'Seluruh pesan dalam antrean berhasil dihapus');
+    }
+
+    /**
      * Toggle WA on/off (kill switch)
      */
     public function toggleWa()
@@ -599,12 +608,10 @@ class WaNotification extends Controller
         $this->ensureSettingsTable();
         $enabled = $this->request->getPost('wa_enabled') ? '1' : '0';
         
-        $existing = $this->db->table('wa_settings')->where('key', 'wa_enabled')->get()->getRow();
-        if ($existing) {
-            $this->db->table('wa_settings')->where('key', 'wa_enabled')->update(['value' => $enabled]);
-        } else {
-            $this->db->table('wa_settings')->insert(['key' => 'wa_enabled', 'value' => $enabled]);
-        }
+        $this->db->query("
+            INSERT INTO wa_settings (`key`, value) VALUES ('wa_enabled', ?)
+            ON DUPLICATE KEY UPDATE value = ?
+        ", [$enabled, $enabled]);
 
         session()->setFlashdata('success', $enabled == '1' ? 'Pengiriman WA diaktifkan' : 'Pengiriman WA DINONAKTIFKAN');
         return redirect()->to('WaNotification/settings');
