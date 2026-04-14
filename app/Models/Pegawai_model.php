@@ -11,7 +11,7 @@ class Pegawai_model extends Model
     public function getPegawai()
     {
         return $this->db->table($this->table)
-        ->join('r_jenis_ptk', 'r_jenis_ptk.id_jenis_ptk = t_ptk.id_jenis_ptk')
+        ->join('r_jenis_ptk', 'r_jenis_ptk.id_jenis_ptk = t_ptk.id_jenis_ptk', 'LEFT')
         ->orderBy('nama_ptk')
         ->get()->getResultArray();
     }

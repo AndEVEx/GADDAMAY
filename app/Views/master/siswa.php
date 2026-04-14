@@ -234,9 +234,9 @@
                                                             <td><?= $data['rfid'] ?></td>
                                                             <td><?= $data['nm_siswa'] ?></td>
                                                             <td><?= $data['alamat'] ?></td>
-                                                            <td><?= $data['tempat_lahir'] ?>, <?= formatTanggal($data['tgl_lahir']) ?></td>
+                                                            <td><?= ($data['tempat_lahir'] ?? '') ?><?= !empty($data['tgl_lahir']) ? ', ' . formatTanggal($data['tgl_lahir']) : '' ?></td>
                                                             <td><?= jk($data['jk']) ?></td>
-                                                            <td><?= $data['hp'] ?></td>
+                                                            <td><?= $data['hp'] ?? '-' ?></td>
                                                             <td>
                                                                 <?php if($data['sts_siswa']==1){ ?>
                                                                     <span class="badge badge-pill badge-success"><?= stsptk($data['sts_siswa']) ?></span>

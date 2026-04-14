@@ -306,6 +306,21 @@ class AttendanceAlert extends Controller
     }
 
     /**
+     * Delete all alerts
+     */
+    public function deleteAll()
+    {
+        if (empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+
+        $this->db->table('attendance_alerts')->emptyTable();
+
+        session()->setFlashdata('success', 'Semua peringatan berhasil dihapus.');
+        return redirect()->to('/AttendanceAlert');
+    }
+
+    /**
      * Settings page for alert templates
      */
     public function settings()

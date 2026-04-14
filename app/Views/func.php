@@ -133,8 +133,10 @@ function updatemsinfinger($id) {
 }
 
 function formatTanggal($date){
+    if (empty($date) || $date === '0000-00-00') return '-';
     // pisahkan tanda - dan jadikan array
     $pecah = explode('-', $date);
+    if (count($pecah) < 3) return $date;
     return $pecah[2].'-'.$pecah[1].'-'.$pecah[0];
 }
 

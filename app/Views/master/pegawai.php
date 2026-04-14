@@ -91,13 +91,13 @@
                                                                             <div class="col-sm-6">
                                                                                 <div class="form-group">
                                                                                     <label>Nomor Finger</label>
-                                                                                    <input type="number" class="form-control" value="<?= $data['nomor_absensi'] ?>" name="no_finger" required>
+                                                                                    <input type="number" class="form-control" value="<?= $data['nomor_absensi'] ?? '' ?>" name="no_finger" required>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-sm-6">
                                                                                 <div class="form-group">
                                                                                     <label>NIP</label>
-                                                                                    <input type="number" class="form-control" value="<?= $data['nip'] ?>" name="nip" required>
+                                                                                    <input type="text" class="form-control" value="<?= $data['nip'] ?? '' ?>" name="nip">
                                                                                 </div>
                                                                             </div>
                                                                             
@@ -111,25 +111,25 @@
                                                                             <div class="col-sm-6">
                                                                                 <div class="form-group">
                                                                                     <label>Nama Panggilan</label>
-                                                                                    <input type="text" class="form-control" value="<?= $data['nama_panggilan'] ?>" name="nm_panggilan" required>
+                                                                                    <input type="text" class="form-control" value="<?= $data['nama_panggilan'] ?? '' ?>" name="nm_panggilan">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-sm-12">
                                                                                 <div class="form-group">
                                                                                     <label>Alamat</label>
-                                                                                    <input type="text" class="form-control" value="<?= $data['alamat'] ?>" name="alamat" required>
+                                                                                    <input type="text" class="form-control" value="<?= $data['alamat'] ?? '' ?>" name="alamat">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-sm-6">
                                                                                 <div class="form-group">
                                                                                     <label>Tempat Lahir</label>
-                                                                                    <input type="text" class="form-control" value="<?= $data['tempat_lahir'] ?>" name="tempat_lahir" required>
+                                                                                    <input type="text" class="form-control" value="<?= $data['tempat_lahir'] ?? '' ?>" name="tempat_lahir">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-sm-6">
                                                                                 <div class="form-group">
                                                                                     <label>Tanggal Lahir</label>
-                                                                                    <input type="date" class="form-control" value="<?= $data['tgl_lahir'] ?>" name="tgl_lahir" required>
+                                                                                    <input type="date" class="form-control" value="<?= $data['tgl_lahir'] ?? '' ?>" name="tgl_lahir">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-sm-6">
@@ -269,9 +269,9 @@
                                                                 <?= $data['nama_ptk']; ?>
                                                             </td>
 
-                                                            <td><?= $data['nama_panggilan'] ?></td>
-                                                            <td><?= $data['nama_jenis_ptk'] ?></td>
-                                                            <td><?= $data['no_hp'] ?></td>
+                                                            <td><?= $data['nama_panggilan'] ?? '-' ?></td>
+                                                            <td><?= $data['nama_jenis_ptk'] ?? '-' ?></td>
+                                                            <td><?= $data['no_hp'] ?? '-' ?></td>
                                                             <td>
                                                                 <?php if($data['status_ptk']==1){ ?>
                                                                     <span class="badge badge-pill badge-success"><?= stsptk($data['status_ptk']) ?></span>

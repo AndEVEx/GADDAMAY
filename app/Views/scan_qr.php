@@ -138,6 +138,30 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // Web Audio API for scan sounds
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playTone(freq, type, duration, vol=0.1) {
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+    function playSuccessSound() {
+      playTone(880, 'sine', 0.1, 0.2);
+      setTimeout(() => playTone(1108.73, 'sine', 0.2, 0.2), 100);
+    }
+    function playErrorSound() {
+      playTone(300, 'sawtooth', 0.3, 0.1);
+      setTimeout(() => playTone(250, 'sawtooth', 0.4, 0.1), 150);
+    }
+
     const html5QrCode = new Html5Qrcode("reader");
 
     document.body.addEventListener('click', () => {
