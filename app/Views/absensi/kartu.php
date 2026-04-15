@@ -123,6 +123,36 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- AudioContext for native beeps - MUST be before flash data scripts -->
+    <script>
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playTone(freq, type, duration, vol=0.1) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      }
+      function playSuccessSound() {
+        playTone(880, 'sine', 0.1, 0.2); 
+        setTimeout(() => playTone(1108.73, 'sine', 0.2, 0.2), 100); 
+      }
+      function playErrorSound() {
+        playTone(300, 'sawtooth', 0.3, 0.1);
+        setTimeout(() => playTone(250, 'sawtooth', 0.4, 0.1), 150);
+      }
+      
+      document.body.addEventListener('click', () => {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+      }, { once: true });
+    </script>
+
     <script>
         function updateClock() {
             const now = new Date();
@@ -154,7 +184,7 @@
                     }, 100);
                 }
             });
-
+            playSuccessSound();
         </script>
     <?php endif; ?>
 
@@ -222,54 +252,21 @@
         </script>
     <?php endif; ?>
 
-
-
-    <!-- AudioContext for native beeps -->
     <script>
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      function playTone(freq, type, duration, vol=0.1) {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      }
-      function playSuccessSound() {
-        playTone(880, 'sine', 0.1, 0.2); 
-        setTimeout(() => playTone(1108.73, 'sine', 0.2, 0.2), 100); 
-      }
-      function playErrorSound() {
-        playTone(300, 'sawtooth', 0.3, 0.1);
-        setTimeout(() => playTone(250, 'sawtooth', 0.4, 0.1), 150);
-      }
-      
-      document.body.addEventListener('click', () => {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-      }, { once: true });
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.querySelector('.rfid-input');
+            if (input) {
+                input.focus();
+                // kalau scanner mengirim "Enter" otomatis submit form
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.form.submit();
+                    }
+                });
+            }
+        });
     </script>
 </body>
 
 </html>
-
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const input = document.querySelector('.rfid-input');
-        if (input) {
-            input.focus();
-            // kalau scanner mengirim "Enter" otomatis submit form
-            input.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.form.submit();
-                }
-            });
-        }
-    });
-</script>
