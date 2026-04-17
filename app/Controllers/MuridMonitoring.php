@@ -436,65 +436,118 @@ class MuridMonitoring extends Controller
         }
 
         $db = \Config\Database::connect();
+        $id_tapel = session()->get('id_tapel');
         
-        foreach ($ids as $id_siswa) {
-            // Check if attendance already exists
-            $cek = $db->table('t_siswa_hadir')
-                ->where('id_siswa', $id_siswa)
+        $db->transStart();
+
+        if (in_array($status, ['Masuk', 'Terlambat', 'Pulang'])) {
+            $sts_hadir = ($status == 'Pulang') ? 1 : 0;
+            
+            // Delete conflicting ketidakhadiran
+            $db->table('t_siswa_absen')
+               ->where('tgl_absen', $tgl)
+               ->whereIn('id_siswa', $ids)
+               ->delete();
+
+            $existing = $db->table('t_siswa_hadir')
+                ->select('id_siswa_hadir, id_siswa')
                 ->where('tgl_hadir', $tgl)
-                ->where('sts_hadir', 0) // type kedatangan
-                ->get()->getRow();
+                ->where('sts_hadir', $sts_hadir)
+                ->whereIn('id_siswa', $ids)
+                ->get()->getResultArray();
+            
+            $existingMap = [];
+            foreach ($existing as $e) {
+                $existingMap[$e['id_siswa']] = $e['id_siswa_hadir'];
+            }
 
-            if ($status == 'Pulang') {
-                // Update jam pulang
-                $cek_pulang = $db->table('t_siswa_hadir')
-                    ->where('id_siswa', $id_siswa)
-                    ->where('tgl_hadir', $tgl)
-                    ->where('sts_hadir', 1) // type pulang
-                    ->get()->getRow();
+            $updateData = [];
+            $insertData = [];
 
-                if ($cek_pulang) {
-                    $db->table('t_siswa_hadir')
-                        ->where('id_siswa_hadir', $cek_pulang->id_siswa_hadir)
-                        ->update(['jam' => $jam]);
-                } else {
-                    $db->table('t_siswa_hadir')->insert([
-                        'id_siswa' => $id_siswa,
-                        'tgl_hadir' => $tgl,
-                        'sts_hadir' => 1,
+            foreach ($ids as $id_siswa) {
+                if (isset($existingMap[$id_siswa])) {
+                    $updateData[] = [
+                        'id_siswa_hadir' => $existingMap[$id_siswa],
                         'jam' => $jam
-                    ]);
-                }
-            } else {
-                // Masuk, Sakit, Izin, Alpha dll
-                $data = [
-                    'jam' => $jam,
-                    'status' => $status == 'Masuk' || $status == 'Terlambat' ? 1 : 
-                               ($status == 'Sakit' ? 2 : 
-                               ($status == 'Izin' ? 3 : 
-                               ($status == 'Alpha' ? 4 : 0)))
-                ];
-
-                if ($cek) {
-                    // if editing Alpha/Sakit but it was entered in t_siswa_tidak_masuk, we simplify by updating t_siswa_hadir status
-                    $db->table('t_siswa_hadir')
-                        ->where('id_siswa_hadir', $cek->id_siswa_hadir)
-                        ->update($data);
+                    ];
                 } else {
-                    $db->table('t_siswa_hadir')->insert(array_merge($data, [
+                    $insertData[] = [
                         'id_siswa' => $id_siswa,
                         'tgl_hadir' => $tgl,
-                        'sts_hadir' => 0
-                    ]));
+                        'sts_hadir' => $sts_hadir,
+                        'jam' => $jam,
+                        'id_tapel' => $id_tapel
+                    ];
                 }
+            }
 
-                // If Sakit/Izin/Alpha, we also update t_siswa_tidak_masuk maybe? But Absensi_model handles both tables differently. 
-                // Wait! Absensi_model handles non-attendance via t_siswa_tidak_masuk, BUT Siswa_model uses `t_siswa_hadir` and `t_rekap_absen`?
-                // Let's use Absensiswa_model or just update it via `t_rekap_absen`.
+            if (!empty($updateData)) {
+                $db->table('t_siswa_hadir')->updateBatch($updateData, 'id_siswa_hadir');
+            }
+            if (!empty($insertData)) {
+                $db->table('t_siswa_hadir')->insertBatch($insertData);
+            }
+
+        } else {
+            $sts_absen = ($status == 'Sakit') ? 2 : (($status == 'Izin') ? 3 : 4);
+            
+            // Delete conflicting kehadiran
+            $db->table('t_siswa_hadir')
+               ->where('tgl_hadir', $tgl)
+               ->whereIn('id_siswa', $ids)
+               ->delete();
+
+            $existing = $db->table('t_siswa_absen')
+                ->select('id_siswa_absen, id_siswa')
+                ->where('tgl_absen', $tgl)
+                ->whereIn('id_siswa', $ids)
+                ->get()->getResultArray();
+
+            $existingMap = [];
+            foreach ($existing as $e) {
+                $existingMap[$e['id_siswa']] = $e['id_siswa_absen'];
+            }
+
+            $updateData = [];
+            $insertData = [];
+
+            foreach ($ids as $id_siswa) {
+                if (isset($existingMap[$id_siswa])) {
+                    $updateData[] = [
+                        'id_siswa_absen' => $existingMap[$id_siswa],
+                        'sts_absen' => $sts_absen,
+                        'ket_absen' => $keterangan ?: 'Koreksi Masal Rombel',
+                        'sts_approve' => 1
+                    ];
+                } else {
+                    $insertData[] = [
+                        'id_siswa' => $id_siswa,
+                        'tgl_absen' => $tgl,
+                        'sts_absen' => $sts_absen,
+                        'ket_absen' => $keterangan ?: 'Koreksi Masal Rombel',
+                        'id_tapel' => $id_tapel,
+                        'tgl_entri' => date('Y-m-d H:i:s'),
+                        'sts_approve' => 1
+                    ];
+                }
+            }
+
+            if (!empty($updateData)) {
+                $db->table('t_siswa_absen')->updateBatch($updateData, 'id_siswa_absen');
+            }
+            if (!empty($insertData)) {
+                $db->table('t_siswa_absen')->insertBatch($insertData);
             }
         }
 
-        session()->setFlashdata('success', 'Koreksi masal berhasil dilakukan');
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            session()->setFlashdata('error', 'Terjadi kesalahan sistem saat memproses koreksi masal.');
+        } else {
+            session()->setFlashdata('success', 'Koreksi masal berhasil dilakukan');
+        }
+        
         return redirect()->back();
     }
 }
