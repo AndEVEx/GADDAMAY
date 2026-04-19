@@ -247,8 +247,8 @@ class Reportwal extends Controller
             $data = array(
                 'getAbsensi' => $model->getAbsensisiswa($id_siswa, $tgl),
                 'getSiswa' => $m_siswa->getSiswarombel($id_rombel),
-                'getNama' => $row->nm_siswa,
-                'nmRombel' => $row->nm_rombel,
+                'getNama' => $row->nm_siswa ?? '',
+                'nmRombel' => $row->nm_rombel ?? '',
                 'idSiswa' => $id_siswa   
             );
         }

@@ -73,6 +73,91 @@
                             </div>
                             <!-- [ Stats Cards ] end -->
 
+                            <!-- [ Data Induk Siswa ] start -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5><i class="feather icon-user"></i> Data Profil Siswa</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>#</th>
+                                                            <th>NIS</th>
+                                                            <th>Nama Siswa</th>
+                                                            <th>Kelas</th>
+                                                            <th>No. Orangtua</th>
+                                                            <th>Aksi</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php $no_profil = 0; foreach ($students as $sp) { $no_profil++; ?>
+                                                        <tr>
+                                                            <td><?= $no_profil ?></td>
+                                                            <td><?= $sp['no_induk'] ?></td>
+                                                            <td><?= $sp['nm_siswa'] ?></td>
+                                                            <td><?= $sp['nm_rombel'] ?></td>
+                                                            <td><?= $sp['hp'] ?: '-' ?></td>
+                                                            <td>
+                                                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editSiswaProfil<?= $sp['id_siswa'] ?>" title="Edit Data Siswa">
+                                                                    <i class="feather icon-edit-2"></i> Edit Profil
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+
+                                                        <!-- Edit Siswa Profil Modal -->
+                                                        <div class="modal fade" id="editSiswaProfil<?= $sp['id_siswa'] ?>">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Edit Data: <?= $sp['nm_siswa'] ?></h5>
+                                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                    </div>
+                                                                    <form method="post" action="<?= base_url('MuridMonitoring/updateSiswa') ?>" enctype="multipart/form-data">
+                                                                        <div class="modal-body">
+                                                                            <input type="hidden" name="id_siswa" value="<?= $sp['id_siswa'] ?>">
+                                                                            <div class="form-group">
+                                                                                <label>Nomor HP Orangtua (Cth: 0812... / 62812...)</label>
+                                                                                <input type="text" class="form-control" name="hp" value="<?= $sp['hp'] ?>">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Alamat</label>
+                                                                                <input type="text" class="form-control" name="alamat" value="">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Tempat Lahir</label>
+                                                                                <input type="text" class="form-control" name="tempat_lahir" value="">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Tanggal Lahir</label>
+                                                                                <input type="date" class="form-control" name="tgl_lahir" value="">
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Foto (opsional)</label>
+                                                                                <input type="file" name="file" class="form-control-file">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                                                                            <button type="submit" class="btn btn-primary">Simpan Profil</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <?php } ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- [ Data Induk Siswa ] end -->
+
                             <!-- [ Daily Attendance ] start -->
                             <div class="row">
                                 <div class="col-sm-12">
@@ -124,10 +209,9 @@
                                                             <th>NIS</th>
                                                             <th>Nama Siswa</th>
                                                             <th>Kelas</th>
-                                                            <th>No. Orangtua</th>
                                                             <th>Jam Masuk</th>
                                                             <th>Status</th>
-                                                            <th>Aksi</th>
+                                                            <th>Hubungi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -138,7 +222,6 @@
                                                             <td><?= $s['no_induk'] ?></td>
                                                             <td><?= $s['nm_siswa'] ?></td>
                                                             <td><?= $s['nm_rombel'] ?></td>
-                                                            <td><?= $s['hp'] ?: '-' ?></td>
                                                             <td><?= jammasuk($s['id_siswa'], $tgl) ?></td>
                                                             <td>
                                                                 <?php 
@@ -152,58 +235,17 @@
                                                                 <span class="badge badge-<?= $badge ?>"><?= $sts ?></span>
                                                             </td>
                                                             <td>
-                                                                <?php if (!empty($s['hp'])) { ?>
-                                                                <a href="tel:<?= $s['hp'] ?>" class="btn btn-success btn-sm" title="Telepon Orangtua">
-                                                                    <i class="feather icon-phone"></i>
+                                                                <?php 
+                                                                if (!empty($s['hp'])) { 
+                                                                    $wa_number = $s['hp'];
+                                                                    if(substr($wa_number, 0, 2) == '08'){ $wa_number = '628' . substr($wa_number, 2); }
+                                                                ?>
+                                                                <a href="https://wa.me/<?= $wa_number ?>" target="_blank" class="btn btn-success btn-sm" title="Chat WhatsApp Orangtua">
+                                                                    <i class="feather icon-message-circle"></i> Chat WA
                                                                 </a>
                                                                 <?php } ?>
-                                                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editSiswa<?= $s['id_siswa'] ?>" title="Edit Data Siswa">
-                                                                    <i class="feather icon-edit-2"></i>
-                                                                </button>
                                                             </td>
                                                         </tr>
-
-                                                        <!-- Edit Siswa Modal -->
-                                                        <div class="modal fade" id="editSiswa<?= $s['id_siswa'] ?>">
-                                                            <div class="modal-dialog">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title">Edit Data: <?= $s['nm_siswa'] ?></h5>
-                                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                                    </div>
-                                                                    <form method="post" action="<?= base_url('MuridMonitoring/updateSiswa') ?>" enctype="multipart/form-data">
-                                                                        <div class="modal-body">
-                                                                            <input type="hidden" name="id_siswa" value="<?= $s['id_siswa'] ?>">
-                                                                            <div class="form-group">
-                                                                                <label>Nomor HP Orangtua</label>
-                                                                                <input type="text" class="form-control" name="hp" value="<?= $s['hp'] ?>">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label>Alamat</label>
-                                                                                <input type="text" class="form-control" name="alamat" value="">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label>Tempat Lahir</label>
-                                                                                <input type="text" class="form-control" name="tempat_lahir" value="">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label>Tanggal Lahir</label>
-                                                                                <input type="date" class="form-control" name="tgl_lahir" value="">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label>Foto (opsional)</label>
-                                                                                <input type="file" name="file" class="form-control-file">
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                                                            <button type="submit" class="btn btn-primary">Simpan</button>
-                                                                        </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
                                                         <?php } ?>
                                                     </tbody>
                                                 </table>
