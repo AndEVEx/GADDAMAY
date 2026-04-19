@@ -22,7 +22,9 @@ class Profile extends Controller
         );
 
         $data = array(
-            'getPegawai' => $model->getPegawaidetail($id)
+            'getPegawai' => $model->getPegawaidetail($id),
+            'title' => 'Data Profile',
+            'nav1' => 'Profile'
         );
         
         echo view('index/sidebar');
