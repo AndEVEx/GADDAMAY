@@ -156,14 +156,6 @@ class ScanQr extends Controller
     }
 
     if (!$absenMasuk) {
-        // 🔹 Cek batas waktu absen pagi 08:00
-        if ($jamnow > '08:00:00') {
-            return $this->response->setJSON([
-                'status' => false,
-                'message' => 'Batas waktu absen pagi telah lewat (08:00)'
-            ]);
-        }
-
         // 🔹 Catat absen masuk
         $data = [
             'id_siswa' => $id_siswa,

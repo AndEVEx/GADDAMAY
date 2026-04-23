@@ -223,11 +223,7 @@ public function addabsensi()
         $stshadir = 'Pulang';
         $pesanDoa = '*MOHON DO`A SELAMAT SAMPAI DI RUMAH*';
     } else {
-        // Absen masuk - cek batas waktu 08:00
-        if ($jamnow > '08:00:00') {
-            session()->setFlashdata('error', 'Batas waktu absen pagi telah lewat (08:00)');
-            return redirect()->to('/Dashboard');
-        }
+        // Absen masuk
 
         $data = [
             'id_siswa'  => $id_siswa,
