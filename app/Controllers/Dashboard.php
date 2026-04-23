@@ -224,6 +224,11 @@ public function addabsensi()
         $pesanDoa = '*MOHON DO`A SELAMAT SAMPAI DI RUMAH*';
     } else {
         // Absen masuk
+        $batasAbsen = $db->table('t_setting_aplikasi')->get()->getRow()->batas_absen_masuk ?? '08:00:00';
+        if ($jamnow > $batasAbsen) {
+            session()->setFlashdata('error', 'Batas waktu absen pagi telah lewat (' . $batasAbsen . ')');
+            return redirect()->to('/Dashboard');
+        }
 
         $data = [
             'id_siswa'  => $id_siswa,

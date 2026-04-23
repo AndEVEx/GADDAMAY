@@ -54,6 +54,10 @@
                                                     <input type="text" class="form-control" value="<?=$getNamakepsek;?>" name="nm_kepsek" required>
                                                 </div>
                                                 <div class="form-group">
+                                                    <label>Batas Akhir Absen Pagi (Jam)</label>
+                                                    <input type="time" class="form-control" value="<?=$getBatasAbsen ?? '08:00';?>" name="batas_absen_masuk" required>
+                                                </div>
+                                                <div class="form-group">
                                                     <label>Alamat</label>
                                                     <input type="text" class="form-control" value="<?=$getAlamat;?>" name="alamat" required>
                                                 </div>
