@@ -829,6 +829,11 @@ class Absensisiswa extends Controller
         $jam = $this->request->getPost('jam') ?: date('H:i');
         $tgl = $this->request->getPost('tgl') ?: date('Y-m-d');
 
+        if ($tgl > date('Y-m-d')) {
+            session()->setFlashdata('error', 'Tanggal koreksi tidak boleh melebihi hari ini.');
+            return redirect()->back();
+        }
+
         $db = \Config\Database::connect();
         
         // Get all active students for this tapel

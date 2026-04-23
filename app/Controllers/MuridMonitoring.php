@@ -430,6 +430,11 @@ class MuridMonitoring extends Controller
         $tgl = $this->request->getPost('tgl') ?: date('Y-m-d');
         $keterangan = $this->request->getPost('keterangan') ?: '';
 
+        if ($tgl > date('Y-m-d')) {
+            session()->setFlashdata('error', 'Tanggal koreksi tidak boleh melebihi hari ini.');
+            return redirect()->back();
+        }
+
         if (empty($ids) || !is_array($ids)) {
             session()->setFlashdata('error', 'Tidak ada siswa yang dipilih');
             return redirect()->back();
