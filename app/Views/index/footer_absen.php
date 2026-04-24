@@ -15,8 +15,13 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        new DataTable('#example1');
+        new DataTable('#example1', {
+            pageLength: -1,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']]
+        });
         $('#example').DataTable( {
+            pageLength: -1,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']],
             buttons: [ 'copy', 'csv', 'excel' ]
         } );
         $( '#single-select-field' ).select2( {

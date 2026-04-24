@@ -108,6 +108,11 @@
   <!-- AUDIO -->
   <audio id="audioSuccess" src="<?= base_url() ?>mp3/berhasil.mp3" preload="auto"></audio>
   <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
+  <script>
+    // Set audio volume to maximum
+    document.getElementById('audioSuccess').volume = 1.0;
+    document.getElementById('audioError').volume = 1.0;
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -140,16 +145,20 @@
 
     async function startScanner(cameraId = null) {
       try {
+        // Responsive qrbox - adapt to container width
+        const readerEl = document.getElementById('reader');
+        const readerWidth = readerEl.offsetWidth || 400;
+        const qrboxSize = Math.min(280, Math.floor(readerWidth * 0.8));
         const config = {
           fps: 15,
-          qrbox: { width: 350, height: 350 },
+          qrbox: { width: qrboxSize, height: qrboxSize },
           aspectRatio: 1.0,
           disableFlip: false
         };
         await html5QrCode.start(cameraId, config, onScanSuccess, onScanFailure);
       } catch (err) {
         console.error("Scanner error:", err);
-        showToast("❌ Gagal mengakses kamera", "danger");
+        showToast("❌ Gagal mengakses kamera: " + err.message, "danger");
       }
     }
 

@@ -57,6 +57,55 @@ class Absensisiswa extends Controller
         echo view('report/hariansiswa', $data);
         echo view('index/footer');
     }
+
+    public function detail($id_siswa = null)
+    {
+        if(empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+
+        if (empty($id_siswa)) {
+            return redirect()->to('Home');
+        }
+
+        $db = \Config\Database::connect();
+        $model = new Absensisiswa_model;
+        $m_siswa = new Siswa_model;
+        $id_tapel = session()->get('id_tapel');
+
+        echo view('func_siswa');
+
+        $datanav = array(
+            'nama' => session()->get('nama'),
+            'title' => 'Detail Absensi Siswa',
+            'nav' => 'Absensisiswa/persiswa'
+        );
+
+        // Ambil data siswa
+        $query = $db->query("SELECT no_induk, nm_siswa, nm_rombel FROM t_siswa 
+            JOIN t_siswa_rombel ON t_siswa_rombel.id_siswa = t_siswa.id_siswa
+            JOIN t_rombel ON t_rombel.id_rombel = t_siswa_rombel.id_rombel
+            WHERE t_siswa.id_siswa='$id_siswa' AND t_siswa_rombel.id_tapel='$id_tapel'");
+        $row = $query->getRow();
+
+        if (!$row) {
+            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            return redirect()->to('Home');
+        }
+
+        $data = array(
+            'getAbsensisiswa' => $model->getAbsensisiswa($id_siswa, date('Y-m-d')),
+            'getSiswa' => $m_siswa->getSiswafilterkelas($id_tapel),
+            'getNama' => $row->nm_siswa,
+            'nmRombel' => $row->nm_rombel,
+            'idSiswa' => $id_siswa,
+        );
+
+        echo view('index/sidebar');
+        echo view('index/navbar', $datanav);
+        echo view('report/persiswa', $data);
+        echo view('index/footer');
+    }
     public function cetakharian()
     {
         if(empty(session()->get('logged_in'))) {
