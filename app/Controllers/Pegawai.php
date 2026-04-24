@@ -22,17 +22,28 @@ class Pegawai extends Controller
             'nav' => 'Pegawai'
         );
 
-        $data = array(
-            'getPegawai' => $model->getPegawai(),
-            'getJenis' => $m_jenis->getJenis()
-        );
+        try {
+            $data = array(
+                'getPegawai' => $model->getPegawai(),
+                'getJenis' => $m_jenis->getJenis()
+            );
 
-         
-        echo view('index/sidebar');
-        echo view('func');
-        echo view('index/navbar',  $datanav);
-        echo view('master/pegawai', $data);
-        echo view('index/footer');
+            echo view('index/sidebar');
+            echo view('func');
+            echo view('index/navbar',  $datanav);
+            echo view('master/pegawai', $data);
+            echo view('index/footer');
+        } catch (\Throwable $e) {
+            echo view('index/sidebar');
+            echo view('func');
+            echo view('index/navbar',  $datanav);
+            echo "<div class='pcoded-main-container'><div class='pcoded-content'><div class='alert alert-danger m-3'>";
+            echo "<h5>Error pada halaman Pegawai</h5>";
+            echo "<p>" . $e->getMessage() . "</p>";
+            echo "<p><small>File: " . $e->getFile() . " Line: " . $e->getLine() . "</small></p>";
+            echo "</div></div></div>";
+            echo view('index/footer');
+        }
     }
    
     public function add()

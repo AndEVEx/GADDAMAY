@@ -21,7 +21,9 @@ class WaMessageQueue_model extends Model
         'week_end',
         'sent_at',
         'error_message',
-        'retry_count'
+        'retry_count',
+        'message_id',
+        'sender_index'
     ];
 
     /**

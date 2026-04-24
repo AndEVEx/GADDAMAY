@@ -201,4 +201,92 @@ class WaGatewayService
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
+
+    /**
+     * Get count of configured senders (1 or 2)
+     */
+    public function getSenderCount()
+    {
+        $count = count(array_filter($this->deviceIds, fn($id) => !empty($id)));
+        return max($count, 1); // At least 1
+    }
+
+    /**
+     * Get message delay (seconds between messages)
+     */
+    public function getMessageDelay()
+    {
+        try {
+            $row = $this->db->table('wa_settings')->where('key', 'message_delay')->get()->getRow();
+            return (int)($row->value ?? 30);
+        } catch (\Exception $e) {
+            return 30;
+        }
+    }
+
+    /**
+     * Send message to WhatsApp Channel/Newsletter
+     * @param string $channelJid Channel JID (e.g. 120363xxx@newsletter)
+     * @param string $message Message text
+     * @param int $senderIndex 0 = primary, 1 = backup
+     */
+    public function sendToChannel($channelJid, $message, $senderIndex = 0)
+    {
+        $deviceId = $this->deviceIds[$senderIndex] ?? '';
+
+        if (empty($deviceId)) {
+            return ['success' => false, 'error' => 'Device ID not configured'];
+        }
+
+        // Ensure JID format has @newsletter
+        if (strpos($channelJid, '@') === false) {
+            $channelJid = $channelJid . '@newsletter';
+        }
+
+        try {
+            $url = $this->baseUrl . '/send/message';
+            $postData = json_encode([
+                'phone' => $channelJid,
+                'message' => $message,
+            ]);
+
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => $postData,
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                    'X-Device-Id: ' . $deviceId,
+                ],
+            ]);
+
+            if (!empty($this->authUser)) {
+                curl_setopt($ch, CURLOPT_USERPWD, $this->authUser . ':' . $this->authPass);
+            }
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($error) {
+                return ['success' => false, 'error' => 'cURL error: ' . $error];
+            }
+
+            $data = json_decode($response, true);
+
+            return [
+                'success' => ($httpCode === 200),
+                'http_code' => $httpCode,
+                'response' => $data,
+                'error' => ($httpCode !== 200) ? ($data['message'] ?? "HTTP $httpCode") : null,
+            ];
+        } catch (\Exception $e) {
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
 }

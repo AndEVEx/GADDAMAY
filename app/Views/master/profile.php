@@ -49,7 +49,7 @@
                                             <div class="form-row">
                                                 <div class="col-md-12 mb-3">
                                                     <label>Nomor Absensi</label>
-                                                    <input type="text" class="form-control" value="<?= $data['nomor_absensi'] ?>" readonly required>
+                                                    <input type="text" class="form-control" value="<?= $data['nomor_absensi'] ?? '' ?>" readonly required>
                                                     
                                                 </div>
                                             </div>
@@ -57,7 +57,7 @@
                                             <div class="form-row">
                                                 <div class="col-md-12 mb-3">
                                                     <label>Nama Lengkap</label>
-                                                    <input type="text" class="form-control" name="nama"  value="<?= $data['nama_ptk'] ?>" required>
+                                                    <input type="text" class="form-control" name="nama"  value="<?= $data['nama_ptk'] ?? '' ?>" required>
                                                     
                                                 </div>
                                             </div>
@@ -65,14 +65,14 @@
                                             <div class="form-row">
                                                 <div class="col-md-12 mb-3">
                                                     <label>Jenis PTK</label>
-                                                    <input type="text" class="form-control" value="<?= $data['nama_jenis_ptk'] ?>" readonly required>
+                                                    <input type="text" class="form-control" value="<?= $data['nama_jenis_ptk'] ?? '' ?>" readonly required>
                                                     
                                                 </div>
                                             </div>
                                             <div class="form-row">
                                                 <div class="col-md-12 mb-3">
                                                     <label>Alamat</label>
-                                                    <input type="text" class="form-control" name="alamat" value="<?= $data['alamat'] ?>" required>
+                                                    <input type="text" class="form-control" name="alamat" value="<?= $data['alamat'] ?? '' ?>" required>
                                                     
                                                 </div>
                                                 
@@ -80,7 +80,7 @@
                                             <div class="form-row">
                                                 <div class="col-md-12 mb-3">
                                                     <label>Tempat Lahir</label>
-                                                    <input type="text" class="form-control" name="tempat_lahir" value="<?= $data['tempat_lahir'] ?>" required>
+                                                    <input type="text" class="form-control" name="tempat_lahir" value="<?= $data['tempat_lahir'] ?? '' ?>" required>
                                                     
                                                 </div>
                                                 
@@ -88,11 +88,11 @@
                                             <div class="form-row">
                                                 <div class="col-md-6 mb-3">
                                                     <label>Tanggal Lahir</label>
-                                                    <input type="date" class="form-control" name="tgl_lahir" value="<?= $data['tgl_lahir'] ?>" required>
+                                                    <input type="date" class="form-control" name="tgl_lahir" value="<?= $data['tgl_lahir'] ?? '' ?>" required>
                                                 </div>
                                                 <div class="col-md-6 mb-3">
                                                     <label>HP (Active Wa)</label>
-                                                    <input type="number" class="form-control" name="hp" value="<?= $data['no_hp'] ?>" required>
+                                                    <input type="number" class="form-control" name="hp" value="<?= $data['no_hp'] ?? '' ?>" required>
                                                     
                                                 </div>
                                             </div>

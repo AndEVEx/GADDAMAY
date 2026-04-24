@@ -1,30 +1,34 @@
 <?php
 /**
- * Chart Absensi Harian per Kelas (Today)
- * Displays a bar chart showing Hadir, Terlambat, Tidak Hadir for each class
+ * Chart Absensi Harian per Jurusan (Today)
+ * Displays a bar chart showing Hadir, Terlambat, Tidak Hadir for each class, separated by Jurusan.
  */
 $db = \Config\Database::connect();
 $tgl = date('Y-m-d');
 $rombelList = getAllRombelForChart();
 
-// Build data arrays for the chart
-$categories = [];
-$dataHadir = [];
-$dataTerlambat = [];
-$dataTidakHadir = [];
+// Build data arrays for the chart grouped by Jurusan
+$jurusanData = [];
 
 foreach ($rombelList as $rombel) {
-    $categories[] = $rombel->nm_rombel;
-    $dataHadir[] = jumHadirKelasHariIni($rombel->id_rombel);
-    $dataTerlambat[] = jumTerlambatKelasHariIni($rombel->id_rombel);
-    $dataTidakHadir[] = jumTidakHadirKelasHariIni($rombel->id_rombel);
+    $parts = explode(" ", trim($rombel->nm_rombel));
+    $jur = isset($parts[1]) ? $parts[1] : 'Lainnya';
+    if(count($parts) > 3) $jur = $parts[1];
+    
+    if(!isset($jurusanData[$jur])) {
+        $jurusanData[$jur] = [
+            'categories' => [],
+            'hadir' => [],
+            'terlambat' => [],
+            'tidak_hadir' => []
+        ];
+    }
+    
+    $jurusanData[$jur]['categories'][] = $rombel->nm_rombel;
+    $jurusanData[$jur]['hadir'][] = jumHadirKelasHariIni($rombel->id_rombel);
+    $jurusanData[$jur]['terlambat'][] = jumTerlambatKelasHariIni($rombel->id_rombel);
+    $jurusanData[$jur]['tidak_hadir'][] = jumTidakHadirKelasHariIni($rombel->id_rombel);
 }
-
-// Convert to JSON for JavaScript
-$categoriesJson = json_encode($categories);
-$dataHadirJson = json_encode($dataHadir);
-$dataTerlambatJson = json_encode($dataTerlambat);
-$dataTidakHadirJson = json_encode($dataTidakHadir);
 ?>
 
 <script>
@@ -32,23 +36,20 @@ $dataTidakHadirJson = json_encode($dataTidakHadir);
 $(document).ready(function() {
     setTimeout(function() {
         $(function() {
-            var options = {
+            <?php foreach($jurusanData as $jur => $data): ?>
+            var options_<?=$jur?> = {
                 chart: {
-                    height: 450,
+                    height: 350,
                     type: 'bar',
-                    toolbar: {
-                        show: true
-                    },
-                    zoom: {
-                        enabled: true
-                    }
+                    toolbar: { show: false },
+                    zoom: { enabled: false }
                 },
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '70%',
+                        columnWidth: '60%',
                         endingShape: 'flat',
-                        borderRadius: 0
+                        borderRadius: 2
                     },
                 },
                 dataLabels: {
@@ -57,42 +58,34 @@ $(document).ready(function() {
                 colors: ["#0e9e4a", "#ffb64d", "#ff5252"],
                 stroke: {
                     show: true,
-                    width: 1,
+                    width: 2,
                     colors: ['transparent']
                 },
                 series: [{
                     name: 'Hadir',
-                    data: <?=$dataHadirJson?>
+                    data: <?= json_encode($data['hadir']) ?>
                 }, {
                     name: 'Terlambat',
-                    data: <?=$dataTerlambatJson?>
+                    data: <?= json_encode($data['terlambat']) ?>
                 }, {
                     name: 'Tidak Hadir',
-                    data: <?=$dataTidakHadirJson?>
+                    data: <?= json_encode($data['tidak_hadir']) ?>
                 }],
                 xaxis: {
-                    categories: <?=$categoriesJson?>,
-                    title: {
-                        text: 'Kelas'
-                    },
+                    categories: <?= json_encode($data['categories']) ?>,
                     labels: {
                         rotate: -45,
                         rotateAlways: true,
-                        style: {
-                            fontSize: '9px'
-                        },
+                        style: { fontSize: '10px' },
                         trim: true,
-                        maxHeight: 80
+                        maxHeight: 100
                     },
                     tickPlacement: 'on'
                 },
                 yaxis: {
-                    title: {
-                        text: 'Jumlah Murid'
-                    },
+                    title: { text: 'Jumlah Murid' },
                     min: 0,
-                    max: 40,
-                    tickAmount: 8
+                    tickAmount: 5
                 },
                 fill: {
                     opacity: 1
@@ -107,31 +100,18 @@ $(document).ready(function() {
                 legend: {
                     position: 'top',
                     horizontalAlign: 'center'
-                },
-                responsive: [{
-                    breakpoint: 768,
-                    options: {
-                        chart: {
-                            height: 350
-                        },
-                        xaxis: {
-                            labels: {
-                                rotate: -90,
-                                style: {
-                                    fontSize: '8px'
-                                }
-                            }
-                        }
-                    }
-                }]
+                }
             };
             
-            var chart = new ApexCharts(
-                document.querySelector("#bar-chart-kelas-hari-ini"),
-                options
-            );
-            chart.render();
+            if(document.querySelector("#chart-jurusan-<?=$jur?>")) {
+                var chart_<?=$jur?> = new ApexCharts(
+                    document.querySelector("#chart-jurusan-<?=$jur?>"),
+                    options_<?=$jur?>
+                );
+                chart_<?=$jur?>.render();
+            }
+            <?php endforeach; ?>
         });
-    }, 800);
+    }, 500);
 });
 </script>

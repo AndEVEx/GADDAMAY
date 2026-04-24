@@ -31,6 +31,7 @@ class Setting extends Controller
             'getNamasekolah' => $aplikasi->nm_sekolah,
             'getAlamat' => $aplikasi->alamat,
             'getNamakepsek' => $aplikasi->nm_kepsek,
+            'getBatasAbsen' => $aplikasi->batas_absen_masuk ?? '08:00:00',
             'getHari' => $m_hari->getHari()
         );
 
@@ -54,6 +55,7 @@ class Setting extends Controller
                 'nm_sekolah' => $this->request->getPost('nm_sekolah'),
                 'alamat' => $this->request->getPost('alamat'),
                 'nm_kepsek' => $this->request->getPost('nm_kepsek'),
+                'batas_absen_masuk' => $this->request->getPost('batas_absen_masuk') ?: '08:00:00',
                 'file' => $fileName
             );
             $file->move('image/', $fileName);
@@ -63,6 +65,7 @@ class Setting extends Controller
                 'nm_sekolah' => $this->request->getPost('nm_sekolah'),
                 'alamat' => $this->request->getPost('alamat'),
                 'nm_kepsek' => $this->request->getPost('nm_kepsek'),
+                'batas_absen_masuk' => $this->request->getPost('batas_absen_masuk') ?: '08:00:00',
             );
         }
         

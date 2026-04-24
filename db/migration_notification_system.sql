@@ -62,9 +62,9 @@ CREATE TABLE IF NOT EXISTS `wa_settings` (
   UNIQUE KEY `idx_key` (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- 4. Tambah kolom id_guru_bk di t_rombel
--- Guru BK per kelas, FK ke t_ptk.id_ptk
-ALTER TABLE `t_rombel` ADD COLUMN `id_guru_bk` INT(11) DEFAULT NULL AFTER `id_walikelas`;
+-- 4. id_guru_bk column
+-- NOTE: Handled by migration_monitoring.sql, do not run this ALTER again
+-- ALTER TABLE `t_rombel` ADD COLUMN `id_guru_bk` INT(11) DEFAULT NULL AFTER `id_walikelas`;
 
 -- 5. Default settings
 INSERT INTO `wa_settings` (`key`, `value`) VALUES

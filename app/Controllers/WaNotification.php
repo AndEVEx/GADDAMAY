@@ -357,7 +357,9 @@ class WaNotification extends Controller
             'distribution_days',
             'schedule_day',
             'schedule_time',
-            'message_template'
+            'message_template',
+            'channel_jid_1',
+            'channel_jid_2'
         ];
 
         foreach ($fields as $field) {
@@ -587,5 +589,31 @@ class WaNotification extends Controller
     public function apiStats()
     {
         return $this->response->setJSON($this->getStats());
+    }
+
+    /**
+     * Delete all messages from queue
+     */
+    public function deleteAllQueue()
+    {
+        $this->db->table('wa_message_queue')->truncate();
+        return redirect()->to('/WaNotification/queue')->with('success', 'Seluruh pesan dalam antrean berhasil dihapus');
+    }
+
+    /**
+     * Toggle WA on/off (kill switch)
+     */
+    public function toggleWa()
+    {
+        $this->ensureSettingsTable();
+        $enabled = $this->request->getPost('wa_enabled') ? '1' : '0';
+        
+        $this->db->query("
+            INSERT INTO wa_settings (`key`, value) VALUES ('wa_enabled', ?)
+            ON DUPLICATE KEY UPDATE value = ?
+        ", [$enabled, $enabled]);
+
+        session()->setFlashdata('success', $enabled == '1' ? 'Pengiriman WA diaktifkan' : 'Pengiriman WA DINONAKTIFKAN');
+        return redirect()->to('WaNotification/settings');
     }
 }

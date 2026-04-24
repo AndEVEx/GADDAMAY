@@ -39,6 +39,41 @@
                             </div>
                         <?php endif; ?>
 
+                        <!-- WA Kill Switch -->
+                        <div class="card shadow-sm mb-4" style="border-radius: 15px; border: 2px solid <?= ($gatewaySettings['wa_enabled'] ?? '1') == '1' ? '#28a745' : '#dc3545' ?>;">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5 class="mb-1">
+                                            <i class="feather icon-power mr-2"></i>
+                                            Status Pengiriman WA: 
+                                            <?php if (($gatewaySettings['wa_enabled'] ?? '1') == '1'): ?>
+                                                <span class="badge badge-success">AKTIF</span>
+                                            <?php else: ?>
+                                                <span class="badge badge-danger">NONAKTIF</span>
+                                            <?php endif; ?>
+                                        </h5>
+                                        <small class="text-muted">Nonaktifkan untuk menghentikan SEMUA pengiriman WA (channel, weekly report, notifikasi)</small>
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <form method="POST" action="<?= base_url('WaNotification/toggleWa') ?>" style="display:inline;">
+                                            <?php if (($gatewaySettings['wa_enabled'] ?? '1') == '1'): ?>
+                                                <input type="hidden" name="wa_enabled" value="0">
+                                                <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Yakin nonaktifkan SEMUA pengiriman WA?')">
+                                                    <i class="feather icon-power"></i> NONAKTIFKAN WA
+                                                </button>
+                                            <?php else: ?>
+                                                <input type="hidden" name="wa_enabled" value="1">
+                                                <button type="submit" class="btn btn-success btn-lg">
+                                                    <i class="feather icon-power"></i> AKTIFKAN WA
+                                                </button>
+                                            <?php endif; ?>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <form method="POST" action="<?= base_url('WaNotification/saveSettings') ?>">
                             <div class="row">
                                 <!-- Gateway Settings -->
@@ -212,6 +247,44 @@
                                                 </strong> pukul <strong>
                                                     <?= $settings['schedule_time'] ?? '16:00' ?>
                                                 </strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- WA Channel Settings -->
+                                    <div class="card shadow-sm mt-4" style="border-radius: 15px; border: none;">
+                                        <div class="card-header bg-white border-0"
+                                            style="border-radius: 15px 15px 0 0;">
+                                            <h5 class="mb-0"><i class="feather icon-message-circle mr-2 text-success"></i>WA Channel
+                                                - Notifikasi Harian Siswa Tidak Hadir</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-success" style="border-radius: 10px;">
+                                                <i class="feather icon-info mr-2"></i>
+                                                Daftar siswa tidak hadir akan dikirim ke WA Channel setiap <strong>jam 10 pagi</strong> (Senin-Sabtu).
+                                                <br>Buat channel WA dari masing-masing nomor pengirim, lalu isi Channel JID di bawah.
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label><i class="feather icon-hash mr-1"></i> Channel JID Pengirim 1</label>
+                                                <input type="text" name="channel_jid_1" class="form-control"
+                                                    style="border-radius: 10px;" placeholder="120363xxxxxxxxx@newsletter"
+                                                    value="<?= $settings['channel_jid_1'] ?? '' ?>">
+                                                <small class="text-muted">JID channel yang dibuat dari Nomor Pengirim 1</small>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label><i class="feather icon-hash mr-1"></i> Channel JID Pengirim 2</label>
+                                                <input type="text" name="channel_jid_2" class="form-control"
+                                                    style="border-radius: 10px;" placeholder="120363xxxxxxxxx@newsletter (opsional)"
+                                                    value="<?= $settings['channel_jid_2'] ?? '' ?>">
+                                                <small class="text-muted">JID channel yang dibuat dari Nomor Pengirim 2</small>
+                                            </div>
+
+                                            <div class="alert alert-warning mt-3" style="border-radius: 10px;">
+                                                <h6 class="alert-heading"><i class="feather icon-terminal mr-2"></i>Cron Setup</h6>
+                                                <code>0 10 * * 1-6 curl -s <?= base_url('DailyAbsentNotification/send') ?></code>
+                                                <br><small>Untuk test: <a href="<?= base_url('DailyAbsentNotification/preview') ?>" target="_blank">Preview Pesan</a></small>
                                             </div>
                                         </div>
                                     </div>

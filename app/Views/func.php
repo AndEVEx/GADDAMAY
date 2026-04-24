@@ -133,8 +133,10 @@ function updatemsinfinger($id) {
 }
 
 function formatTanggal($date){
+    if (empty($date) || $date === '0000-00-00') return '-';
     // pisahkan tanda - dan jadikan array
     $pecah = explode('-', $date);
+    if (count($pecah) < 3) return $date;
     return $pecah[2].'-'.$pecah[1].'-'.$pecah[0];
 }
 
@@ -1284,6 +1286,65 @@ function getAllRombelForChart() {
         ORDER BY nm_rombel ASC
     ");
     return $query->getResult();
+}
+
+/**
+ * Get Rekap Absen per Kelas Hari Ini
+ */
+function getRekapKelasHariIni($id_rombel) {
+    $db = \Config\Database::connect();
+    $tgl = date('Y-m-d');
+    $id_tapel = session()->get('id_tapel');
+    
+    // Total Siswa
+    $query_total = $db->query("
+        SELECT COUNT(*) as total FROM t_siswa_rombel sr
+        JOIN t_siswa s ON s.id_siswa = sr.id_siswa
+        WHERE sr.id_rombel = '$id_rombel' 
+        AND sr.id_tapel = '$id_tapel'
+        AND s.sts_siswa = 1
+    ");
+    $total_siswa = $query_total->getRow()->total ?? 0;
+    
+    // Hadir + Terlambat (sts_hadir = 0 artinya masuk)
+    $query_hadir = $db->query("
+        SELECT COUNT(DISTINCT sh.id_siswa) as total FROM t_siswa_hadir sh
+        JOIN t_siswa_rombel sr ON sr.id_siswa = sh.id_siswa AND sr.id_tapel = '$id_tapel'
+        WHERE sh.tgl_hadir = '$tgl' 
+        AND sh.sts_hadir = 0 
+        AND sr.id_rombel = '$id_rombel'
+    ");
+    $hadir = $query_hadir->getRow()->total ?? 0;
+    
+    // Sakit (sts_absen = 2)
+    $query_sakit = $db->query("
+        SELECT COUNT(DISTINCT sa.id_siswa) as total FROM t_siswa_absen sa
+        JOIN t_siswa_rombel sr ON sr.id_siswa = sa.id_siswa AND sr.id_tapel = '$id_tapel'
+        WHERE sa.tgl_absen = '$tgl' 
+        AND sa.sts_absen = 2 
+        AND sr.id_rombel = '$id_rombel'
+    ");
+    $sakit = $query_sakit->getRow()->total ?? 0;
+    
+    // Izin (sts_absen = 3)
+    $query_izin = $db->query("
+        SELECT COUNT(DISTINCT sa.id_siswa) as total FROM t_siswa_absen sa
+        JOIN t_siswa_rombel sr ON sr.id_siswa = sa.id_siswa AND sr.id_tapel = '$id_tapel'
+        WHERE sa.tgl_absen = '$tgl' 
+        AND sa.sts_absen = 3 
+        AND sr.id_rombel = '$id_rombel'
+    ");
+    $izin = $query_izin->getRow()->total ?? 0;
+    
+    $alfa = max(0, $total_siswa - $hadir - $sakit - $izin);
+    
+    return [
+        'total' => $total_siswa,
+        'hadir'  => $hadir,
+        'sakit'  => $sakit,
+        'izin'   => $izin,
+        'alfa'   => $alfa
+    ];
 }
 
 

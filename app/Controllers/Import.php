@@ -229,4 +229,81 @@ class Import extends Controller
         }
 		
     }
+
+    public function addrombel()
+    {
+        if(empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+        
+        $model = new Rombel_model;
+       
+        $file_excel = $this->request->getFile('file');
+		$ext = $file_excel->getClientExtension();
+		if($ext == 'xls') {
+			$render = new \PhpOffice\PhpSpreadsheet\Reader\Xls();
+		} else {
+			$render = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+		}
+		$spreadsheet = $render->load($file_excel);
+        $id_tapel = session()->get('id_tapel');
+	
+		$data = $spreadsheet->getActiveSheet()->toArray();
+        $success = false;
+		foreach($data as $x => $row) {
+			if ($x == 0) {
+				continue;
+			}
+				
+            $nm_rombel = $row[0];
+            $id_tingkat_kelas = $row[1];
+            $nip_walikelas = $row[2];
+
+            if(empty($nm_rombel)) continue;
+
+            // Look up walikelas by NIP
+            $db = \Config\Database::connect();
+            $id_walikelas = null;
+            if(!empty($nip_walikelas)) {
+                $queryWali = $db->table('t_ptk')->getWhere(['nip' => $nip_walikelas])->getRow();
+                if($queryWali) {
+                    $id_walikelas = $queryWali->id_ptk;
+                }
+            }
+
+            // Check if rombel already exists for this tapel
+            $cekRombel = $db->table('t_rombel')
+                ->where('nm_rombel', $nm_rombel)
+                ->where('id_tapel', $id_tapel)
+                ->get()->getResult();
+
+            $simpandata = [
+                'nm_rombel' => $nm_rombel,
+                'id_tingkat_kelas' => $id_tingkat_kelas,
+                'id_tapel' => $id_tapel,
+                'id_walikelas' => $id_walikelas
+            ];
+
+            if(count($cekRombel) > 0) {
+                // Update existing
+                $db->table('t_rombel')
+                    ->where('nm_rombel', $nm_rombel)
+                    ->where('id_tapel', $id_tapel)
+                    ->update($simpandata);
+                $success = true;
+            } else {
+                // Insert new
+                $success = $model->saveRombel($simpandata);
+            }
+		}
+
+        if($success){
+            session()->setFlashdata('success','Import Rombel berhasil');
+            return redirect()->to('/Import');
+        }else{
+            session()->setFlashdata('error','Import Rombel gagal');
+            return redirect()->to('/Import');
+        }
+		
+    }
 }

@@ -56,9 +56,6 @@ class ScanQr extends Controller
     $m_siswa = new Siswa_model;
     $db = \Config\Database::connect();
 
-    // 🔹 Token WA Gateway kamu
-    $token = '$2y$10$yTn8zkPgCMi1GgTlGkepiusjx7A6ZmiF1UDijT3ZN3l7m6Yx3wuqa';
-
     if (!$this->request->isAJAX()) {
         return $this->response->setJSON(['status' => false, 'message' => 'Invalid request']);
     }
@@ -70,10 +67,26 @@ class ScanQr extends Controller
         return $this->response->setJSON(['status' => false, 'message' => 'QR tidak terbaca']);
     }
 
-    // 🔹 Cari siswa berdasarkan NISN
-    $siswa = $m_siswa->where('nisn', $kode)->first();
+    // 🔹 Trim whitespace & leading zeros for matching
+    $kode = trim($kode);
+    $kodeTrimmed = ltrim($kode, '0');
+
+    // 🔹 Cari siswa: rfid -> no_induk -> nisn
+    $siswa = $m_siswa->where('rfid', $kode)->first();
+    if (!$siswa && $kodeTrimmed !== $kode) {
+        $siswa = $m_siswa->where('rfid', $kodeTrimmed)->first();
+    }
     if (!$siswa) {
-        return $this->response->setJSON(['status' => false, 'message' => 'Siswa tidak ditemukan']);
+        $siswa = $m_siswa->where('no_induk', $kode)->first();
+    }
+    if (!$siswa && $kodeTrimmed !== $kode) {
+        $siswa = $m_siswa->where('no_induk', $kodeTrimmed)->first();
+    }
+    if (!$siswa) {
+        $siswa = $m_siswa->where('nisn', $kode)->first();
+    }
+    if (!$siswa) {
+        return $this->response->setJSON(['status' => false, 'message' => 'Siswa tidak ditemukan (kode: ' . $kode . ')']);
     }
 
     $id_siswa = $siswa['id_siswa'];
@@ -94,7 +107,10 @@ class ScanQr extends Controller
     $id_rombel = $kelas ? $kelas->id_rombel : null;
 
     if (!$id_rombel) {
-        return $this->response->setJSON(['status' => false, 'message' => 'Rombel tidak ditemukan']);
+        return $this->response->setJSON([
+            'status' => false, 
+            'message' => 'Siswa "' . ($siswa['nm_siswa'] ?? '-') . '" tidak terdaftar di kelas manapun untuk tahun pelajaran aktif. Silakan tambahkan siswa ke rombel terlebih dahulu.'
+        ]);
     }
 
     // 🔹 Ambil jadwal dari r_hari
@@ -140,6 +156,14 @@ class ScanQr extends Controller
     }
 
     if (!$absenMasuk) {
+        $batasAbsen = $db->table('t_setting_aplikasi')->get()->getRow()->batas_absen_masuk ?? '08:00:00';
+        if ($jamnow > $batasAbsen) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Batas waktu absen pagi telah lewat (' . $batasAbsen . ')'
+            ]);
+        }
+
         // 🔹 Catat absen masuk
         $data = [
             'id_siswa' => $id_siswa,
@@ -151,21 +175,6 @@ class ScanQr extends Controller
         $model->saveAbsensi($data);
 
         $terlambat = ($jamnow > $jamMasuk) ? ' (Terlambat)' : '';
-
-        // 🔹 Kirim notifikasi WA (Masuk)
-        $pesan = "
-📢 *Pemberitahuan Absensi Masuk*
-Tanggal: *" . formatTanggal($tanggal) . "*
-No. Induk: *{$rowsiswa->no_induk}*
-Nama: *{$rowsiswa->nm_siswa}*
-Kelas: *{$rowsiswa->nm_rombel}*
-Status: *Masuk{$terlambat}*
-Jam: *{$jamnow}*
-
-Terima kasih 🙏
-*SMKN 2 INDRAMAYU*
-        ";
-        if ($nomorWA) $this->kirimWA($token, $nomorWA, $pesan);
 
         return $this->response->setJSON([
             'status' => true,
@@ -207,20 +216,7 @@ Terima kasih 🙏
             ];
             $model->saveAbsensi($data);
 
-            // 🔹 Kirim notifikasi WA (Pulang)
-            $pesan = "
-📢 *Pemberitahuan Absensi Pulang*
-Tanggal: *" . formatTanggal($tanggal) . "*
-No. Induk: *{$rowsiswa->no_induk}*
-Nama: *{$rowsiswa->nm_siswa}*
-Kelas: *{$rowsiswa->nm_rombel}*
-Status: *Pulang*
-Jam: *{$jamnow}*
-
-Terima kasih 🙏
-*SMKN 2 INDRAMAYU*
-            ";
-            if ($nomorWA) $this->kirimWA($token, $nomorWA, $pesan);
+            // WA tidak dikirim saat scan - hanya via WeeklyReport
 
             return $this->response->setJSON([
                 'status' => true,
@@ -256,24 +252,19 @@ Terima kasih 🙏
     }
 }
 
-private function kirimWA($token, $target, $pesan)
+private function kirimWA($target, $pesan)
 {
-    $curl = curl_init();
-    curl_setopt_array($curl, [
-        CURLOPT_URL => 'https://notificationwa.com/api/post',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => [
-            'isi_pesan' => $pesan,
-            'nomor_recieved' => $target
-        ],
-        CURLOPT_HTTPHEADER => [
-            "Authorization: $token"
-        ]
-    ]);
-    $response = curl_exec($curl);
-    curl_close($curl);
-    return $response;
+    try {
+        $waGateway = new \App\Libraries\WaGatewayService();
+        $result = $waGateway->sendMessage($target, $pesan, 0);
+        if (!$result['success']) {
+            log_message('error', 'ScanQr WA Error: ' . ($result['error'] ?? 'Unknown'));
+        }
+        return $result;
+    } catch (\Exception $e) {
+        log_message('error', 'ScanQr WA Exception: ' . $e->getMessage());
+        return null;
+    }
 }
 
 

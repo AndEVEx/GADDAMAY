@@ -54,11 +54,24 @@ class Dashboard extends Controller
     $kelas = null;
 
     if (!empty($rfid)) {
+        $rfid = trim($rfid);
         $row_siswa = $db->table('t_siswa')
             ->select('nm_siswa, file, id_siswa')
             ->where('rfid', $rfid)
             ->get()
             ->getRow();
+
+        // Retry without leading zeros
+        if (!$row_siswa) {
+            $rfidTrimmed = ltrim($rfid, '0');
+            if ($rfidTrimmed !== $rfid) {
+                $row_siswa = $db->table('t_siswa')
+                    ->select('nm_siswa, file, id_siswa')
+                    ->where('rfid', $rfidTrimmed)
+                    ->get()
+                    ->getRow();
+            }
+        }
 
         if ($row_siswa) {
             $foto = !empty($row_siswa->file)
@@ -67,15 +80,15 @@ class Dashboard extends Controller
             $nama = $row_siswa->nm_siswa;
 
             // ambil nama kelas (optional)
-            $kelasRow = $db->table('t_rombel_siswa')
-                ->select('r_rombel.nama_rombel')
-                ->join('r_rombel', 'r_rombel.id_rombel = t_rombel_siswa.id_rombel', 'left')
-                ->where('t_rombel_siswa.id_siswa', $row_siswa->id_siswa)
-                ->where('t_rombel_siswa.id_tapel', $id_tapel)
+            $kelasRow = $db->table('t_siswa_rombel')
+                ->select('t_rombel.nm_rombel')
+                ->join('t_rombel', 't_rombel.id_rombel = t_siswa_rombel.id_rombel', 'left')
+                ->where('t_siswa_rombel.id_siswa', $row_siswa->id_siswa)
+                ->where('t_siswa_rombel.id_tapel', $id_tapel)
                 ->get()
                 ->getRow();
 
-            $kelas = $kelasRow->nama_rombel ?? '-';
+            $kelas = $kelasRow->nm_rombel ?? '-';
         } else {
             session()->setFlashdata('error', 'RFID tidak ditemukan');
             return redirect()->to('/Dashboard');
@@ -103,7 +116,7 @@ public function addabsensi()
     $model = new Absensisiswa_model;
     $m_absenguru = new Absensiguru_model;
    
-    $rfid = $this->request->getPost('rfid');
+    $rfid = trim($this->request->getPost('rfid'));
     $tgl = date('Y-m-d');
     $jamnow = date('H:i:s');
 
@@ -130,8 +143,14 @@ public function addabsensi()
         return redirect()->to('/Dashboard');
     }
 
-    // cek apakah RFID terdaftar
+    // cek apakah RFID terdaftar (try exact match, then without leading zeros)
     $siswaRow = $db->table('t_siswa')->select('id_siswa')->where('rfid', $rfid)->get()->getRow();
+    if (!$siswaRow) {
+        $rfidTrimmed = ltrim($rfid, '0');
+        if ($rfidTrimmed !== $rfid) {
+            $siswaRow = $db->table('t_siswa')->select('id_siswa')->where('rfid', $rfidTrimmed)->get()->getRow();
+        }
+    }
 
     if (!$siswaRow) {
         session()->setFlashdata('error','Nomor RFID tidak terdaftar');
@@ -205,6 +224,12 @@ public function addabsensi()
         $pesanDoa = '*MOHON DO`A SELAMAT SAMPAI DI RUMAH*';
     } else {
         // Absen masuk
+        $batasAbsen = $db->table('t_setting_aplikasi')->get()->getRow()->batas_absen_masuk ?? '08:00:00';
+        if ($jamnow > $batasAbsen) {
+            session()->setFlashdata('error', 'Batas waktu absen pagi telah lewat (' . $batasAbsen . ')');
+            return redirect()->to('/Dashboard');
+        }
+
         $data = [
             'id_siswa'  => $id_siswa,
             'id_tapel'  => $id_tapel,
@@ -215,7 +240,6 @@ public function addabsensi()
         $model->saveAbsensi($data);
 
         $stshadir = ($jamnow > $jammasuk) ? 'Terlambat' : 'Hadir';
-        $pesanDoa = '*MOHON DO`A DIBERIKAN KEMUDAHAN DALAM BELAJAR*';
     }
 
     // 🧩 siapkan foto
@@ -229,83 +253,87 @@ public function addabsensi()
     session()->setFlashdata('Fotoabsen', $foto);
     session()->setFlashdata('Jamabsen', $jamnow);
 
-    // ============================
-    // KIRIM NOTIFIKASI WHATSAPP
-    // ============================
-    if (!empty($rowsiswa->hp)) {
-
-        $pesanWA =
-    "🏫 *SMKN 2 INDRAMAYU*\n\n" .
-    "📋 *Notifikasi Absensi Siswa*\n\n" .
-    "Halo Bapak/Ibu 👋\n" .
-    "Kami informasikan bahwa kehadiran siswa berikut telah tercatat dalam sistem:\n\n" .
-    "👤 *Nama*   : {$rowsiswa->nm_siswa}\n" .
-    "🆔 *NIS*    : {$rowsiswa->no_induk}\n" .
-    "🏫 *Kelas*  : {$rowsiswa->nm_rombel}\n" .
-    "📅 *Hari*   : {$hari}\n" .
-    "📆 *Tanggal*: " . date('d-m-Y') . "\n" .
-    "⏰ *Jam*    : {$jamnow}\n" .
-    "📌 *Status* : *{$stshadir}*\n\n" .
-    $pesanDoa . "\n\n" .
-    "Terima kasih atas perhatian dan kerja samanya 🙏\n" .
-    "Semoga ananda selalu sehat dan semangat belajar.\n\n" .
-    "— *Sistem Absensi Digital*\n" .
-    "*SMKN 2 INDRAMAYU*";
-
-        $this->sendWA($rowsiswa->hp, $pesanWA);
-    }
+    // WA TIDAK dikirim saat scan.
+    // Notifikasi ke orangtua HANYA via WeeklyReport (Jumat sore)
 
     return redirect()->to('/Dashboard');
 }
 
-private function sendWA($nomor, $pesan)
-{
-    $token = '$2y$10$yTn8zkPgCMi1GgTlGkepiusjx7A6ZmiF1UDijT3ZN3l7m6Yx3wuqa';
-
-    // ===============================
-    // Normalisasi nomor (08 -> 628)
-    // ===============================
-    $nomor = preg_replace('/[^0-9]/', '', $nomor);
-    if (substr($nomor, 0, 1) == '0') {
-        $nomor = '62' . substr($nomor, 1);
-    }
-
-    // ===============================
-    // Kirim ke API NotificationWA
-    // ===============================
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://notificationwa.com/api/post',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => array(
-            'isi_pesan'     => $pesan,
-            'nomor_recieved'=> $nomor
-        ),
-        CURLOPT_HTTPHEADER => array(
-            "Authorization: $token"
-        ),
-    ));
-
-    $response = curl_exec($curl);
-
-    if (curl_errno($curl)) {
-        log_message('error', 'WA Error: ' . curl_error($curl));
-    } else {
-        log_message('info', 'WA Response: ' . $response);
-    }
-
-    curl_close($curl);
-
-    return $response;
-}
+// sendWA removed - WA notifications are now ONLY sent via WeeklyReport (Fridays)
 
 
  
+    public function getDetailKelasAjax($id_rombel)
+    {
+        $db = \Config\Database::connect();
+        $tgl = date('Y-m-d');
+        $id_tapel = session()->get('id_tapel');
+        
+        $nmhari = date ("D");
+        switch($nmhari){
+            case 'Sun': $hari_ini = "Minggu"; break;
+            case 'Mon': $hari_ini = "Senin"; break;
+            case 'Tue': $hari_ini = "Selasa"; break;
+            case 'Wed': $hari_ini = "Rabu"; break;
+            case 'Thu': $hari_ini = "Kamis"; break;
+            case 'Fri': $hari_ini = "Jumat"; break;
+            case 'Sat': $hari_ini = "Sabtu"; break;
+            default: $hari_ini = "Tidak di ketahui"; break;
+        }
+
+        $query_jam = $db->query("SELECT jammasuk FROM r_hari where nm_hari='$hari_ini'");
+        $row_jam = $query_jam->getRow();
+        $jammasuk = $row_jam->jammasuk ?? '07:10:00';
+
+        // Get all students for this class
+        $querySiswa = $db->query("
+            SELECT s.id_siswa, s.nm_siswa 
+            FROM t_siswa_rombel sr
+            JOIN t_siswa s ON s.id_siswa = sr.id_siswa
+            WHERE sr.id_rombel = '$id_rombel' 
+            AND sr.id_tapel = '$id_tapel'
+            AND s.sts_siswa = 1
+            ORDER BY s.nm_siswa ASC
+        ");
+        
+        $siswaList = $querySiswa->getResult();
+        $result = [];
+
+        foreach($siswaList as $siswa) {
+            $id = $siswa->id_siswa;
+            $res = [
+                'id_siswa' => $id,
+                'nm_siswa' => $siswa->nm_siswa,
+                'jam_masuk' => null,
+                'jam_pulang' => null,
+                'status' => 'Alpha'
+            ];
+
+            // Cek hadir
+            $qHadir = $db->query("SELECT sts_hadir, jam FROM t_siswa_hadir WHERE id_siswa = '$id' AND tgl_hadir = '$tgl' ORDER BY sts_hadir ASC");
+            $absens = $qHadir->getResult();
+            if(count($absens) > 0) {
+                foreach($absens as $absen) {
+                    if($absen->sts_hadir == 0) {
+                        $res['jam_masuk'] = substr($absen->jam, 0, 5);
+                        $res['status'] = ($absen->jam > $jammasuk) ? 'Terlambat' : 'Hadir';
+                    } else if($absen->sts_hadir == 1) {
+                        $res['jam_pulang'] = substr($absen->jam, 0, 5);
+                        if($res['status'] == 'Alpha') $res['status'] = 'Pulang'; 
+                    }
+                }
+            } else {
+                // Cek sakit/izin
+                $qIzin = $db->query("SELECT sts_absen FROM t_siswa_absen WHERE id_siswa = '$id' AND tgl_absen = '$tgl'");
+                $izin = $qIzin->getRow();
+                if($izin) {
+                    if($izin->sts_absen == 2) $res['status'] = 'Sakit';
+                    else if($izin->sts_absen == 3) $res['status'] = 'Izin';
+                }
+            }
+            $result[] = $res;
+        }
+
+        return $this->response->setJSON($result);
+    }
 }

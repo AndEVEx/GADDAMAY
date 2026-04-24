@@ -21,7 +21,9 @@ class Siswaprofile extends Controller
         );
         
         $data = array(
-            'getSiswa' => $model->getSiswaid($id)
+            'getSiswa' => $model->getSiswaid($id),
+            'title' => 'Data Profile',
+            'nav1' => 'Profile'
         );
         
         echo view('index/sidebar');

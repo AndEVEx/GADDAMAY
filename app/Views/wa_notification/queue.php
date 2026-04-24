@@ -140,6 +140,10 @@
                                             <?= count($messages) ?>)
                                         </h5>
                                         <div>
+                                            <a href="<?= base_url('WaNotification/deleteAllQueue') ?>" class="btn btn-outline-danger mr-2"
+                                                style="border-radius: 10px;" onclick="return confirm('APAKAH ANDA YAKIN? Tindakan ini akan menghapus semua pesan dari antrean secara permanen!')">
+                                                <i class="feather icon-trash-2 mr-1"></i> Hapus Semua
+                                            </a>
                                             <a href="<?= base_url('WaNotification') ?>" class="btn btn-outline-primary"
                                                 style="border-radius: 10px;">
                                                 <i class="feather icon-arrow-left mr-1"></i> Kembali

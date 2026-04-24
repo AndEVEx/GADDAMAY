@@ -158,7 +158,9 @@ class Reportwal extends Controller
                 'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
                 'getBulan' => $bln,
                 'idRombel' => $id_rombel,
-                'nmRombel' => ""
+                'nmRombel' => "",
+                'title' => 'Info Absensi',
+                'nav' => 'Reportwal/bulanan'
             );
         }else{
             $bln = $this->request->getPost('bln');
@@ -168,7 +170,9 @@ class Reportwal extends Controller
                 'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
                 'getBulan' => $bln,
                 'idRombel' => $id_rombel,
-                'nmRombel' => nmrombel($id_rombel)
+                'nmRombel' => nmrombel($id_rombel),
+                'title' => 'Info Absensi',
+                'nav' => 'Reportwal/bulanan'
             );
             
         }
@@ -203,7 +207,9 @@ class Reportwal extends Controller
                 'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
                 'getBulan' => $bln,
                 'idRombel' => $id_rombel,
-                'nmRombel' => nmrombel($id_rombel)
+                'nmRombel' => nmrombel($id_rombel),
+                'title' => 'Info Absensi',
+                'nav' => 'Reportwal/bulanan'
             );
 
         echo view('print/bulananrombel', $data);
@@ -233,7 +239,9 @@ class Reportwal extends Controller
                 'getSiswa' => $m_siswa->getSiswarombel($id_rombel),
                 'getNama' => "",
                 'nmRombel' => "",
-                'idSiswa' => ""
+                'idSiswa' => "",
+                'title' => 'Info Absensi Persiswa',
+                'nav' => 'Reportwal/persiswa'
             );
         }else{
             $id_siswa = $this->request->getPost('id_siswa');
@@ -247,9 +255,11 @@ class Reportwal extends Controller
             $data = array(
                 'getAbsensi' => $model->getAbsensisiswa($id_siswa, $tgl),
                 'getSiswa' => $m_siswa->getSiswarombel($id_rombel),
-                'getNama' => $row->nm_siswa,
-                'nmRombel' => $row->nm_rombel,
-                'idSiswa' => $id_siswa   
+                'getNama' => $row ? $row->nm_siswa : '',
+                'nmRombel' => $row ? $row->nm_rombel : '',
+                'idSiswa' => $id_siswa,
+                'title' => 'Info Absensi Persiswa',
+                'nav' => 'Reportwal/persiswa'
             );
         }
         

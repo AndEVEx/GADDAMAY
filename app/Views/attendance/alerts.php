@@ -114,9 +114,14 @@
                                 class="btn btn-outline-info btn-sm mr-2">
                                 <i class="feather icon-file-text mr-1"></i>Laporan
                             </a>
-                            <button class="btn btn-primary btn-sm" onclick="scanAlerts()">
+                            <button class="btn btn-primary btn-sm mr-2" onclick="scanAlerts()">
                                 <i class="feather icon-refresh-cw mr-1"></i>Scan Sekarang
                             </button>
+                            <a href="<?= base_url('AttendanceAlert/deleteAll') ?>"
+                                class="btn btn-danger btn-sm"
+                                onclick="return confirm('Yakin ingin MENGHAPUS SEMUA peringatan? Aksi ini tidak bisa dibatalkan.')">
+                                <i class="feather icon-trash-2 mr-1"></i>Hapus Semua
+                            </a>
                         </div>
                     </div>
                     <div class="card-body">

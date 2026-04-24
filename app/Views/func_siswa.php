@@ -1,4 +1,41 @@
 <?php
+if (!function_exists('is_hari_libur_date_cached')) {
+    function is_hari_libur_date_cached($tgl) {
+        static $libur_besar_cache = null;
+        static $r_hari_cache = null;
+        $db = \Config\Database::connect();
+
+        if ($libur_besar_cache === null) {
+            $libur_besar_cache = [];
+            $res = $db->table('libur_besar')->select('tgl_libur')->get()->getResultArray();
+            foreach ($res as $row) {
+                $libur_besar_cache[$row['tgl_libur']] = true;
+            }
+        }
+
+        if ($r_hari_cache === null) {
+            $r_hari_cache = [];
+            $res = $db->table('r_hari')->select('nm_hari, sts_hari')->get()->getResultArray();
+            foreach ($res as $row) {
+                $r_hari_cache[$row['nm_hari']] = $row['sts_hari'];
+            }
+        }
+
+        if (isset($libur_besar_cache[$tgl])) {
+            return true;
+        }
+
+        $namahari = date('l', strtotime($tgl));
+        $hariMap = ["Sunday"=>"Minggu", "Monday"=>"Senin", "Tuesday"=>"Selasa", "Wednesday"=>"Rabu", "Thursday"=>"Kamis", "Friday"=>"Jumat", "Saturday"=>"Sabtu"];
+        $hari = $hariMap[$namahari] ?? $namahari;
+
+        if (isset($r_hari_cache[$hari]) && $r_hari_cache[$hari] == 2) {
+            return true;
+        }
+
+        return false;
+    }
+}
 function level($kode){
     if($kode==1){
         echo "Administrator";
@@ -465,13 +502,12 @@ function jumsakitbln($id_siswa,$bln) {
     $builder->where('sts_approve', 1);
     $builder->where('MONTH(tgl_absen)', $bln);
     $builder->where('YEAR(tgl_absen)', $thn);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       $sts = $all;
-    }else{
-        $sts=0;
+    $results = $builder->get()->getResultArray();
+    $count = 0;
+    foreach($results as $r) {
+        if (!is_hari_libur_date_cached($r['tgl_absen'])) $count++;
     }
-    return $sts;
+    return $count;
 }
 function jumsakitpertanggal($id_siswa,$tgl1,$tgl2) {
     //cek apakah ada absen sakit
@@ -482,13 +518,12 @@ function jumsakitpertanggal($id_siswa,$tgl1,$tgl2) {
     $builder->where('sts_approve', 1);
     $builder->where('tgl_absen >=', $tgl1);
     $builder->where('tgl_absen <=', $tgl2);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       $sts = $all;
-    }else{
-        $sts=0;
+    $results = $builder->get()->getResultArray();
+    $count = 0;
+    foreach($results as $r) {
+        if (!is_hari_libur_date_cached($r['tgl_absen'])) $count++;
     }
-    return $sts;
+    return $count;
 }
 function jumsakitblnadmin($bln) {
     //cek apakah ada absen sakit
@@ -514,13 +549,12 @@ function jumizinbln($id_siswa,$bln) {
     $builder->where('sts_approve', 1);
     $builder->where('MONTH(tgl_absen)', $bln);
     $builder->where('YEAR(tgl_absen)', $thn);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       $sts = $all;
-    }else{
-        $sts=0;
+    $results = $builder->get()->getResultArray();
+    $count = 0;
+    foreach($results as $r) {
+        if (!is_hari_libur_date_cached($r['tgl_absen'])) $count++;
     }
-    return $sts;
+    return $count;
 }
 function jumizinpertanggal($id_siswa,$tgl1,$tgl2) {
     //cek apakah ada absen izin
@@ -531,13 +565,12 @@ function jumizinpertanggal($id_siswa,$tgl1,$tgl2) {
     $builder->where('sts_approve', 1);
     $builder->where('tgl_absen >=', $tgl1);
     $builder->where('tgl_absen <=', $tgl2);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       $sts = $all;
-    }else{
-        $sts=0;
+    $results = $builder->get()->getResultArray();
+    $count = 0;
+    foreach($results as $r) {
+        if (!is_hari_libur_date_cached($r['tgl_absen'])) $count++;
     }
-    return $sts;
+    return $count;
 }
 
 function jumizinblnadmin($bln) {
@@ -559,9 +592,8 @@ function jumalphatgl($id_siswa) {
     $sum = 0;
 
     for($i=1;$i<=$jumHari;$i++){
-        $tanggal = date('Y').'-'.date('m').'-'.$i;
-        $namahari = date('l', strtotime($tanggal));
-        if(harilibur($namahari)==2){
+        $tanggal = date('Y').'-'.date('m').'-'.str_pad($i, 2, '0', STR_PAD_LEFT);
+        if(is_hari_libur_date_cached($tanggal)){
             $sum++;
         }
     }
@@ -580,11 +612,10 @@ function jumalphatgl($id_siswa) {
     $builder->where('tgl_hadir <=', $tgl);
     $builder->where('MONTH(tgl_hadir)', $bln);
     $builder->where('YEAR(tgl_hadir)', $thn);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       $masuk = $all;
-    }else{
-        $masuk=0;
+    $resMasuk = $builder->get()->getResultArray();
+    $masuk = 0;
+    foreach($resMasuk as $r) {
+        if(!is_hari_libur_date_cached($r['tgl_hadir'])) $masuk++;
     }
 
     //cek sakit /izin
@@ -593,14 +624,15 @@ function jumalphatgl($id_siswa) {
     $builder1->where('tgl_absen <=', $tgl);
     $builder1->where('MONTH(tgl_absen)', $bln);
     $builder1->where('YEAR(tgl_absen)', $thn);
-    $all1 =  $builder1->countAllResults();
-    if($all1>0){
-       $ijinsakit = $all1;
-    }else{
-        $ijinsakit=0;
+    $builder1->whereIn('sts_absen', [2, 3]);
+    $resIzin = $builder1->get()->getResultArray();
+    $ijinsakit = 0;
+    foreach($resIzin as $r) {
+        if(!is_hari_libur_date_cached($r['tgl_absen'])) $ijinsakit++;
     }
 
-    $sts     = $harimasuk-$masuk-$ijinsakit;
+    $sts = $harimasuk-$masuk-$ijinsakit;
+    if($sts < 0) $sts = 0;
     return $sts;
 } 
 function jumalphabln($id_siswa,$bln) {
@@ -611,23 +643,51 @@ function jumalphabln($id_siswa,$bln) {
     if($bulan==$bln){
         $jumHari = date('d');
     }else{
-        $jumHari = jumlah_hari($bulan,$thn);
+        $jumHari = jumlah_hari($bln,$thn);
     }
-
    
     if($bln>$bulan){
-        $alpha = 0;
-    }else{
-        for($i=1;$i<=$jumHari;$i++){
-            $tanggal = date('Y').'-'.$bln.'-'.$i;
-            $sts = sts_absen($id_siswa,$tanggal);
-            if($sts=='Alpha'){
-                $sumalpha++;
-            }
+        return 0;
+    }
+    
+    $harilibur = 0;
+    for($i=1;$i<=$jumHari;$i++){
+        $tanggal = $thn.'-'.str_pad($bln, 2, '0', STR_PAD_LEFT).'-'.str_pad($i, 2, '0', STR_PAD_LEFT);
+        if(is_hari_libur_date_cached($tanggal)){
+            $harilibur++;
         }
     }
-    $alpha = $sumalpha;
-    return $alpha;
+    $harimasuk = $jumHari - $harilibur;
+
+    $db = \Config\Database::connect();
+    
+    $resMasuk = $db->table('t_siswa_hadir')
+        ->where('id_siswa', $id_siswa)
+        ->where('sts_hadir', 0)
+        ->where('MONTH(tgl_hadir)', $bln)
+        ->where('YEAR(tgl_hadir)', $thn)
+        ->get()->getResultArray();
+        
+    $masuk = 0;
+    foreach($resMasuk as $r) {
+        if(!is_hari_libur_date_cached($r['tgl_hadir'])) $masuk++;
+    }
+
+    $resIzin = $db->table('t_siswa_absen')
+        ->where('id_siswa', $id_siswa)
+        ->whereIn('sts_absen', [2, 3])
+        ->where('MONTH(tgl_absen)', $bln)
+        ->where('YEAR(tgl_absen)', $thn)
+        ->get()->getResultArray();
+        
+    $ijinsakit = 0;
+    foreach($resIzin as $r) {
+        if(!is_hari_libur_date_cached($r['tgl_absen'])) $ijinsakit++;
+    }
+
+    $sts = $harimasuk - $masuk - $ijinsakit;
+    if($sts < 0) $sts = 0;
+    return $sts;
 }
 function jumalphapertanggal($id_siswa,$tgl1,$tgl2) {
     $tg1 = $tgl1;
@@ -639,45 +699,42 @@ function jumalphapertanggal($id_siswa,$tgl1,$tgl2) {
     while (strtotime($tg1) <= strtotime($tg2)) {
         $jml++;
         $tanggal = $tg1;
-        $tg1 = date ("Y-m-d", strtotime("+1 day", strtotime($tg1)));//looping tambah 1 date
-        $namahari = date('l', strtotime($tanggal));
-
+        $tg1 = date ("Y-m-d", strtotime("+1 day", strtotime($tg1)));
        
-        if(harilibur($namahari)==2){
+        if(is_hari_libur_date_cached($tanggal)){
             $sum++;
         }
-        
     }
     $jumHari = $jml;
     $harilibur = $sum;
     $harimasuk = $jumHari-$harilibur;
 
     $db = \Config\Database::connect();
-	$builder = $db->table('t_siswa_hadir');
-    $builder->where('id_siswa', $id_siswa);
-    $builder->where('sts_hadir', 0);
-    $builder->where('tgl_hadir >=', $tgl1);
-    $builder->where('tgl_hadir <=', $tgl2);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       $masuk = $all;
-    }else{
-        $masuk=0;
+    
+    $resMasuk = $db->table('t_siswa_hadir')
+        ->where('id_siswa', $id_siswa)
+        ->where('sts_hadir', 0)
+        ->where('tgl_hadir >=', $tgl1)
+        ->where('tgl_hadir <=', $tgl2)
+        ->get()->getResultArray();
+    $masuk = 0;
+    foreach($resMasuk as $r) {
+        if(!is_hari_libur_date_cached($r['tgl_hadir'])) $masuk++;
     }
 
-    //cek sakit /izin
-	$builder1 = $db->table('t_siswa_absen');
-    $builder1->where('id_siswa', $id_siswa);
-    $builder1->where('tgl_absen >=', $tgl1);
-    $builder1->where('tgl_absen <=', $tgl2);
-    $all1 =  $builder1->countAllResults();
-    if($all1>0){
-       $ijinsakit = $all1;
-    }else{
-        $ijinsakit=0;
+    $resIzin = $db->table('t_siswa_absen')
+        ->where('id_siswa', $id_siswa)
+        ->whereIn('sts_absen', [2, 3])
+        ->where('tgl_absen >=', $tgl1)
+        ->where('tgl_absen <=', $tgl2)
+        ->get()->getResultArray();
+    $ijinsakit = 0;
+    foreach($resIzin as $r) {
+        if(!is_hari_libur_date_cached($r['tgl_absen'])) $ijinsakit++;
     }
 
-    $sts     = $harimasuk-$masuk-$ijinsakit;
+    $sts = $harimasuk-$masuk-$ijinsakit;
+    if($sts < 0) $sts = 0;
     return $sts;
 }
 function jumalphablnadmin($bln) {

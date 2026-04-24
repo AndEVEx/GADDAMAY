@@ -72,7 +72,12 @@
                                                         <tr>
                                                             <td>3</td>
                                                             <td>Format Import Setting Kelas</td>
-                                                            <td><img src="<?=base_url()?>/image/excel.png" width="30" height="30"> <a href="<?=base_url()?>/file/format_import_setting_kelas.xls">Downlaod</a></td>
+                                                            <td><img src="<?=base_url()?>/image/excel.png" width="30" height="30"> <a href="<?=base_url()?>/file/format_import_setting_kelas.xls">Download</a></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>4</td>
+                                                            <td>Format Import Rombel</td>
+                                                            <td><img src="<?=base_url()?>/image/excel.png" width="30" height="30"> <a href="<?=base_url()?>/file/format_import_rombel.xlsx">Download</a></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -170,6 +175,30 @@
                                                             <label for="formFile" class="form-label">Pilih File Import</label>
                                                             <input class="form-control" name="file" type="file" id="formFile" required>
                                                         </div>
+                                                        <button type="submit" class="btn btn-info">Import</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <div class="row">
+                                                        <div class="col-10">
+                                                        <h5>Import Data Rombel</h5>
+                                                        </div>
+                                                    
+                                                    </div>
+
+                                                </div>
+                                                <form class="was-validated" method="post" action="<?= base_url('Import/addrombel'); ?>" enctype="multipart/form-data">
+                                                    <div class="card-body table-border-style">
+                                                        <div class="form-group">
+                                                            <label for="formFileRombel" class="form-label">Pilih File Import</label>
+                                                            <input class="form-control" name="file" type="file" id="formFileRombel" required>
+                                                        </div>
+                                                        <small class="form-text text-muted mb-2 d-block">Kolom: nm_rombel | id_tingkat_kelas | NIP_walikelas</small>
                                                         <button type="submit" class="btn btn-info">Import</button>
                                                     </div>
                                                 </form>

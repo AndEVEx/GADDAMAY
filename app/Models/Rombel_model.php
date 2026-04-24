@@ -12,8 +12,10 @@ class Rombel_model extends Model
     public function getRombel($id)
     {
         return $this->db->table($this->table)
+        ->select('t_rombel.*, r_tingkat_kelas.nm_tingkat_kelas, wali.nama_ptk, bk.nama_ptk as nm_guru_bk')
         ->join('r_tingkat_kelas','r_tingkat_kelas.id_tingkat_kelas = t_rombel.id_tingkat_kelas')
-        ->join('t_ptk','t_ptk.id_ptk = t_rombel.id_walikelas','LEFT')
+        ->join('t_ptk wali','wali.id_ptk = t_rombel.id_walikelas','LEFT')
+        ->join('t_ptk bk','bk.id_ptk = t_rombel.id_guru_bk','LEFT')
         ->where('id_tapel', $id)
         ->orderby('nm_rombel','ASC')
         ->get()->getResultArray();

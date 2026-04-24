@@ -25,13 +25,20 @@
 						<h4 class="mb-3 f-w-400">Signin</h4>
  
 					<form class="pt-3" action="<?= base_url('Cpanel/process'); ?>" method="post">
-						<div class="form-group mb-3">
-							<label class="floating-label">Username</label>
-							<input type="text" class="form-control" name="email" required>
+						<div class="form-group mb-3 text-left">
+							<label>Username</label>
+							<input type="text" class="form-control" name="email" placeholder="NIP / NISN" required>
 						</div>
-						<div class="form-group mb-4">
-							<label class="floating-label">Password</label>
-							<input type="password" class="form-control" name="password" required>
+						<div class="form-group mb-4 text-left">
+							<label>Password</label>
+							<div class="input-group">
+								<input type="password" class="form-control" name="password" id="passwordInput" placeholder="Password" required>
+								<div class="input-group-append">
+									<button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1" style="border-color: #ced4da;">
+										<i class="feather icon-eye" id="eyeIcon"></i>
+									</button>
+								</div>
+							</div>
 						</div>
 						<div class="form-group mb-4">
 							<select class="form-control" name="tapel" required>
@@ -51,3 +58,16 @@
 	</div>
 </div>
 <!-- [ auth-signin ] end -->
+<script>
+document.getElementById('togglePassword').addEventListener('click', function() {
+    var input = document.getElementById('passwordInput');
+    var icon = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'feather icon-eye-off';
+    } else {
+        input.type = 'password';
+        icon.className = 'feather icon-eye';
+    }
+});
+</script>

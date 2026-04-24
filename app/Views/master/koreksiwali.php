@@ -85,11 +85,50 @@
                                             </div>
                                         <?php endif; ?>
                                         </div>
+                                        <form method="post" action="<?= base_url('MuridMonitoring/bulkUpdateHadir') ?>">
+                                        <input type="hidden" name="tgl" value="<?= $getTanggal ?>">
                                         <div class="card-body table-border-style">
+                                            <div class="mb-3 d-flex align-items-center">
+                                                <button type="button" class="btn btn-primary btn-bulk" style="display:none;" data-toggle="modal" data-target="#modalBulk">
+                                                    <i class="feather icon-check-square"></i> Koreksi Masal (<span class="count-checked">0</span>)
+                                                </button>
+                                            </div>
+
+                                            <!-- Modal Koreksi Masal -->
+                                            <div class="modal fade" id="modalBulk">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Koreksi Masal Absensi</h5>
+                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="form-group">
+                                                                <label>Status Kehadiran</label>
+                                                                <select name="status" class="form-control" required>
+                                                                    <option value="Masuk">Masuk</option>
+                                                                    <option value="Terlambat">Terlambat</option>
+                                                                    <option value="Sakit">Sakit</option>
+                                                                    <option value="Izin">Izin</option>
+                                                                    <option value="Alpha">Alpha</option>
+                                                                    <option value="Pulang">Pulang</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label>Jam Absen</label>
+                                                                <input type="time" name="jam" class="form-control" value="<?= date('H:i') ?>">
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary">Simpan Koreksi</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                             <div class="table-responsive">
                                                 <table id="example" class="table table-striped table-hover">
                                                     <thead>
                                                         <tr>
+                                                            <th><input type="checkbox" id="checkAll"></th>
                                                             <th>#</th>
                                                             <th>No Induk</th>
                                                             <th>Nama Siswa</th>
@@ -110,6 +149,7 @@
                                                         $jampulang = jampulang($id,$getTanggal);
                                                         ?>
                                                         <tr>
+                                                            <td><input type="checkbox" name="ids[]" value="<?= $data['id_siswa'] ?>" class="cb-siswa"></td>
                                                             <td><?= $no ?></td>
                                                             <td><?= $data['no_induk'] ?></td>
                                                             <td><?= $data['nm_siswa'] ?></td>
@@ -261,11 +301,35 @@
                                                 </table>
                                             </div>
                                         </div>
+                                        </form>
                                     </div>
                                 </div>
                                 <!-- [ static-layout ] end -->
                             </div>
                             <!-- [ Main Content ] end -->
+                            
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sa = document.getElementById('checkAll');
+    const cbs = document.querySelectorAll('.cb-siswa');
+    const btn = document.querySelector('.btn-bulk');
+    const cnt = document.querySelector('.count-checked');
+
+    if(sa) {
+        sa.addEventListener('change', e => {
+            cbs.forEach(cb => cb.checked = e.target.checked);
+            updateBtn();
+        });
+        cbs.forEach(cb => cb.addEventListener('change', updateBtn));
+    }
+    
+    function updateBtn() {
+        let checked = document.querySelectorAll('.cb-siswa:checked').length;
+        cnt.innerText = checked;
+        btn.style.display = checked > 0 ? 'inline-block' : 'none';
+    }
+});
+</script>
                            
                             
                         </div>

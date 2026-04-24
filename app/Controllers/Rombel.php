@@ -25,17 +25,29 @@ class Rombel extends Controller
             'nav' => 'Rombel'
         );
 
-        $data = array(
-            'getTingkat' => $m_tingkat->getTingkat(),
-            'getRombel' => $model->getRombel($id_tapel),
-            'getGuru' => $m_pegawai->getPegawaiwalikelas($id_tapel)
-        );
+        try {
+            $data = array(
+                'getTingkat' => $m_tingkat->getTingkat(),
+                'getRombel' => $model->getRombel($id_tapel),
+                'getGuru' => $m_pegawai->getPegawaiwalikelas($id_tapel)
+            );
 
-        echo view('index/sidebar');
-        echo view('func');
-        echo view('index/navbar',  $datanav);
-        echo view('master/rombel', $data);
-        echo view('index/footer');
+            echo view('index/sidebar');
+            echo view('func');
+            echo view('index/navbar',  $datanav);
+            echo view('master/rombel', $data);
+            echo view('index/footer');
+        } catch (\Throwable $e) {
+            echo view('index/sidebar');
+            echo view('func');
+            echo view('index/navbar',  $datanav);
+            echo "<div class='pcoded-main-container'><div class='pcoded-content'><div class='alert alert-danger m-3'>";
+            echo "<h5>Error pada halaman Rombel</h5>";
+            echo "<p>" . $e->getMessage() . "</p>";
+            echo "<p><small>File: " . $e->getFile() . " Line: " . $e->getLine() . "</small></p>";
+            echo "</div></div></div>";
+            echo view('index/footer');
+        }
     }
    
     public function add()
@@ -48,7 +60,8 @@ class Rombel extends Controller
             'nm_rombel' => $this->request->getPost('nama'),
             'id_tingkat_kelas' => $this->request->getPost('tingkat'),
             'id_tapel' => session()->get('id_tapel'),
-            'id_walikelas' => $this->request->getPost('id_ptk')
+            'id_walikelas' => $this->request->getPost('id_ptk'),
+            'id_guru_bk' => $this->request->getPost('id_guru_bk') ?: null
         );
 
         //validasi input
@@ -75,7 +88,8 @@ class Rombel extends Controller
         $id = $this->request->getPost('id');
         $data = array(
             'nm_Rombel' => $this->request->getPost('nama'),
-            'id_walikelas' => $this->request->getPost('id_ptk')
+            'id_walikelas' => $this->request->getPost('id_ptk'),
+            'id_guru_bk' => $this->request->getPost('id_guru_bk') ?: null
         );
 
         //update data

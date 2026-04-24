@@ -24,16 +24,20 @@ class Siswa extends Controller
             'nav' => 'Siswa'
         );
 
-        $data = array(
-            'getSiswa' => $model->getSiswa()
-        );
-
-        
-        echo view('index/sidebar');
-        echo view('func');
-        echo view('index/navbar',  $datanav);
-        echo view('master/siswa', $data);
-        echo view('index/footer');
+        try {
+            $data = array(
+                'getSiswa' => $model->getSiswa()
+            );
+            
+            echo view('index/sidebar');
+            echo view('func');
+            echo view('index/navbar',  $datanav);
+            echo view('master/siswa', $data);
+            echo view('index/footer');
+            
+        } catch (\Throwable $e) {
+            echo "SYSTEM ERROR: " . $e->getMessage() . " di file " . $e->getFile() . " baris " . $e->getLine();
+        }
     }
    
     public function add()
@@ -42,7 +46,6 @@ class Siswa extends Controller
         $model = new Siswa_model;
         $file = $this->request->getFile('file');
         $fileName = $file->getRandomName();
-        $pass=$this->request->getPost('password');
         $data = array(
             'nisn' => $this->request->getPost('nisn'),
             'no_induk' => $this->request->getPost('no_induk'),
@@ -55,8 +58,7 @@ class Siswa extends Controller
             'alamat' => $this->request->getPost('alamat'),
             'tempat_lahir' => $this->request->getPost('tempat_lahir'),
             'tgl_lahir' => $this->request->getPost('tgl_lahir'),
-            'file' => $fileName,
-            'password' => password_hash($pass,PASSWORD_DEFAULT),
+            'file' => $fileName
         );
 
         //validasi input
@@ -125,34 +127,7 @@ class Siswa extends Controller
             return redirect()->to('/Siswa');
         }
     }
-    public function updatepassword()
-    {
-        $model = new Siswa_model;
-        $id = $this->request->getPost('id');
-        $pass1=$this->request->getPost('password1');
-        $pass2=$this->request->getPost('password2');
 
-        if($pass1==$pass2)
-        {
-            $data = array(
-                'password' => password_hash($pass1,PASSWORD_DEFAULT)
-            );
-
-            //update data
-            $success = $model->editSiswa($data, $id);
-            if($success){
-                session()->setFlashdata('success','Diupdate');
-                return redirect()->to('/Siswa');
-            }else{
-                session()->setFlashdata('error','Diupdate');
-                return redirect()->to('/Siswa');
-            }
-        }else
-        {
-            session()->setFlashdata('error','Diupadete, terdeteksi password tidak sama');
-            return redirect()->to('/Siswa');
-        }
-    }
     public function hapus()
     {
         $model = new Siswa_model;
@@ -273,5 +248,34 @@ class Siswa extends Controller
         return $dompdf->stream("KartuPelajar_{$nisn}.pdf", ["Attachment" => true]);
     }
 
+
+    /**
+     * Bulk delete students by IDs
+     */
+    public function bulkDelete()
+    {
+        if (empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+
+        $ids = $this->request->getPost('ids');
+        if (empty($ids) || !is_array($ids)) {
+            session()->setFlashdata('error', 'Tidak ada siswa yang dipilih');
+            return redirect()->to('Siswa');
+        }
+
+        $db = \Config\Database::connect();
+        $deleted = 0;
+        foreach ($ids as $id) {
+            // Delete from siswa_rombel first
+            $db->table('t_siswa_rombel')->where('id_siswa', $id)->delete();
+            // Delete from siswa
+            $db->table('t_siswa')->where('id_siswa', $id)->delete();
+            $deleted++;
+        }
+
+        session()->setFlashdata('success', "$deleted siswa berhasil dihapus");
+        return redirect()->to('Siswa');
+    }
 
 }
