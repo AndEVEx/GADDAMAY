@@ -936,40 +936,12 @@ function jumterlambattgl($tgl) {
 }
 
 function jmlpoint($id_siswa,$bln) {
-    $db = \Config\Database::connect();
-    $thn = date('Y');
-    $builder = $db->table('t_point_siswa');
-    $builder->where('id_siswa', $id_siswa);
-    $builder->where('MONTH(tgl_point)', $bln);
-    $builder->where('YEAR(tgl_point)', $thn);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       //jumlah point
-        $query = $db->query("SELECT sum(nilai) as point FROM t_point_siswa where id_siswa='$id_siswa' and MONTH(tgl_point)='$bln' and YEAR(tgl_point)='$thn'");
-        $row = $query->getRow();
-        $sts = $row->point;
-    }else{
-        $sts=0;
-    }
-    
-    return $sts;
+    // t_point_siswa is deprecated and no longer used
+    return 0;
 }
 function jmlpointtgl($id_siswa,$tgl) {
-    $db = \Config\Database::connect();
-    $builder = $db->table('t_point_siswa');
-    $builder->where('id_siswa', $id_siswa);
-    $builder->where('tgl_point', $tgl);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       //jumlah point
-        $query = $db->query("SELECT nilai FROM t_point_siswa where id_siswa='$id_siswa' and tgl_point='$tgl'");
-        $row = $query->getRow();
-        $sts = $row->nilai;
-    }else{
-        $sts=0;
-    }
-    
-    return $sts;
+    // t_point_siswa is deprecated and no longer used
+    return 0;
 }
 
 function harilibur($kode) {
