@@ -16,11 +16,21 @@
     }
 
     body {
-      background: linear-gradient(135deg, #0f1729 0%, #1a2744 40%, #1e3a5f 70%, #2a5298 100%);
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 40%, #facc15 70%, #eab308 100%);
       min-height: 100vh;
       font-family: 'Inter', 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
+    }
+
+    /* Hide number input arrows */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
     }
 
     .main-wrapper {
