@@ -119,9 +119,15 @@
 
     const html5QrCode = new Html5Qrcode("reader");
 
+    // Unlock audio on first interaction silently
     document.body.addEventListener('click', () => {
-      document.getElementById('audioSuccess').play().catch(() => { });
-      document.getElementById('audioError').play().catch(() => { });
+      const aS = document.getElementById('audioSuccess');
+      const aE = document.getElementById('audioError');
+      if(aS && aE) {
+          aS.volume = 0; aE.volume = 0;
+          aS.play().then(() => { aS.pause(); aS.currentTime = 0; aS.volume = 1.0; }).catch(() => {});
+          aE.play().then(() => { aE.pause(); aE.currentTime = 0; aE.volume = 1.0; }).catch(() => {});
+      }
     }, { once: true });
 
     function showToast(message, type = 'primary') {

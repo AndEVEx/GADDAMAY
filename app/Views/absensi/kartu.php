@@ -123,34 +123,31 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- AudioContext for native beeps - MUST be before flash data scripts -->
+    <!-- Audio elements -->
+    <audio id="audioSuccess" src="<?= base_url() ?>mp3/berhasil.mp3" preload="auto"></audio>
+    <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
+
     <script>
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      function playTone(freq, type, duration, vol=0.1) {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      }
+      // Unlock audio on first interaction silently
+      document.body.addEventListener('click', () => {
+        const aS = document.getElementById('audioSuccess');
+        const aE = document.getElementById('audioError');
+        if(aS && aE) {
+            aS.volume = 0; aE.volume = 0;
+            aS.play().then(() => { aS.pause(); aS.currentTime = 0; aS.volume = 1.0; }).catch(() => {});
+            aE.play().then(() => { aE.pause(); aE.currentTime = 0; aE.volume = 1.0; }).catch(() => {});
+        }
+      }, { once: true });
+
       function playSuccessSound() {
-        playTone(880, 'sine', 0.1, 0.2); 
-        setTimeout(() => playTone(1108.73, 'sine', 0.2, 0.2), 100); 
+        const aS = document.getElementById('audioSuccess');
+        if(aS) { aS.currentTime = 0; aS.play().catch(()=>{}); }
       }
       function playErrorSound() {
-        playTone(300, 'sawtooth', 0.3, 0.1);
-        setTimeout(() => playTone(250, 'sawtooth', 0.4, 0.1), 150);
+        const aE = document.getElementById('audioError');
+        if(aE) { aE.currentTime = 0; aE.play().catch(()=>{}); }
       }
       
-      document.body.addEventListener('click', () => {
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-      }, { once: true });
     </script>
 
     <script>
