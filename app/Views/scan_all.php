@@ -16,7 +16,7 @@
     }
 
     body {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 40%, #facc15 70%, #eab308 100%);
+      background: linear-gradient(135deg, #0f1729 0%, #1a2744 40%, #1e3a5f 70%, #2a5298 100%);
       min-height: 100vh;
       font-family: 'Inter', 'Segoe UI', sans-serif;
       margin: 0;
@@ -121,18 +121,19 @@
     .scan-panel {
       flex: 1;
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 3px solid rgba(255, 255, 255, 0.2);
       border-radius: 20px;
       backdrop-filter: blur(12px);
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
       transition: all 0.3s ease;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
     .scan-panel:hover {
-      border-color: rgba(255, 255, 255, 0.2);
       background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     }
 
     .panel-header {
@@ -159,6 +160,8 @@
     }
 
     /* QR Scanner */
+    .qr-panel { border-color: rgba(74, 144, 226, 0.4); }
+    .qr-panel:hover { border-color: rgba(74, 144, 226, 0.8); }
     .qr-panel .panel-icon { color: #4a90e2; }
 
     #reader {
@@ -193,6 +196,8 @@
     }
 
     /* RFID Panel */
+    .rfid-panel { border-color: rgba(245, 166, 35, 0.4); }
+    .rfid-panel:hover { border-color: rgba(245, 166, 35, 0.8); }
     .rfid-panel .panel-icon { color: #f5a623; }
 
     .rfid-input-wrapper {
