@@ -62,7 +62,7 @@ class Reportwal extends Controller
         $m_rombel = new Rombel_model;
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
-        echo view('func');
+        echo view('func_siswa');
         $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
         $datanav = array(
             'nama' => session()->get('nama'),

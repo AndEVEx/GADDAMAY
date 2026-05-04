@@ -54,44 +54,40 @@
     </script>
 <?php endif; ?>
 <script>
-    new DataTable('#example1', {
-        pageLength: -1,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']]
-    });
-    $('#example').DataTable({
-        pageLength: -1,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']],
-        buttons: ['copy', 'csv', 'excel']
-    });
-    $('#single-select-field').select2({
-        theme: "bootstrap-5",
-        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-        placeholder: $(this).data('placeholder'),
-    });
+    if ($.fn.DataTable && !$.fn.dataTable.isDataTable('#example1')) {
+        new DataTable('#example1', {
+            pageLength: -1,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']]
+        });
+    }
+    if ($.fn.DataTable && !$.fn.dataTable.isDataTable('#example')) {
+        $('#example').DataTable({
+            pageLength: -1,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']],
+            buttons: ['copy', 'csv', 'excel']
+        });
+    }
+    if ($('#single-select-field').length) {
+        $('#single-select-field').select2({
+            theme: "bootstrap-5",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+        });
+    }
 </script>
 <script>
-    new DataTable('#example2', {
-        orderCellsTop: true,
-        pageLength: -1,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']],
-        layout: {
-            topStart: {
-                buttons: ['copy', 'excel', 'pdf', 'colvis']
+    if ($.fn.DataTable && !$.fn.dataTable.isDataTable('#example2')) {
+        new DataTable('#example2', {
+            orderCellsTop: true,
+            pageLength: -1,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']],
+            layout: {
+                topStart: {
+                    buttons: ['copy', 'excel', 'pdf', 'colvis']
+                }
             }
-        }
-    });
-
-
-    new DataTable('#example', {
-        pageLength: -1,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Semua']]
-    });
-
-    $('#single-select-field').select2({
-        theme: "bootstrap-5",
-        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-        placeholder: $(this).data('placeholder'),
-    });
+        });
+    }
 </script>
 
 </body>

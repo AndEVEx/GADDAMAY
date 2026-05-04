@@ -73,11 +73,18 @@ class Cpanel extends Controller
                 return redirect()->back();
             }
         }else{
-            //cek guru
+            //cek guru by nip
             $builder_gr = $db->table('t_ptk');
             $builder_gr -> where('nip', $email);
             $query_gr =  $builder_gr->get();
             $user_gr = $query_gr->getRow();
+            // Fallback: try nomor_absensi
+            if(!$user_gr){
+                $builder_gr2 = $db->table('t_ptk');
+                $builder_gr2 -> where('nomor_absensi', $email);
+                $query_gr2 =  $builder_gr2->get();
+                $user_gr = $query_gr2->getRow();
+            }
             if($user_gr){
                 if (password_verify($pass, $user_gr->password)) {
                     session()->set([
