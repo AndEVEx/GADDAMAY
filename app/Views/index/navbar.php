@@ -199,9 +199,16 @@
                         $all_bk = $builder_bk->countAllResults();
                         if ($all_bk > 0) {
                         ?>
-                        <li class="nav-item">
-                            <a href="<?= base_url('MuridMonitoring'); ?>" class="nav-link "><span class="pcoded-micon"><i
-                                        class="feather icon-alert-triangle"></i></span><span class="pcoded-mtext">Monitoring Murid</span></a>
+                        <li class="nav-item pcoded-hasmenu">
+                            <a href="#!" class="nav-link "><span class="pcoded-micon"><i
+                                        class="feather icon-alert-triangle"></i></span><span class="pcoded-mtext">Guru BK</span></a>
+                            <ul class="pcoded-submenu">
+                                <li><a href="<?= base_url('MuridMonitoring'); ?>">Dashboard Monitoring</a></li>
+                                <li><a href="<?= base_url('Reportwal/persiswa'); ?>">Per Siswa</a></li>
+                                <li><a href="<?= base_url('Reportwal'); ?>">Harian</a></li>
+                                <li><a href="<?= base_url('Reportwal/pertanggal'); ?>">Per Tanggal</a></li>
+                                <li><a href="<?= base_url('Reportwal/bulanan'); ?>">Bulanan</a></li>
+                            </ul>
                         </li>
                         <?php
                         }

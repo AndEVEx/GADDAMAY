@@ -33,10 +33,9 @@ class Pegawai_model extends Model
     public function getPegawaidetail($id)
     {
         return $this->db->table($this->table)
-        ->select('t_ptk.id_jenis_ptk as id_jenis_ptk,t_ptk.id_ptk as id_ptk,nip,nik,nama_ptk,nama_jenis_ptk,no_hp,nomor_absensi,alamat,tempat_lahir,tgl_lahir')
-        ->join('r_jenis_ptk', 'r_jenis_ptk.id_jenis_ptk = t_ptk.id_jenis_ptk')
+        ->select('t_ptk.id_jenis_ptk as id_jenis_ptk,t_ptk.id_ptk as id_ptk,nip,nik,nama_ptk,nama_jenis_ptk,no_hp,nomor_absensi,alamat,tempat_lahir,tgl_lahir,photo')
+        ->join('r_jenis_ptk', 'r_jenis_ptk.id_jenis_ptk = t_ptk.id_jenis_ptk', 'LEFT')
         ->where('t_ptk.id_ptk',$id)
-        ->where('t_ptk.status_ptk',1)
         ->get()->getResultArray();
     }
     public function getPegawaidosen()

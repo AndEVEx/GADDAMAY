@@ -1123,6 +1123,37 @@ function rombelwalikelas($id, $tapel) {
     
     return $sts;
 }
+
+/**
+ * Get first rombel ID where this guru is assigned as guru BK
+ */
+function rombelbk($id, $tapel) {
+    $db = \Config\Database::connect();
+    $query = $db->query("SELECT id_rombel FROM t_rombel WHERE id_guru_bk='$id' AND id_tapel='$tapel' LIMIT 1");
+    $row = $query->getRow();
+    return $row ? $row->id_rombel : 0;
+}
+
+/**
+ * Get all rombel IDs where this guru is BK
+ */
+function rombelsbk($id, $tapel) {
+    $db = \Config\Database::connect();
+    $query = $db->query("SELECT id_rombel FROM t_rombel WHERE id_guru_bk='$id' AND id_tapel='$tapel'");
+    $rows = $query->getResultArray();
+    return array_column($rows, 'id_rombel');
+}
+
+/**
+ * Get first rombel: try walikelas first, then fallback to BK
+ */
+function rombelwalikelas_or_bk($id, $tapel) {
+    $rombel = rombelwalikelas($id, $tapel);
+    if($rombel <= 0) {
+        $rombel = rombelbk($id, $tapel);
+    }
+    return $rombel;
+}
 function idsiswatoidrombel($id,$idtapel) {
     $db = \Config\Database::connect();
     $builder = $db->table('t_siswa_rombel');

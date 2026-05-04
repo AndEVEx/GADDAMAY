@@ -136,6 +136,12 @@ class MuridMonitoring extends Controller
             }
         }
 
+        // Detect role for this guru
+        $waliRombels = $this->monitoringModel->getRombelWalikelas($id_user, $id_tapel);
+        $bkRombels = $this->monitoringModel->getRombelBK($id_user, $id_tapel);
+        $isWalikelas = !empty($waliRombels);
+        $isBK = !empty($bkRombels);
+
         $data = array(
             'students' => $students,
             'monitorList' => $monitorList,
@@ -146,7 +152,9 @@ class MuridMonitoring extends Controller
             'tidakHadirCount' => $totalSiswa - $hadirCount,
             'pulangList' => $pulangList,
             'monitorCount' => count($monitorList),
-            'tgl' => $tgl
+            'tgl' => $tgl,
+            'isWalikelas' => $isWalikelas,
+            'isBK' => $isBK
         );
 
         echo view('index/sidebar');

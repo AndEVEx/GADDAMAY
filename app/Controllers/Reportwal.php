@@ -24,7 +24,7 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas(session()->get('id_user'),$id_tapel);
+        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
 
         $datanav = array(
             'nama' => session()->get('nama'),
@@ -63,7 +63,7 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func');
-        $id_rombel = rombelwalikelas(session()->get('id_user'),$id_tapel);
+        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi',
@@ -112,7 +112,7 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas(session()->get('id_user'),$id_tapel);
+        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi',
@@ -144,7 +144,7 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas(session()->get('id_user'), $id_tapel);
+        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'), $id_tapel);
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi',
@@ -193,7 +193,7 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas(session()->get('id_user'), $id_tapel);
+        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'), $id_tapel);
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi',
@@ -226,7 +226,7 @@ class Reportwal extends Controller
         $tgl = date('Y-m-d');
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas(session()->get('id_user'),$id_tapel);
+        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi Persiswa',
