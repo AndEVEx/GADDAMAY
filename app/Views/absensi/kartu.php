@@ -108,12 +108,9 @@
 
         <div class="clock mb-4" id="digitalClock">--:--:--</div>
 
-        <form method="post" action="<?= base_url('Dashboard/addabsensi'); ?>">
-            <input type="text" name="rfid" class="rfid-input w-100 mb-3"
+        <form id="rfidForm" onsubmit="return submitRFID(event)">
+            <input type="text" name="rfid" id="rfidInput" class="rfid-input w-100 mb-3"
                 placeholder="Tempelkan Kartu / Masukkan RFID / Scan Qr" autofocus required>
-            <input type="hidden" name="hari" value="<?= $getHari; ?>">
-            <input type="hidden" name="sts" value="<?= $stsAbsen; ?>">
-            <input type="hidden" name="id_tapel" value="<?= $getIdtapel; ?>">
             <button type="submit" class="btn btn-light btn-lg w-100">
                 <i class="bi bi-check2-circle"></i> Absen
             </button>
@@ -128,8 +125,11 @@
     <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
 
     <script>
-      // Unlock audio on first interaction silently
-      document.body.addEventListener('click', () => {
+      // Unlock audio on ANY user interaction (keydown for RFID, click, touchstart)
+      let audioUnlocked = false;
+      function unlockAudio() {
+        if (audioUnlocked) return;
+        audioUnlocked = true;
         const aS = document.getElementById('audioSuccess');
         const aE = document.getElementById('audioError');
         if(aS && aE) {
@@ -137,17 +137,21 @@
             aS.play().then(() => { aS.pause(); aS.currentTime = 0; aS.volume = 1.0; }).catch(() => {});
             aE.play().then(() => { aE.pause(); aE.currentTime = 0; aE.volume = 1.0; }).catch(() => {});
         }
-      }, { once: true });
+      }
+      ['click','keydown','touchstart','focus'].forEach(evt => {
+        document.addEventListener(evt, unlockAudio, { once: false, capture: true });
+      });
+      const rfidEl = document.getElementById('rfidInput');
+      if(rfidEl) rfidEl.addEventListener('focus', unlockAudio);
 
       function playSuccessSound() {
         const aS = document.getElementById('audioSuccess');
-        if(aS) { aS.currentTime = 0; aS.play().catch(()=>{}); }
+        if(aS) { aS.currentTime = 0; aS.volume = 1.0; aS.play().catch(()=>{}); }
       }
       function playErrorSound() {
         const aE = document.getElementById('audioError');
-        if(aE) { aE.currentTime = 0; aE.play().catch(()=>{}); }
+        if(aE) { aE.currentTime = 0; aE.volume = 1.0; aE.play().catch(()=>{}); }
       }
-      
     </script>
 
     <script>
@@ -161,104 +165,84 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Auto reload tiap 15 detik
-        setTimeout(function () {
-            location.reload();
-        }, 15000);
-    </script>
-    <?php if (session()->getFlashdata('success')): ?>
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Data berhasil disimpan',
-                html: 'Menutup otomatis dalam <b></b> detik.',
-                timer: 5000,
-                timerProgressBar: true,
-                didOpen: () => {
-                    const b = Swal.getHtmlContainer().querySelector('b');
-                    let timerInterval = setInterval(() => {
-                        b.textContent = Math.ceil(Swal.getTimerLeft() / 1000);
-                    }, 100);
+        let isProcessing = false;
+
+        function submitRFID(e) {
+            e.preventDefault();
+            if (isProcessing) return false;
+            isProcessing = true;
+
+            const rfid = document.getElementById('rfidInput').value.trim();
+            if (!rfid) { isProcessing = false; return false; }
+
+            fetch('<?= base_url("Dashboard/addabsensiAjax") ?>', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
+                body: 'rfid=' + encodeURIComponent(rfid)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const fotoUrl = data.foto || '<?= base_url("image/siswa/noimage.png") ?>';
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Absensi Berhasil',
+                        html: `
+                            <div style="text-align:center;">
+                                <img src="${fotoUrl}" alt="Foto Siswa"
+                                     style="width:110px;height:110px;object-fit:cover;border-radius:50%;
+                                     border:3px solid #28a745;margin-bottom:10px;box-shadow:0 0 10px rgba(0,0,0,0.2);">
+                                <h4 style="margin-bottom:6px;color:#333;">${data.nama}</h4>
+                                <div style="text-align:left;display:inline-block;font-size:14px;color:#555;">
+                                    <p><b>NIS:</b> ${data.nis}</p>
+                                    <p><b>Kelas:</b> ${data.kelas}</p>
+                                    <p><b>Status:</b> <span style="color:#007bff;">${data.status_absen}</span></p>
+                                    <p><b>Jam:</b> ${data.jam}</p>
+                                </div>
+                            </div>`,
+                        timer: 4500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                    playSuccessSound();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: data.message,
+                        timer: 2500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    });
+                    playErrorSound();
                 }
+
+                // Reset input and refocus
+                document.getElementById('rfidInput').value = '';
+                document.getElementById('rfidInput').focus();
+                isProcessing = false;
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                Swal.fire({ icon: 'error', title: 'Gagal!', text: 'Koneksi error', timer: 2000, showConfirmButton: false });
+                playErrorSound();
+                document.getElementById('rfidInput').value = '';
+                document.getElementById('rfidInput').focus();
+                isProcessing = false;
             });
-            playSuccessSound();
-        </script>
-    <?php endif; ?>
 
-    <?php if (session()->getFlashdata('error')): ?>
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                html: '<?= session()->getFlashdata('error'); ?><br><small>Menutup otomatis dalam <b></b> detik...</small>',
-                timer: 2500,
-                timerProgressBar: true,
-                showConfirmButton: false,
-                didOpen: () => {
-                    const b = Swal.getHtmlContainer().querySelector('b');
-                    const timerInterval = setInterval(() => {
-                        b.textContent = Math.ceil(Swal.getTimerLeft() / 1000);
-                    }, 100);
-                },
-                willClose: () => {
-                    document.querySelector('.rfid-input').focus();
-                }
-            });
-            playErrorSound();
-        </script>
-    <?php endif; ?>
+            return false;
+        }
 
-    <?php if (session()->getFlashdata('Pesanabsen')): ?>
-        <?php
-        $foto = session()->getFlashdata('Fotoabsen');
-        $fotoUrl = !empty($foto) ? base_url('image/siswa/' . $foto) : base_url('image/siswa/noimage.png');
-        ?>
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: '✅ Absensi Berhasil',
-                html: `
-        <div style="text-align:center;">
-            <img src="<?= $fotoUrl ?>" alt="Foto Siswa"
-                 style="width:110px;height:110px;object-fit:cover;border-radius:50%;
-                 border:3px solid #28a745;margin-bottom:10px;box-shadow:0 0 10px rgba(0,0,0,0.2);">
-
-            <h4 style="margin-bottom:6px;color:#333;"><?= session()->getFlashdata('Nama'); ?></h4>
-
-            <div style="text-align:left;display:inline-block;font-size:14px;color:#555;">
-                <p><i class="fas fa-id-card"></i> <b>NIS:</b> <?= session()->getFlashdata('NIS'); ?></p>
-                <p><i class="fas fa-school"></i> <b>Kelas:</b> <?= session()->getFlashdata('Kelas'); ?></p>
-                <p><i class="fas fa-user-check"></i> <b>Status:</b> 
-                    <span style="color:#007bff;"><?= session()->getFlashdata('Pesanabsen'); ?></span>
-                </p>
-                <p><i class="fas fa-clock"></i> <b>Jam Absen:</b> <?= session()->getFlashdata('Jamabsen'); ?></p>
-            </div>
-        </div>
-    `,
-                timer: 4500,
-                timerProgressBar: true,
-                showConfirmButton: false,
-                background: '#f9f9f9',
-                backdrop: `
-        rgba(0,0,0,0.3)
-        left top
-        no-repeat
-    `
-            });
-            playSuccessSound();
-        </script>
-    <?php endif; ?>
-
-    <script>
+        // RFID scanner sends Enter key to submit
         document.addEventListener('DOMContentLoaded', function () {
-            const input = document.querySelector('.rfid-input');
+            const input = document.getElementById('rfidInput');
             if (input) {
                 input.focus();
-                // kalau scanner mengirim "Enter" otomatis submit form
                 input.addEventListener('keypress', function (e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
-                        this.form.submit();
+                        submitRFID(e);
                     }
                 });
             }

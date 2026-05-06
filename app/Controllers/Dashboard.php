@@ -261,6 +261,109 @@ public function addabsensi()
 
 // sendWA removed - WA notifications are now ONLY sent via WeeklyReport (Fridays)
 
+/**
+ * AJAX version of addabsensi - returns JSON so page doesn't reload
+ * This preserves audio unlock state for sound feedback
+ */
+public function addabsensiAjax()
+{
+    $model = new Absensisiswa_model;
+    $rfid = trim($this->request->getPost('rfid'));
+    $tgl = date('Y-m-d');
+    $jamnow = date('H:i:s');
+
+    $db = \Config\Database::connect();
+    $id_tapel = $db->table('r_tapel')->where('sts_aktif', 1)->get()->getRow()->id_tapel ?? null;
+
+    if (!$id_tapel) {
+        return $this->response->setJSON(['success' => false, 'message' => 'Tahun pelajaran aktif tidak ditemukan']);
+    }
+
+    // Load func view for helper functions
+    ob_start();
+    echo view('func');
+    ob_end_clean();
+
+    // Cek RFID
+    $siswaRow = $db->table('t_siswa')->select('id_siswa')->where('rfid', $rfid)->get()->getRow();
+    if (!$siswaRow) {
+        $rfidTrimmed = ltrim($rfid, '0');
+        if ($rfidTrimmed !== $rfid) {
+            $siswaRow = $db->table('t_siswa')->select('id_siswa')->where('rfid', $rfidTrimmed)->get()->getRow();
+        }
+    }
+
+    if (!$siswaRow) {
+        return $this->response->setJSON(['success' => false, 'message' => 'Nomor RFID tidak terdaftar']);
+    }
+
+    $id_siswa = $siswaRow->id_siswa;
+
+    // Cek rombel
+    $rombelRow = $db->table('t_siswa_rombel')->where('id_siswa', $id_siswa)->where('id_tapel', $id_tapel)->get()->getRow();
+    if (!$rombelRow) {
+        return $this->response->setJSON(['success' => false, 'message' => 'Siswa belum mempunyai kelas']);
+    }
+
+    // Ambil hari
+    $hariMap = ["Sunday"=>"Minggu","Monday"=>"Senin","Tuesday"=>"Selasa","Wednesday"=>"Rabu","Thursday"=>"Kamis","Friday"=>"Jumat","Saturday"=>"Sabtu"];
+    $hari = $hariMap[date('l')] ?? 'Senin';
+
+    $row_jam = $db->table('r_hari')->where('nm_hari', $hari)->get()->getRow();
+    $jammasuk = $row_jam->jammasuk ?? null;
+    $jampulang = $row_jam->jampulang ?? null;
+
+    // Ambil data siswa
+    $rowsiswa = $db->table('t_siswa')
+        ->select('t_siswa.nm_siswa, t_siswa.no_induk, t_siswa.hp, t_rombel.nm_rombel, t_siswa.file')
+        ->join('t_siswa_rombel', 't_siswa_rombel.id_siswa = t_siswa.id_siswa')
+        ->join('t_rombel', 't_rombel.id_rombel = t_siswa_rombel.id_rombel')
+        ->where('t_siswa.id_siswa', $id_siswa)
+        ->where('t_siswa_rombel.id_tapel', $id_tapel)
+        ->get()->getRow();
+
+    if (!$rowsiswa) {
+        return $this->response->setJSON(['success' => false, 'message' => 'Data siswa tidak ditemukan']);
+    }
+
+    // Cek sudah masuk/pulang
+    $sudahMasuk = $db->table('t_siswa_hadir')->where(['tgl_hadir'=>$tgl,'id_siswa'=>$id_siswa,'sts_hadir'=>0])->countAllResults();
+    $sudahPulang = $db->table('t_siswa_hadir')->where(['tgl_hadir'=>$tgl,'id_siswa'=>$id_siswa,'sts_hadir'=>1])->countAllResults();
+
+    if ($sudahPulang > 0) {
+        return $this->response->setJSON(['success' => false, 'message' => 'Siswa sudah absen pulang hari ini']);
+    }
+
+    if ($sudahMasuk > 0) {
+        if ($jamnow < $jampulang) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Belum waktunya pulang']);
+        }
+        $data = ['id_siswa'=>$id_siswa,'id_tapel'=>$id_tapel,'tgl_hadir'=>$tgl,'sts_hadir'=>1,'jam'=>$jamnow];
+        $model->saveAbsensi($data);
+        $stshadir = 'Pulang';
+    } else {
+        $batasAbsen = $db->table('t_setting_aplikasi')->get()->getRow()->batas_absen_masuk ?? '08:00:00';
+        if ($jamnow > $batasAbsen) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Batas waktu absen pagi telah lewat ('.$batasAbsen.')']);
+        }
+        $data = ['id_siswa'=>$id_siswa,'id_tapel'=>$id_tapel,'tgl_hadir'=>$tgl,'sts_hadir'=>0,'jam'=>$jamnow];
+        $model->saveAbsensi($data);
+        $stshadir = ($jamnow > $jammasuk) ? 'Terlambat' : 'Hadir';
+    }
+
+    $foto = !empty($rowsiswa->file) ? $rowsiswa->file : 'noimage.png';
+
+    return $this->response->setJSON([
+        'success' => true,
+        'message' => 'Absensi berhasil',
+        'status_absen' => $stshadir,
+        'nama' => $rowsiswa->nm_siswa,
+        'nis' => $rowsiswa->no_induk,
+        'kelas' => $rowsiswa->nm_rombel,
+        'foto' => base_url('image/siswa/' . $foto),
+        'jam' => $jamnow
+    ]);
+}
 
  
     public function getDetailKelasAjax($id_rombel)

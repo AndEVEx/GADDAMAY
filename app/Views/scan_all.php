@@ -522,14 +522,25 @@
     document.getElementById('audioSuccess').volume = 1.0;
     document.getElementById('audioError').volume = 1.0;
 
-    // Unlock audio on first interaction silently
-    document.body.addEventListener('click', () => {
+    // Unlock audio on ANY user interaction (keydown for RFID, click, touchstart)
+    let audioUnlocked = false;
+    function unlockAudio() {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
       const aS = document.getElementById('audioSuccess');
       const aE = document.getElementById('audioError');
-      aS.volume = 0; aE.volume = 0;
-      aS.play().then(() => { aS.pause(); aS.currentTime = 0; aS.volume = 1.0; }).catch(() => {});
-      aE.play().then(() => { aE.pause(); aE.currentTime = 0; aE.volume = 1.0; }).catch(() => {});
-    }, { once: true });
+      if(aS && aE) {
+        aS.volume = 0; aE.volume = 0;
+        aS.play().then(() => { aS.pause(); aS.currentTime = 0; aS.volume = 1.0; }).catch(() => {});
+        aE.play().then(() => { aE.pause(); aE.currentTime = 0; aE.volume = 1.0; }).catch(() => {});
+      }
+    }
+    ['click','keydown','touchstart','focus'].forEach(evt => {
+      document.addEventListener(evt, unlockAudio, { once: false, capture: true });
+    });
+    // Also try to unlock immediately when RFID input gets focus
+    const rfidEl = document.getElementById('rfidInput');
+    if(rfidEl) rfidEl.addEventListener('focus', unlockAudio);
 
     const html5QrCode = new Html5Qrcode("reader");
     let isProcessing = false;
