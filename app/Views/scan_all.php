@@ -525,8 +525,8 @@
   </div>
 
   <!-- AUDIO - volume set to maximum -->
-  <audio id="audioSuccess" src="<?= base_url() ?>mp3/berhasil.mp3" preload="auto"></audio>
-  <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
+  <audio id="audioSuccess" src="<?= base_url('ScanAll/audio/berhasil') ?>" preload="auto"></audio>
+  <audio id="audioError" src="<?= base_url('ScanAll/audio/gagal') ?>" preload="auto"></audio>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>

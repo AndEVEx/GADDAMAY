@@ -148,6 +148,8 @@
                                 padding: 20px;
                                 text-align: center;
                                 box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+                                overflow: hidden;
+                                position: relative;
                             }
                             .summary-card h2 { font-size: 2rem; font-weight: 800; margin-bottom: 4px; }
                             .summary-card span { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }

@@ -334,4 +334,29 @@ Terima kasih 🙏
             ->setHeader('Cache-Control', 'public, max-age=3600')
             ->setJSON(['photos' => $list, 'count' => count($list)]);
     }
+
+    /**
+     * Serve audio files directly via controller (bypasses .htaccess restrictions)
+     * URL: /ScanAll/audio/berhasil or /ScanAll/audio/gagal
+     */
+    public function audio($name = 'berhasil')
+    {
+        // Whitelist allowed files
+        $allowed = ['berhasil', 'gagal', 'success', 'failes'];
+        if (!in_array($name, $allowed)) {
+            return $this->response->setStatusCode(404, 'Not Found');
+        }
+
+        $path = FCPATH . 'mp3/' . $name . '.mp3';
+        if (!file_exists($path)) {
+            return $this->response->setStatusCode(404, 'File Not Found');
+        }
+
+        return $this->response
+            ->setHeader('Content-Type', 'audio/mpeg')
+            ->setHeader('Content-Length', (string) filesize($path))
+            ->setHeader('Cache-Control', 'public, max-age=604800') // Cache 7 days
+            ->setHeader('Accept-Ranges', 'bytes')
+            ->setBody(file_get_contents($path));
+    }
 }

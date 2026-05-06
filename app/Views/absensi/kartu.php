@@ -121,8 +121,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Audio elements -->
-    <audio id="audioSuccess" src="<?= base_url() ?>mp3/berhasil.mp3" preload="auto"></audio>
-    <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
+    <audio id="audioSuccess" src="<?= base_url('ScanAll/audio/berhasil') ?>" preload="auto"></audio>
+    <audio id="audioError" src="<?= base_url('ScanAll/audio/gagal') ?>" preload="auto"></audio>
 
     <script>
       // Unlock audio sequentially on ANY user interaction

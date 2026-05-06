@@ -106,8 +106,8 @@
   </div>
 
   <!-- AUDIO -->
-  <audio id="audioSuccess" src="<?= base_url() ?>mp3/berhasil.mp3" preload="auto"></audio>
-  <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
+  <audio id="audioSuccess" src="<?= base_url('ScanAll/audio/berhasil') ?>" preload="auto"></audio>
+  <audio id="audioError" src="<?= base_url('ScanAll/audio/gagal') ?>" preload="auto"></audio>
   <script>
     // Set audio volume to maximum
     document.getElementById('audioSuccess').volume = 1.0;
