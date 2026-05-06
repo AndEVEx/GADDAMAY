@@ -314,4 +314,24 @@ Terima kasih 🙏
         curl_close($curl);
         return $response;
     }
+
+    /**
+     * Return list of student photo filenames for browser cache preloading
+     * Lightweight: only returns filenames, no heavy data
+     */
+    public function photoList()
+    {
+        $db = \Config\Database::connect();
+        $photos = $db->query("SELECT file FROM t_siswa WHERE file IS NOT NULL AND file != '' AND file != 'noimage.png' GROUP BY file")->getResultArray();
+        
+        $list = [];
+        foreach ($photos as $p) {
+            $list[] = $p['file'];
+        }
+
+        // Set cache headers so this list is cached for 1 hour
+        return $this->response
+            ->setHeader('Cache-Control', 'public, max-age=3600')
+            ->setJSON(['photos' => $list, 'count' => count($list)]);
+    }
 }

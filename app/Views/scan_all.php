@@ -827,7 +827,95 @@
         }
       }
     }, 3000);
+
+    // ===== PHOTO PRELOADER =====
+    // Preload all student photos into browser cache in background
+    // When scan happens, photo loads instantly from cache (0 delay, 0 extra bandwidth)
+    (function preloadPhotos() {
+      const indicator = document.getElementById('preloadIndicator');
+      const progress = document.getElementById('preloadProgress');
+      const counter = document.getElementById('preloadCounter');
+
+      fetch('<?= base_url("ScanAll/photoList") ?>')
+        .then(r => r.json())
+        .then(data => {
+          if (!data.photos || data.photos.length === 0) {
+            indicator.style.display = 'none';
+            return;
+          }
+
+          const total = data.photos.length;
+          let loaded = 0;
+          let batch = 0;
+          const batchSize = 5; // Load 5 at a time to not overwhelm
+
+          function loadBatch() {
+            const start = batch * batchSize;
+            const end = Math.min(start + batchSize, total);
+
+            for (let i = start; i < end; i++) {
+              const img = new Image();
+              img.onload = img.onerror = function() {
+                loaded++;
+                const pct = Math.round((loaded / total) * 100);
+                progress.style.width = pct + '%';
+                counter.textContent = loaded + '/' + total;
+
+                if (loaded >= total) {
+                  // All loaded, hide indicator after a moment
+                  setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    setTimeout(() => indicator.style.display = 'none', 500);
+                  }, 1000);
+                }
+              };
+              img.src = '<?= base_url("image/siswa") ?>/' + data.photos[i];
+            }
+
+            batch++;
+            if (end < total) {
+              // Load next batch after small delay to not block UI
+              setTimeout(loadBatch, 100);
+            }
+          }
+
+          indicator.style.display = 'flex';
+          loadBatch();
+        })
+        .catch(err => {
+          console.warn('Photo preload failed:', err);
+          indicator.style.display = 'none';
+        });
+    })();
   </script>
+
+  <!-- Preload progress indicator (subtle, bottom-left) -->
+  <div id="preloadIndicator" style="
+    display: none;
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 8px 14px;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.75rem;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+  ">
+    <i class="bi bi-image" style="font-size:0.9rem;"></i>
+    <div style="flex:1;">
+      <div style="margin-bottom:3px;">Memuat foto siswa...</div>
+      <div style="background: rgba(255,255,255,0.15); border-radius:4px; height:4px; width:120px; overflow:hidden;">
+        <div id="preloadProgress" style="height:100%; width:0%; background:linear-gradient(90deg,#4a90e2,#00f2fe); border-radius:4px; transition: width 0.2s;"></div>
+      </div>
+    </div>
+    <span id="preloadCounter" style="font-weight:600; min-width:45px; text-align:right;">0/0</span>
+  </div>
 
 </body>
 
