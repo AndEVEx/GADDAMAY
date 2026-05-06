@@ -158,25 +158,25 @@
                         <!-- Summary Cards -->
                         <div class="row mb-4">
                             <div class="col-md-3">
-                                <div class="summary-card" style="background: linear-gradient(135deg, #667eea22, #764ba222);">
+                                <div class="summary-card" style="background-color: #ffffff; background-image: linear-gradient(135deg, #667eea22, #764ba222);">
                                     <h2 style="color:#667eea;" id="totalDevices">15</h2>
                                     <span style="color:#764ba2;">Total Perangkat</span>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="summary-card" style="background: linear-gradient(135deg, #28a74522, #20c99722);">
+                                <div class="summary-card" style="background-color: #ffffff; background-image: linear-gradient(135deg, #28a74522, #20c99722);">
                                     <h2 style="color:#28a745;" id="onlineCount">0</h2>
                                     <span style="color:#20c997;">Terhubung</span>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="summary-card" style="background: linear-gradient(135deg, #dc354522, #e8437522);">
+                                <div class="summary-card" style="background-color: #ffffff; background-image: linear-gradient(135deg, #dc354522, #e8437522);">
                                     <h2 style="color:#dc3545;" id="lockedCount">0</h2>
                                     <span style="color:#e84375;">Terkunci</span>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="summary-card" style="background: linear-gradient(135deg, #ffc10722, #fd7e1422);">
+                                <div class="summary-card" style="background-color: #ffffff; background-image: linear-gradient(135deg, #ffc10722, #fd7e1422);">
                                     <h2 style="color:#fd7e14;" id="offlineCount">15</h2>
                                     <span style="color:#ffc107;">Tidak Aktif</span>
                                 </div>
@@ -265,6 +265,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function updateSummary() {
     const total = document.querySelectorAll('.device-slot').length;
@@ -306,31 +307,54 @@ document.querySelectorAll('.device-name, .device-ip').forEach(input => {
 
 // Toggle lock
 document.querySelectorAll('.btn-lock').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', async function() {
         const id = this.dataset.id;
         const slot = this.closest('.device-slot');
-        fetch('<?= base_url("DeviceManager/toggleLock") ?>', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
-            body: 'id=' + id
-        }).then(r => r.json()).then(data => {
-            if(data.status) {
-                const icon = this.querySelector('i');
-                const inputs = slot.querySelectorAll('.form-control');
-                if(data.locked) {
-                    this.classList.add('locked');
-                    icon.className = 'feather icon-lock';
-                    inputs.forEach(i => i.disabled = true);
-                    addLog('Device #' + id + ' LOCKED 🔒', '#e17055');
-                } else {
-                    this.classList.remove('locked');
-                    icon.className = 'feather icon-unlock';
-                    inputs.forEach(i => i.disabled = false);
-                    addLog('Device #' + id + ' UNLOCKED 🔓', '#00b894');
+        
+        const { value: code } = await Swal.fire({
+            title: 'Masukkan Kode Akses',
+            input: 'password',
+            inputLabel: 'Kode akses diperlukan untuk mengubah pengaturan ini',
+            inputPlaceholder: 'Masukkan PIN',
+            showCancelButton: true,
+            confirmButtonText: 'Submit',
+            cancelButtonText: 'Batal',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'Kode akses tidak boleh kosong!'
                 }
-                updateSummary();
+                if (value !== '696969') {
+                    return 'Kode akses salah!'
+                }
             }
         });
+
+        if (code === '696969') {
+            fetch('<?= base_url("DeviceManager/toggleLock") ?>', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
+                body: 'id=' + id
+            }).then(r => r.json()).then(data => {
+                if(data.status) {
+                    const icon = this.querySelector('i');
+                    const inputs = slot.querySelectorAll('.form-control');
+                    if(data.locked) {
+                        this.classList.add('locked');
+                        icon.className = 'feather icon-lock';
+                        inputs.forEach(i => i.disabled = true);
+                        addLog('Device #' + id + ' LOCKED 🔒', '#e17055');
+                        Swal.fire('Berhasil', 'Perangkat berhasil dikunci.', 'success');
+                    } else {
+                        this.classList.remove('locked');
+                        icon.className = 'feather icon-unlock';
+                        inputs.forEach(i => i.disabled = false);
+                        addLog('Device #' + id + ' UNLOCKED 🔓', '#00b894');
+                        Swal.fire('Berhasil', 'Perangkat berhasil dibuka.', 'success');
+                    }
+                    updateSummary();
+                }
+            });
+        }
     });
 });
 
