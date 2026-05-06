@@ -269,14 +269,14 @@
 
     .result-card {
       background: linear-gradient(135deg, #1a2744, #2a3a5a);
-      border-radius: 24px;
-      padding: 2.5rem;
-      max-width: 450px;
-      width: 90%;
+      border-radius: 28px;
+      padding: 3rem 3.5rem;
+      max-width: 600px;
+      width: 92%;
       text-align: center;
       color: #fff;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      border: 2px solid rgba(255,255,255,0.15);
       transform: scale(0.8);
       transition: transform 0.3s ease;
     }
@@ -286,61 +286,73 @@
     }
 
     .result-card.success {
-      border-color: rgba(46, 204, 113, 0.4);
+      border-color: rgba(46, 204, 113, 0.5);
+      box-shadow: 0 24px 80px rgba(46, 204, 113, 0.15);
     }
 
     .result-card.error {
-      border-color: rgba(231, 76, 60, 0.4);
+      border-color: rgba(231, 76, 60, 0.5);
+      box-shadow: 0 24px 80px rgba(231, 76, 60, 0.15);
     }
 
     .result-photo {
-      width: 100px;
-      height: 100px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid rgba(255,255,255,0.3);
-      margin-bottom: 1rem;
+      border: 4px solid rgba(255,255,255,0.4);
+      margin-bottom: 1.2rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     }
 
     .result-name {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.5px;
     }
 
     .result-details {
       text-align: left;
-      margin: 1rem 0;
-      padding: 1rem;
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
+      margin: 1.2rem 0;
+      padding: 1.2rem 1.5rem;
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
     }
 
     .result-details p {
-      margin: 0.3rem 0;
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.8);
+      margin: 0.5rem 0;
+      font-size: 1.15rem;
+      color: rgba(255,255,255,0.85);
     }
 
     .result-details strong {
       color: rgba(255,255,255,0.5);
-      min-width: 80px;
+      min-width: 100px;
       display: inline-block;
+      font-size: 1rem;
     }
 
     .result-status {
       display: inline-block;
-      padding: 0.5rem 1.5rem;
+      padding: 0.7rem 2rem;
       border-radius: 50px;
-      font-weight: 700;
-      font-size: 1.1rem;
-      margin-top: 0.5rem;
+      font-weight: 800;
+      font-size: 1.4rem;
+      margin-top: 0.8rem;
+      letter-spacing: 1px;
     }
 
-    .result-status.masuk { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
-    .result-status.pulang { background: rgba(52, 152, 219, 0.2); color: #3498db; }
-    .result-status.terlambat { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
-    .result-status.gagal { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+    .result-status.masuk { background: rgba(46, 204, 113, 0.25); color: #2ecc71; border: 2px solid rgba(46,204,113,0.3); }
+    .result-status.pulang { background: rgba(52, 152, 219, 0.25); color: #3498db; border: 2px solid rgba(52,152,219,0.3); }
+    .result-status.terlambat { background: rgba(241, 196, 15, 0.25); color: #f1c40f; border: 2px solid rgba(241,196,15,0.3); }
+    .result-status.gagal { background: rgba(231, 76, 60, 0.25); color: #e74c3c; border: 2px solid rgba(231,76,60,0.3); }
+
+    .result-message {
+      font-size: 1.1rem;
+      margin-top: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
 
     /* Mode tabs */
     .mode-tabs {
@@ -472,19 +484,19 @@
         <div id="reader"></div>
       </div>
 
-      <!-- RFID Panel -->
+      <!-- RFID / Barcode / QR HID Panel -->
       <div class="scan-panel rfid-panel" id="rfidPanel">
         <div class="panel-header">
           <div class="panel-icon"><i class="bi bi-credit-card-2-front"></i></div>
-          <h4>Scan RFID / Kartu</h4>
-          <p>Tempelkan kartu atau masukkan nomor RFID</p>
+          <h4>Scan RFID / Barcode / QR HID</h4>
+          <p>Tempelkan kartu, scan barcode, atau gunakan QR Scanner HID</p>
         </div>
 
         <div class="rfid-input-wrapper">
-          <input type="number" id="rfidInput" class="rfid-input"
-            placeholder="Tempelkan Kartu RFID" autofocus />
+          <input type="text" id="rfidInput" class="rfid-input"
+            placeholder="Tap Kartu / Scan Barcode / QR" autofocus autocomplete="off" />
           <div class="rfid-hint">
-            <i class="bi bi-info-circle"></i> Kartu akan otomatis diproses setelah scan
+            <i class="bi bi-info-circle"></i> Mendukung: RFID Reader, Barcode Scanner, QR Scanner HID (USB)
           </div>
         </div>
       </div>
@@ -582,7 +594,12 @@
     }
 
     // ===== RESULT DISPLAY =====
+    let resultTimer = null;
+
     function showResult(data, isSuccess) {
+      // Clear any previous timer so new scan can interrupt
+      if (resultTimer) { clearTimeout(resultTimer); resultTimer = null; }
+
       const overlay = document.getElementById('resultOverlay');
       const card = document.getElementById('resultCard');
       const photo = document.getElementById('resultPhoto');
@@ -618,7 +635,7 @@
         name.textContent = isSuccess ? '✅ Berhasil' : '❌ Gagal';
         details.innerHTML = '';
         status.className = 'result-status gagal';
-        status.textContent = data.status_absen || '';
+        status.textContent = data.status_absen || data.message || '';
       }
 
       msg.textContent = data.message || '';
@@ -627,23 +644,30 @@
       // Play audio
       if (isSuccess) {
         document.getElementById('audioSuccess').currentTime = 0;
+        document.getElementById('audioSuccess').volume = 1.0;
         document.getElementById('audioSuccess').play().catch(() => {});
       } else {
         document.getElementById('audioError').currentTime = 0;
+        document.getElementById('audioError').volume = 1.0;
         document.getElementById('audioError').play().catch(() => {});
       }
 
-      // Auto-hide after 3.5 seconds
-      setTimeout(() => {
+      // Allow next scan immediately (don't block with isProcessing during popup display)
+      // Reset input and refocus right away so next student can scan
+      document.getElementById('rfidInput').value = '';
+      document.getElementById('rfidInput').focus();
+
+      // Auto-hide popup after 2.5s (shorter so it's faster)
+      resultTimer = setTimeout(() => {
         overlay.classList.remove('show');
-        isProcessing = false;
-        // Restart QR scanner
+        // Restart QR scanner if stopped
         const selectedCamera = document.getElementById('cameraSelect').value;
         if (selectedCamera) startScanner(selectedCamera);
-        // Refocus RFID input
-        document.getElementById('rfidInput').value = '';
         document.getElementById('rfidInput').focus();
-      }, 3500);
+      }, 2500);
+
+      // Unlock processing immediately so next scan can happen
+      isProcessing = false;
     }
 
     // ===== QR SCANNER =====
@@ -706,20 +730,35 @@
       showToast("❌ Gagal mengambil daftar kamera", "danger");
     });
 
-    // ===== RFID INPUT =====
+    // ===== RFID / QR HID INPUT =====
+    // Works with: RFID readers, Barcode scanners, QR HID scanners (all act as keyboard)
     const rfidInput = document.getElementById('rfidInput');
     let rfidTimeout = null;
+    let rfidBuffer = '';
+    let lastKeyTime = 0;
 
     rfidInput.addEventListener('input', function () {
       clearTimeout(rfidTimeout);
-      if (this.value.length >= 3) {
+      const now = Date.now();
+      const val = this.value.trim();
+
+      if (val.length >= 3) {
+        // HID scanners type very fast (<50ms between chars), humans type slower
+        // Wait 300ms after last input to auto-submit (covers fast HID scanners)
         rfidTimeout = setTimeout(() => {
           if (!isProcessing && this.value.trim()) {
             isProcessing = true;
+            // Dismiss any existing popup before showing new one
+            const overlay = document.getElementById('resultOverlay');
+            if (overlay.classList.contains('show')) {
+              overlay.classList.remove('show');
+              if (resultTimer) { clearTimeout(resultTimer); resultTimer = null; }
+            }
             processAttendance('rfid', { rfid: this.value.trim() });
           }
-        }, 500);
+        }, 300);
       }
+      lastKeyTime = now;
     });
 
     rfidInput.addEventListener('keypress', function (e) {
@@ -728,6 +767,12 @@
         clearTimeout(rfidTimeout);
         if (!isProcessing && this.value.trim()) {
           isProcessing = true;
+          // Dismiss any existing popup
+          const overlay = document.getElementById('resultOverlay');
+          if (overlay.classList.contains('show')) {
+            overlay.classList.remove('show');
+            if (resultTimer) { clearTimeout(resultTimer); resultTimer = null; }
+          }
           processAttendance('rfid', { rfid: this.value.trim() });
         }
       }
