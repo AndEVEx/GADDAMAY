@@ -596,7 +596,7 @@
     // ===== RESULT DISPLAY =====
     let resultTimer = null;
 
-    function showResult(data, isSuccess) {
+    async function showResult(data, isSuccess) {
       // Clear any previous timer so new scan can interrupt
       if (resultTimer) { clearTimeout(resultTimer); resultTimer = null; }
 
@@ -611,9 +611,8 @@
       card.className = 'result-card ' + (isSuccess ? 'success' : 'error');
 
       if (isSuccess && data.siswa) {
-        const fotoUrl = data.siswa.file
-          ? '<?= base_url("image/siswa") ?>/' + data.siswa.file
-          : '<?= base_url("image/siswa/noimage.png") ?>';
+        // Load photo from Cache API first (instant), fallback to server
+        const fotoUrl = await getCachedPhotoUrl(data.siswa.file || 'noimage.png');
         photo.src = fotoUrl;
         photo.style.display = 'block';
         name.textContent = data.siswa.nm_siswa || '-';
@@ -828,65 +827,151 @@
       }
     }, 3000);
 
-    // ===== PHOTO PRELOADER =====
-    // Preload all student photos into browser cache in background
-    // When scan happens, photo loads instantly from cache (0 delay, 0 extra bandwidth)
-    (function preloadPhotos() {
+    // ===== SMART PHOTO PRELOADER (Cache API) =====
+    // Uses browser Cache API for persistent storage across reloads
+    // Only downloads photos that aren't already cached
+    const PHOTO_CACHE_NAME = 'smkn2-siswa-photos-v1';
+    const PHOTO_BASE_URL = '<?= base_url("image/siswa") ?>/';
+
+    (async function preloadPhotos() {
       const indicator = document.getElementById('preloadIndicator');
       const progress = document.getElementById('preloadProgress');
       const counter = document.getElementById('preloadCounter');
+      const statusText = document.getElementById('preloadStatus');
 
-      fetch('<?= base_url("ScanAll/photoList") ?>')
-        .then(r => r.json())
-        .then(data => {
-          if (!data.photos || data.photos.length === 0) {
-            indicator.style.display = 'none';
-            return;
+      try {
+        // Check if Cache API is supported
+        if (!('caches' in window)) {
+          console.warn('Cache API not supported, falling back to Image preload');
+          fallbackPreload();
+          return;
+        }
+
+        const res = await fetch('<?= base_url("ScanAll/photoList") ?>');
+        const data = await res.json();
+
+        if (!data.photos || data.photos.length === 0) {
+          indicator.style.display = 'none';
+          return;
+        }
+
+        const cache = await caches.open(PHOTO_CACHE_NAME);
+        const total = data.photos.length;
+        let cached = 0;
+        let downloaded = 0;
+        let skipped = 0;
+
+        // Check which photos are already cached
+        const toDownload = [];
+        for (const filename of data.photos) {
+          const url = PHOTO_BASE_URL + filename;
+          const match = await cache.match(url);
+          if (match) {
+            skipped++;
+          } else {
+            toDownload.push(filename);
           }
+        }
 
-          const total = data.photos.length;
-          let loaded = 0;
-          let batch = 0;
-          const batchSize = 5; // Load 5 at a time to not overwhelm
+        if (toDownload.length === 0) {
+          // All photos already cached!
+          indicator.style.display = 'flex';
+          progress.style.width = '100%';
+          progress.style.background = 'linear-gradient(90deg,#00b894,#2ecc71)';
+          counter.textContent = total + '/' + total;
+          statusText.textContent = '✅ Semua foto dari cache';
+          setTimeout(() => {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.style.display = 'none', 500);
+          }, 2000);
+          return;
+        }
 
-          function loadBatch() {
-            const start = batch * batchSize;
-            const end = Math.min(start + batchSize, total);
+        // Show indicator with download info
+        indicator.style.display = 'flex';
+        const pctCached = Math.round((skipped / total) * 100);
+        progress.style.width = pctCached + '%';
+        counter.textContent = skipped + '/' + total;
+        statusText.textContent = 'Memuat ' + toDownload.length + ' foto baru...';
 
-            for (let i = start; i < end; i++) {
-              const img = new Image();
-              img.onload = img.onerror = function() {
-                loaded++;
-                const pct = Math.round((loaded / total) * 100);
+        // Download uncached photos in batches
+        let batch = 0;
+        const batchSize = 5;
+
+        function loadBatch() {
+          const start = batch * batchSize;
+          const end = Math.min(start + batchSize, toDownload.length);
+          let batchDone = 0;
+
+          for (let i = start; i < end; i++) {
+            const url = PHOTO_BASE_URL + toDownload[i];
+            fetch(url)
+              .then(response => {
+                if (response.ok) {
+                  // Store in cache
+                  return cache.put(url, response);
+                }
+              })
+              .catch(() => {})
+              .finally(() => {
+                downloaded++;
+                batchDone++;
+                const totalDone = skipped + downloaded;
+                const pct = Math.round((totalDone / total) * 100);
                 progress.style.width = pct + '%';
-                counter.textContent = loaded + '/' + total;
+                counter.textContent = totalDone + '/' + total;
 
-                if (loaded >= total) {
-                  // All loaded, hide indicator after a moment
+                if (downloaded >= toDownload.length) {
+                  // All done
+                  progress.style.background = 'linear-gradient(90deg,#00b894,#2ecc71)';
+                  statusText.textContent = '✅ Selesai (' + skipped + ' cache, ' + downloaded + ' baru)';
                   setTimeout(() => {
                     indicator.style.opacity = '0';
                     setTimeout(() => indicator.style.display = 'none', 500);
-                  }, 1000);
+                  }, 2000);
                 }
-              };
-              img.src = '<?= base_url("image/siswa") ?>/' + data.photos[i];
-            }
 
-            batch++;
-            if (end < total) {
-              // Load next batch after small delay to not block UI
-              setTimeout(loadBatch, 100);
-            }
+                // Start next batch when current is done
+                if (batchDone >= (end - start) && end < toDownload.length) {
+                  batch++;
+                  setTimeout(loadBatch, 50);
+                }
+              });
           }
+        }
 
-          indicator.style.display = 'flex';
-          loadBatch();
-        })
-        .catch(err => {
-          console.warn('Photo preload failed:', err);
-          indicator.style.display = 'none';
-        });
+        loadBatch();
+
+      } catch (err) {
+        console.warn('Photo preload error:', err);
+        indicator.style.display = 'none';
+      }
+
+      // Fallback for browsers without Cache API
+      function fallbackPreload() {
+        fetch('<?= base_url("ScanAll/photoList") ?>')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.photos) return;
+            data.photos.forEach(f => { const img = new Image(); img.src = PHOTO_BASE_URL + f; });
+          });
+      }
     })();
+
+    // Helper: get photo from cache for popup display
+    async function getCachedPhotoUrl(filename) {
+      if (!filename || !('caches' in window)) return PHOTO_BASE_URL + (filename || 'noimage.png');
+      try {
+        const cache = await caches.open(PHOTO_CACHE_NAME);
+        const url = PHOTO_BASE_URL + filename;
+        const match = await cache.match(url);
+        if (match) {
+          const blob = await match.blob();
+          return URL.createObjectURL(blob);
+        }
+      } catch(e) {}
+      return PHOTO_BASE_URL + filename;
+    }
   </script>
 
   <!-- Preload progress indicator (subtle, bottom-left) -->
@@ -909,7 +994,7 @@
   ">
     <i class="bi bi-image" style="font-size:0.9rem;"></i>
     <div style="flex:1;">
-      <div style="margin-bottom:3px;">Memuat foto siswa...</div>
+      <div id="preloadStatus" style="margin-bottom:3px;">Memuat foto siswa...</div>
       <div style="background: rgba(255,255,255,0.15); border-radius:4px; height:4px; width:120px; overflow:hidden;">
         <div id="preloadProgress" style="height:100%; width:0%; background:linear-gradient(90deg,#4a90e2,#00f2fe); border-radius:4px; transition: width 0.2s;"></div>
       </div>
