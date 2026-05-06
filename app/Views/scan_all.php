@@ -524,89 +524,54 @@
     </div>
   </div>
 
-  <!-- AUDIO - volume set to maximum -->
-  <audio id="audioSuccess" src="<?= base_url() ?>mp3/berhasil.mp3" preload="auto"></audio>
-  <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
-
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Set audio volume to maximum
-    document.getElementById('audioSuccess').volume = 1.0;
-    document.getElementById('audioError').volume = 1.0;
+    // Web Audio API - reliable playback from AJAX callbacks
+    // Once AudioContext is resumed via user gesture, audio can play anytime
+    let _actx = null;
+    const _bufs = {};
 
-    // Unlock audio on ANY user interaction (keydown for RFID, click, touchstart)
-    // IMPORTANT: unlock BOTH audio files sequentially (not parallel)
-    // Some browsers only allow one play() per user gesture
-    let audioSuccessUnlocked = false;
-    let audioErrorUnlocked = false;
-
-    async function unlockAudio() {
-      const aS = document.getElementById('audioSuccess');
-      const aE = document.getElementById('audioError');
-
-      // Unlock success audio
-      if (!audioSuccessUnlocked && aS) {
-        try {
-          aS.volume = 0;
-          await aS.play();
-          aS.pause();
-          aS.currentTime = 0;
-          aS.volume = 1.0;
-          audioSuccessUnlocked = true;
-        } catch(e) {}
-      }
-
-      // Unlock error audio (sequential, after success)
-      if (!audioErrorUnlocked && aE) {
-        try {
-          aE.volume = 0;
-          await aE.play();
-          aE.pause();
-          aE.currentTime = 0;
-          aE.volume = 1.0;
-          audioErrorUnlocked = true;
-        } catch(e) {}
-      }
+    async function _getCtx() {
+      if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+      if (_actx.state === 'suspended') await _actx.resume();
+      return _actx;
     }
 
-    // Listen on multiple events to catch any user interaction
+    // Pre-load both mp3 files as decoded buffers
+    (async function() {
+      try {
+        const ctx = await _getCtx();
+        const files = { success: '<?= base_url() ?>mp3/berhasil.mp3', error: '<?= base_url() ?>mp3/gagal.mp3' };
+        for (const [k, url] of Object.entries(files)) {
+          const r = await fetch(url);
+          const ab = await r.arrayBuffer();
+          _bufs[k] = await ctx.decodeAudioData(ab);
+        }
+      } catch(e) {}
+    })();
+
+    // Resume AudioContext on any user interaction (required by browser policy)
+    async function unlockAudio() {
+      try { await _getCtx(); } catch(e) {}
+    }
     ['click','keydown','touchstart','focus'].forEach(evt => {
       document.addEventListener(evt, unlockAudio, { capture: true });
     });
-    // Also try to unlock immediately when RFID input gets focus
     const rfidEl = document.getElementById('rfidInput');
     if(rfidEl) rfidEl.addEventListener('focus', unlockAudio);
 
-    // Robust play functions with retry
-    function playSuccessSound() {
-      const a = document.getElementById('audioSuccess');
-      if (!a) return;
-      a.currentTime = 0;
-      a.volume = 1.0;
-      a.play().catch(() => {
-        // If play fails, try unlock first then play again
-        unlockAudio().then(() => {
-          a.currentTime = 0;
-          a.volume = 1.0;
-          a.play().catch(() => {});
-        });
-      });
+    function _playBuf(name) {
+      if (!_actx || !_bufs[name]) return;
+      try {
+        const src = _actx.createBufferSource();
+        src.buffer = _bufs[name];
+        src.connect(_actx.destination);
+        src.start(0);
+      } catch(e) {}
     }
 
-    function playErrorSound() {
-      const a = document.getElementById('audioError');
-      if (!a) return;
-      a.currentTime = 0;
-      a.volume = 1.0;
-      a.play().catch(() => {
-        // If play fails, try unlock first then play again
-        unlockAudio().then(() => {
-          a.currentTime = 0;
-          a.volume = 1.0;
-          a.play().catch(() => {});
-        });
-      });
-    }
+    function playSuccessSound() { _playBuf('success'); }
+    function playErrorSound()   { _playBuf('error'); }
 
     const html5QrCode = new Html5Qrcode("reader");
     let isProcessing = false;
