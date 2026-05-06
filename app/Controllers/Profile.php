@@ -37,12 +37,10 @@ class Profile extends Controller
     { 
         $model = new Pegawai_model;
         $id = $this->request->getPost('id');
-        if($this->request->getFile('file')->isValid()){
+        if($this->request->getFile('file') && $this->request->getFile('file')->isValid()){
             $file = $this->request->getFile('file');
             $fileName = $file->getRandomName();
             $data = array(
-                'nip' => $this->request->getPost('nip'),
-                'nik' => $this->request->getPost('nik'),
                 'nama_ptk' => $this->request->getPost('nama'),
                 'no_hp' => $this->request->getPost('hp'),
                 'alamat' => $this->request->getPost('alamat'),
@@ -51,17 +49,22 @@ class Profile extends Controller
                 'photo' => $fileName
             );
             $file->move('image/guru/', $fileName);
-
         }else{
             $data = array(
-                'nip' => $this->request->getPost('nip'),
-                'nik' => $this->request->getPost('nik'),
                 'nama_ptk' => $this->request->getPost('nama'),
                 'no_hp' => $this->request->getPost('hp'),
                 'alamat' => $this->request->getPost('alamat'),
                 'tempat_lahir' => $this->request->getPost('tempat_lahir'),
                 'tgl_lahir' => $this->request->getPost('tgl_lahir')
             );
+        }
+
+        // Only add nip and nik if they were actually submitted
+        if ($this->request->getPost('nip') !== null) {
+            $data['nip'] = $this->request->getPost('nip');
+        }
+        if ($this->request->getPost('nik') !== null) {
+            $data['nik'] = $this->request->getPost('nik');
         }
         
        

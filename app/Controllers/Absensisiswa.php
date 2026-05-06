@@ -720,32 +720,31 @@ class Absensisiswa extends Controller
         if(empty(session()->get('logged_in'))) {
             return redirect()->to('Cpanel');
         }
-        $model = new Absensisiswa_model;
+        $db = \Config\Database::connect();
+        
         $tgl = $this->request->getPost('tgl');
+        $id_siswa = $this->request->getPost('id_siswa');
+        $status = $this->request->getPost('status'); // 0: Masuk, 1: Pulang
+        $jam = $this->request->getPost('jam');
+        $id_tapel = session()->get('id_tapel');
 
-        if(empty($this->request->getPost('sts'))){
-            $data = array(
-                'jam' => $this->request->getPost('jam')
-            );
-        }else{
-            $data = array(
-                'id_siswa' => $this->request->getPost('id_siswa'),
-                'tgl_hadir' => $this->request->getPost('tgl'),
-                'jam' => $this->request->getPost('jam'),
-                'id_tapel' => session()->get('id_tapel'),
-                'sts_hadir' => $this->request->getPost('status')
-            );
-            //insert data
-            $success = $model->saveAbsensi($data);
+        // Cek apakah sudah ada record untuk status tersebut di hari itu
+        $cek = $db->query("SELECT id_siswa_hadir FROM t_siswa_hadir WHERE id_siswa = ? AND tgl_hadir = ? AND sts_hadir = ?", [$id_siswa, $tgl, $status])->getRow();
+
+        if ($cek) {
+            // Update jam
+            $success = $db->query("UPDATE t_siswa_hadir SET jam = ? WHERE id_siswa_hadir = ?", [$jam, $cek->id_siswa_hadir]);
+        } else {
+            // Insert baru
+            $success = $db->query("INSERT INTO t_siswa_hadir (id_siswa, tgl_hadir, jam, sts_hadir, id_tapel) VALUES (?, ?, ?, ?, ?)", [$id_siswa, $tgl, $jam, $status, $id_tapel]);
         }
 
         if($success){
             session()->setFlashdata('success','Diupdate');
-            return redirect()->to('/Absensisiswa/koreksiwali/?tgl='.$tgl);
         }else{
-            session()->setFlashdata('error','Diupdate');
-            return redirect()->to('/Absensisiswa/koreksiwali/?tgl='.$tgl);
+            session()->setFlashdata('error','Gagal Update');
         }
+        return redirect()->back();
     }
    
     public function updatetidakmasukwali()
@@ -753,46 +752,40 @@ class Absensisiswa extends Controller
         if(empty(session()->get('logged_in'))) {
             return redirect()->to('Cpanel');
         }
-        $model = new Absensiswa_model;
+        $db = \Config\Database::connect();
         $tgl = $this->request->getPost('tgl');
-        $id_rombel = $this->request->getPost('id_rombel');
-        
-        if(($this->request->getPost('status'))=="Alpha"){
-            $data = array(
-                'id_siswa' => $this->request->getPost('id_siswa'),
-                'tgl_absen' => $this->request->getPost('tgl'),
-                'sts_absen' => $this->request->getPost('sts'),
-                'ket_absen' => $this->request->getPost('keterangan'),
-                'id_tapel' => session()->get('id_tapel'),
-                'tgl_entri' => date('Y-m-d H:i:s'),
-                'sts_approve' => 1
-            );
-            //insert data
-            $success = $model->saveAbsen($data);
-        }else{
-            $id = $this->request->getPost('id');
-            $tgl = $this->request->getPost('tgl');
+        $id_siswa = $this->request->getPost('id_siswa');
+        $sts_baru = $this->request->getPost('sts'); // 2: Sakit, 3: Izin, 4: Alpha
+        $keterangan = $this->request->getPost('keterangan');
+        $id_tapel = session()->get('id_tapel');
 
-            //cek apakah dia ingin merubah ke alpha
-            if(($this->request->getPost('sts'))==4){
-                $success = $model->hapusAbsen($id, $tgl);
-            }else{
-                $data = array(
-                    'sts_absen' => $this->request->getPost('sts'),
-                    'ket_absen' => $this->request->getPost('keterangan'),
-                );
-                //insert data
-                $success = $model->editAbsensiswa($data, $id, $tgl);
+        // Jika merubah ke Alpha (4), kita hapus record dari t_absen_siswa (karena Alpha berarti tidak ada record sakit/izin)
+        // dan jika ada record di t_siswa_hadir, kita hapus juga (batal hadir)
+        if ($sts_baru == 4) {
+            $success = $db->query("DELETE FROM t_absen_siswa WHERE id_siswa = ? AND tgl_absen = ?", [$id_siswa, $tgl]);
+            $db->query("DELETE FROM t_siswa_hadir WHERE id_siswa = ? AND tgl_hadir = ?", [$id_siswa, $tgl]);
+        } else {
+            // Sakit (2) atau Izin (3)
+            // Cek apakah sudah ada record di t_absen_siswa
+            $cek = $db->query("SELECT id_absen FROM t_absen_siswa WHERE id_siswa = ? AND tgl_absen = ?", [$id_siswa, $tgl])->getRow();
+            if ($cek) {
+                // Update
+                $success = $db->query("UPDATE t_absen_siswa SET sts_absen = ?, ket_absen = ? WHERE id_absen = ?", [$sts_baru, $keterangan, $cek->id_absen]);
+            } else {
+                // Insert
+                $tgl_entri = date('Y-m-d H:i:s');
+                $success = $db->query("INSERT INTO t_absen_siswa (id_siswa, tgl_absen, sts_absen, ket_absen, id_tapel, tgl_entri, sts_approve) VALUES (?, ?, ?, ?, ?, ?, 1)", [$id_siswa, $tgl, $sts_baru, $keterangan, $id_tapel, $tgl_entri]);
             }
+            // Jika sakit/izin, hapus juga record hadir jika ada (batal hadir)
+            $db->query("DELETE FROM t_siswa_hadir WHERE id_siswa = ? AND tgl_hadir = ?", [$id_siswa, $tgl]);
         }
 
         if($success){
             session()->setFlashdata('success','Diupdate');
-            return redirect()->to('/Absensisiswa/koreksiwali/?tgl='.$tgl);
         }else{
-            session()->setFlashdata('error','Diupdate');
-            return redirect()->to('/Absensisiswa/koreksiwali/?tgl='.$tgl);
+            session()->setFlashdata('error','Gagal Update');
         }
+        return redirect()->back();
     }
 
     public function biweekly()

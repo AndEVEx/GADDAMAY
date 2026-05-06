@@ -64,7 +64,9 @@
                                                 <div class="col-6">
                                                 <h5>Tabel Data Absensi Tanggal <?=formatTanggal($getTanggal);?>, Kelas <?= $nmRombel ?></h5>
                                                 </div>
-                                                
+                                                <div class="col-6 text-right">
+                                                    <a href="<?= base_url('Reportwal/cetakharian/?tgl='.$getTanggal) ?>" class="btn btn-warning btn-sm" target="_blank"><i class="feather icon-printer"></i> Print PDF</a>
+                                                </div>
                                             </div>
                                             
                                         </div>
@@ -79,6 +81,7 @@
                                                             <th>Jam Masuk</th>
                                                             <th>Status</th>
                                                             <th>Jam Pulang</th>
+                                                            <th>Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -96,7 +99,9 @@
                                                             <td><?= jammasuk($id_siswa,$getTanggal) ?></td>
                                                             <td><?= sts_absen($id_siswa,$getTanggal) ?></td>
                                                             <td><?= jampulang($id_siswa,$getTanggal) ?></td>
-                                                            
+                                                            <td>
+                                                                <a href="<?= base_url('Absensisiswa/koreksiwali/?tgl='.$getTanggal) ?>" class="btn btn-primary btn-sm"><i class="feather icon-edit"></i> Koreksi</a>
+                                                            </td>
                                                         </tr>    
                                                        <?php } ?>
                                                     </tbody>

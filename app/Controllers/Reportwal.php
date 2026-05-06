@@ -53,6 +53,31 @@ class Reportwal extends Controller
         echo view('report/harianrombel', $data);
         echo view('index/footer');
     }
+
+    public function cetakharian()
+    {
+        if(empty(session()->get('logged_in'))) {
+            return redirect()->to('Cpanel');
+        }
+        $m_rombel = new Rombel_model;
+        $m_siswarombel = new Siswarombel_model;
+        $id_tapel = session()->get('id_tapel');
+        echo view('func_siswa');
+        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
+        $tgl = $this->request->getVar('tgl') ?? date('Y-m-d');
+        
+        $data = array(
+            'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
+            'getRombel' => $m_rombel->getRombel($id_tapel),
+            'getTanggal' => $tgl,
+            'idRombel' => $id_rombel,
+            'nmRombel' => nmrombel($id_rombel),
+            'title' => 'Print Info Absensi',
+        );
+
+        echo view('print/harianrombel', $data);
+    }
+
     public function pertanggal()
     {
         if(empty(session()->get('logged_in'))) {
@@ -245,6 +270,12 @@ class Reportwal extends Controller
             );
         }else{
             $id_siswa = $this->request->getPost('id_siswa');
+            
+            // Jika user klik Lihat Data tapi tidak memilih siswa (value "Pilih")
+            if ($id_siswa == 'Pilih' || empty($id_siswa)) {
+                return redirect()->to('/Reportwal/persiswa');
+            }
+
             //ambil data siswq
             $query = $db->query("SELECT no_induk,nm_siswa,nm_rombel FROM t_siswa 
             JOIN t_siswa_rombel ON t_siswa_rombel.id_siswa = t_siswa.id_siswa
