@@ -165,6 +165,10 @@
                             <li><a href="<?= base_url('AttendanceAlert/settings'); ?>">Pengaturan</a></li>
                         </ul>
                     </li>
+                    <li class="nav-item">
+                        <a href="<?= base_url('DeviceManager'); ?>" class="nav-link "><span class="pcoded-micon"><i
+                                    class="feather icon-cpu"></i></span><span class="pcoded-mtext">Perangkat Scanner</span></a>
+                    </li>
 
                 <?php } elseif ((session()->get('level')) == 2) { ?>
 
