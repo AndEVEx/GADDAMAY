@@ -33,6 +33,7 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Cpanel::index');
 $routes->get('/Web/(:alpha)', 'Web::index/$1');
 $routes->get('Siswa/downloadCard/(:any)', 'Siswa::downloadCard/$1');
+$routes->get('snd/(:segment)', 'Audio::serve/$1');
 
 
 /**

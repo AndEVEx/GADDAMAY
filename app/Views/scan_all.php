@@ -527,32 +527,27 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // Web Audio API - reliable playback from AJAX callbacks
-    // Once AudioContext is resumed via user gesture, audio can play anytime
     let _actx = null;
     const _bufs = {};
 
-    async function _getCtx() {
-      if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
-      if (_actx.state === 'suspended') await _actx.resume();
-      return _actx;
-    }
-
-    // Pre-load both mp3 files as decoded buffers
+    // Create context + decode buffers immediately (decodeAudioData works even when suspended)
     (async function() {
       try {
-        const ctx = await _getCtx();
-        const files = { success: '<?= base_url() ?>mp3/berhasil.mp3', error: '<?= base_url() ?>mp3/gagal.mp3' };
-        for (const [k, url] of Object.entries(files)) {
+        _actx = new (window.AudioContext || window.webkitAudioContext)();
+        const urls = { success: '<?= base_url() ?>snd/berhasil.mp3', error: '<?= base_url() ?>snd/gagal.mp3' };
+        for (const [k, url] of Object.entries(urls)) {
           const r = await fetch(url);
           const ab = await r.arrayBuffer();
-          _bufs[k] = await ctx.decodeAudioData(ab);
+          _bufs[k] = await _actx.decodeAudioData(ab);
         }
       } catch(e) {}
     })();
 
-    // Resume AudioContext on any user interaction (required by browser policy)
+    // Resume context on user gesture (required by Chrome/Safari autoplay policy)
     async function unlockAudio() {
-      try { await _getCtx(); } catch(e) {}
+      if (_actx && _actx.state === 'suspended') {
+        try { await _actx.resume(); } catch(e) {}
+      }
     }
     ['click','keydown','touchstart','focus'].forEach(evt => {
       document.addEventListener(evt, unlockAudio, { capture: true });
@@ -562,6 +557,15 @@
 
     function _playBuf(name) {
       if (!_actx || !_bufs[name]) return;
+      if (_actx.state === 'suspended') {
+        _actx.resume().then(() => {
+          const src = _actx.createBufferSource();
+          src.buffer = _bufs[name];
+          src.connect(_actx.destination);
+          src.start(0);
+        }).catch(() => {});
+        return;
+      }
       try {
         const src = _actx.createBufferSource();
         src.buffer = _bufs[name];
