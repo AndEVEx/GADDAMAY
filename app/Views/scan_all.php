@@ -535,24 +535,78 @@
     document.getElementById('audioError').volume = 1.0;
 
     // Unlock audio on ANY user interaction (keydown for RFID, click, touchstart)
-    let audioUnlocked = false;
-    function unlockAudio() {
-      if (audioUnlocked) return;
-      audioUnlocked = true;
+    // IMPORTANT: unlock BOTH audio files sequentially (not parallel)
+    // Some browsers only allow one play() per user gesture
+    let audioSuccessUnlocked = false;
+    let audioErrorUnlocked = false;
+
+    async function unlockAudio() {
       const aS = document.getElementById('audioSuccess');
       const aE = document.getElementById('audioError');
-      if(aS && aE) {
-        aS.volume = 0; aE.volume = 0;
-        aS.play().then(() => { aS.pause(); aS.currentTime = 0; aS.volume = 1.0; }).catch(() => {});
-        aE.play().then(() => { aE.pause(); aE.currentTime = 0; aE.volume = 1.0; }).catch(() => {});
+
+      // Unlock success audio
+      if (!audioSuccessUnlocked && aS) {
+        try {
+          aS.volume = 0;
+          await aS.play();
+          aS.pause();
+          aS.currentTime = 0;
+          aS.volume = 1.0;
+          audioSuccessUnlocked = true;
+        } catch(e) {}
+      }
+
+      // Unlock error audio (sequential, after success)
+      if (!audioErrorUnlocked && aE) {
+        try {
+          aE.volume = 0;
+          await aE.play();
+          aE.pause();
+          aE.currentTime = 0;
+          aE.volume = 1.0;
+          audioErrorUnlocked = true;
+        } catch(e) {}
       }
     }
+
+    // Listen on multiple events to catch any user interaction
     ['click','keydown','touchstart','focus'].forEach(evt => {
-      document.addEventListener(evt, unlockAudio, { once: false, capture: true });
+      document.addEventListener(evt, unlockAudio, { capture: true });
     });
     // Also try to unlock immediately when RFID input gets focus
     const rfidEl = document.getElementById('rfidInput');
     if(rfidEl) rfidEl.addEventListener('focus', unlockAudio);
+
+    // Robust play functions with retry
+    function playSuccessSound() {
+      const a = document.getElementById('audioSuccess');
+      if (!a) return;
+      a.currentTime = 0;
+      a.volume = 1.0;
+      a.play().catch(() => {
+        // If play fails, try unlock first then play again
+        unlockAudio().then(() => {
+          a.currentTime = 0;
+          a.volume = 1.0;
+          a.play().catch(() => {});
+        });
+      });
+    }
+
+    function playErrorSound() {
+      const a = document.getElementById('audioError');
+      if (!a) return;
+      a.currentTime = 0;
+      a.volume = 1.0;
+      a.play().catch(() => {
+        // If play fails, try unlock first then play again
+        unlockAudio().then(() => {
+          a.currentTime = 0;
+          a.volume = 1.0;
+          a.play().catch(() => {});
+        });
+      });
+    }
 
     const html5QrCode = new Html5Qrcode("reader");
     let isProcessing = false;
@@ -640,15 +694,11 @@
       msg.textContent = data.message || '';
       overlay.classList.add('show');
 
-      // Play audio
+      // Play audio using robust helper functions
       if (isSuccess) {
-        document.getElementById('audioSuccess').currentTime = 0;
-        document.getElementById('audioSuccess').volume = 1.0;
-        document.getElementById('audioSuccess').play().catch(() => {});
+        playSuccessSound();
       } else {
-        document.getElementById('audioError').currentTime = 0;
-        document.getElementById('audioError').volume = 1.0;
-        document.getElementById('audioError').play().catch(() => {});
+        playErrorSound();
       }
 
       // Allow next scan immediately (don't block with isProcessing during popup display)

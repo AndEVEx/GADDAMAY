@@ -125,32 +125,37 @@
     <audio id="audioError" src="<?= base_url() ?>mp3/gagal.mp3" preload="auto"></audio>
 
     <script>
-      // Unlock audio on ANY user interaction (keydown for RFID, click, touchstart)
-      let audioUnlocked = false;
-      function unlockAudio() {
-        if (audioUnlocked) return;
-        audioUnlocked = true;
+      // Unlock audio sequentially on ANY user interaction
+      let audioSuccessUnlocked = false;
+      let audioErrorUnlocked = false;
+
+      async function unlockAudio() {
         const aS = document.getElementById('audioSuccess');
         const aE = document.getElementById('audioError');
-        if(aS && aE) {
-            aS.volume = 0; aE.volume = 0;
-            aS.play().then(() => { aS.pause(); aS.currentTime = 0; aS.volume = 1.0; }).catch(() => {});
-            aE.play().then(() => { aE.pause(); aE.currentTime = 0; aE.volume = 1.0; }).catch(() => {});
+        if (!audioSuccessUnlocked && aS) {
+          try { aS.volume = 0; await aS.play(); aS.pause(); aS.currentTime = 0; aS.volume = 1.0; audioSuccessUnlocked = true; } catch(e) {}
+        }
+        if (!audioErrorUnlocked && aE) {
+          try { aE.volume = 0; await aE.play(); aE.pause(); aE.currentTime = 0; aE.volume = 1.0; audioErrorUnlocked = true; } catch(e) {}
         }
       }
       ['click','keydown','touchstart','focus'].forEach(evt => {
-        document.addEventListener(evt, unlockAudio, { once: false, capture: true });
+        document.addEventListener(evt, unlockAudio, { capture: true });
       });
       const rfidEl = document.getElementById('rfidInput');
       if(rfidEl) rfidEl.addEventListener('focus', unlockAudio);
 
       function playSuccessSound() {
-        const aS = document.getElementById('audioSuccess');
-        if(aS) { aS.currentTime = 0; aS.volume = 1.0; aS.play().catch(()=>{}); }
+        const a = document.getElementById('audioSuccess');
+        if(!a) return;
+        a.currentTime = 0; a.volume = 1.0;
+        a.play().catch(() => { unlockAudio().then(() => { a.currentTime = 0; a.volume = 1.0; a.play().catch(()=>{}); }); });
       }
       function playErrorSound() {
-        const aE = document.getElementById('audioError');
-        if(aE) { aE.currentTime = 0; aE.volume = 1.0; aE.play().catch(()=>{}); }
+        const a = document.getElementById('audioError');
+        if(!a) return;
+        a.currentTime = 0; a.volume = 1.0;
+        a.play().catch(() => { unlockAudio().then(() => { a.currentTime = 0; a.volume = 1.0; a.play().catch(()=>{}); }); });
       }
     </script>
 
