@@ -42,8 +42,19 @@
                                         <div class="card-body table-border-style">
                                             <div class="row">
                                                 <div class="col-3">
-                                                    <input type="date" class="form-control" name="tgl" required>
+                                                    <input type="date" class="form-control" name="tgl" value="<?= $getTanggal ?>" required>
                                                 </div>
+                                                <?php if (isset($getRombel) && count($getRombel) > 1) { ?>
+                                                <div class="col-3">
+                                                    <select class="form-control" name="id_rombel" required>
+                                                        <?php foreach ($getRombel as $r) { ?>
+                                                            <option value="<?= $r['id_rombel'] ?>" <?= $r['id_rombel'] == $idRombel ? 'selected' : '' ?>><?= $r['nm_rombel'] ?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                                <?php } else { ?>
+                                                    <input type="hidden" name="id_rombel" value="<?= $idRombel ?>">
+                                                <?php } ?>
                                                
                                                 <div class="col-2">
                                                 <button type="submit" class="btn btn-danger">Cari Data</button>

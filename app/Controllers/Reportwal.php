@@ -8,11 +8,39 @@ use App\Models\Rombel_model;
 use App\Models\Siswarombel_model;
 use App\Models\Pointsiswa_model;
 use App\Models\Totalpointsiswa_model;
+use App\Models\Totalpoint_model;
 
 use CodeIgniter\Controller;
 
 class Reportwal extends Controller
 {
+    private function getMyRombels()
+    {
+        $id_user = session()->get('id_user');
+        $id_tapel = session()->get('id_tapel');
+        $db = \Config\Database::connect();
+
+        $waliRombels = $db->table('t_rombel')
+            ->where('id_walikelas', $id_user)
+            ->where('id_tapel', $id_tapel)
+            ->get()->getResultArray();
+
+        $bkRombels = $db->table('t_rombel')
+            ->where('id_guru_bk', $id_user)
+            ->where('id_tapel', $id_tapel)
+            ->get()->getResultArray();
+
+        $allRombels = [];
+        foreach ($waliRombels as $r) {
+            $allRombels[$r['id_rombel']] = $r;
+        }
+        foreach ($bkRombels as $r) {
+            $allRombels[$r['id_rombel']] = $r;
+        }
+
+        return $allRombels;
+    }
+
     public function index()
     {
         if(empty(session()->get('logged_in'))) {
@@ -24,7 +52,15 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
+
+        $myRombels = $this->getMyRombels();
+        $id_rombel = $this->request->getPost('id_rombel');
+        if (empty($id_rombel)) {
+            $id_rombel = $this->request->getGet('id_rombel');
+        }
+        if (empty($id_rombel)) {
+            $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
+        }
 
         $datanav = array(
             'nama' => session()->get('nama'),
@@ -40,7 +76,7 @@ class Reportwal extends Controller
             
             $data = array(
                 'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-                'getRombel' => $m_rombel->getRombel($id_tapel),
+                'getRombel' => $myRombels,
                 'getTanggal' => $tgl,
                 'idRombel' => $id_rombel,
                 'nmRombel' => nmrombel($id_rombel)
@@ -63,12 +99,21 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
+
+        $myRombels = $this->getMyRombels();
+        $id_rombel = $this->request->getVar('id_rombel');
+        if (empty($id_rombel)) {
+            $id_rombel = $this->request->getVar('id');
+        }
+        if (empty($id_rombel)) {
+            $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
+        }
+        
         $tgl = $this->request->getVar('tgl') ?? date('Y-m-d');
         
         $data = array(
             'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-            'getRombel' => $m_rombel->getRombel($id_tapel),
+            'getRombel' => $myRombels,
             'getTanggal' => $tgl,
             'idRombel' => $id_rombel,
             'nmRombel' => nmrombel($id_rombel),
@@ -88,46 +133,38 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
+
+        $myRombels = $this->getMyRombels();
+        $id_rombel = $this->request->getPost('id_rombel');
+        if (empty($id_rombel)) {
+            $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
+        }
+
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi',
             'nav' => 'Reportwal/pertanggal'
         );
         
-        if(empty($this->request->getPost('tgl1'))){
-            $tgl1 = date('Y-m-d');
-            $tgl2 = date('Y-m-d');
-            $data = array(
-                'getRombel' => $m_rombel->getRombel($id_tapel),
-                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-                'getTanggal1' => $tgl1,
-                'getTanggal2' => $tgl2,
-                'idRombel' => $id_rombel,
-                'nmRombel' => ""
-            );
-        }else{
-            $tgl1 = $this->request->getPost('tgl1');
-            $tgl2 = $this->request->getPost('tgl2');
-           
-            $data = array(
-                'getRombel' => $m_rombel->getRombel($id_tapel),
-                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-                'getTanggal1' => $tgl1,
-                'getTanggal2' => $tgl2,
-                'idRombel' => $id_rombel,
-                'nmRombel' => nmrombel($id_rombel)
-            );
-           
-        }
+        $tgl1 = $this->request->getPost('tgl1') ?? date('Y-m-d');
+        $tgl2 = $this->request->getPost('tgl2') ?? date('Y-m-d');
+       
+        $data = array(
+            'getRombel' => $myRombels,
+            'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
+            'getTanggal1' => $tgl1,
+            'getTanggal2' => $tgl2,
+            'idRombel' => $id_rombel,
+            'nmRombel' => nmrombel($id_rombel)
+        );
 
         echo view('index/sidebar');
         
         echo view('index/navbar',  $datanav);
-        echo view('report/pertanggalrombel', $data);
+        echo view('report/pertanggalsis', $data);
         echo view('index/footer');
     }
-    public function printpertanggal()
+    public function cetakpertanggal()
     {
         if(empty(session()->get('logged_in'))) {
             return redirect()->to('Cpanel');
@@ -137,24 +174,27 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
-        $datanav = array(
-            'nama' => session()->get('nama'),
-            'title' => 'Info Absensi',
-            'nav' => 'Reportwal/pertanggal'
-        );
-        
-            $tgl1 = $this->request->getVar('tgl1');
-            $tgl2 = $this->request->getVar('tgl2');
+
+        $myRombels = $this->getMyRombels();
+        $id_rombel = $this->request->getVar('id_rombel');
+        if (empty($id_rombel)) {
+            $id_rombel = $this->request->getVar('idrombel');
+        }
+        if (empty($id_rombel)) {
+            $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
+        }
+
+        $tgl1 = $this->request->getVar('tgl1');
+        $tgl2 = $this->request->getVar('tgl2');
            
-            $data = array(
-                'getRombel' => $m_rombel->getRombel($id_tapel),
-                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-                'getTanggal1' => $tgl1,
-                'getTanggal2' => $tgl2,
-                'idRombel' => $id_rombel,
-                'nmRombel' => nmrombel($id_rombel)
-            );
+        $data = array(
+            'getRombel' => $myRombels,
+            'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
+            'getTanggal1' => $tgl1,
+            'getTanggal2' => $tgl2,
+            'idRombel' => $id_rombel,
+            'nmRombel' => nmrombel($id_rombel)
+        );
 
        
         echo view('print/pertanggalrombel', $data);
@@ -169,38 +209,30 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'), $id_tapel);
+
+        $myRombels = $this->getMyRombels();
+        $id_rombel = $this->request->getPost('id_rombel');
+        if (empty($id_rombel)) {
+            $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
+        }
+
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi',
             'nav' => 'Reportwal/bulanan'
         );
 
-        if(empty($this->request->getPost('bln'))){
-            $bln = date('m');
-            $data = array(
-                'getRombel' => $m_rombel->getRombel($id_tapel),
-                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-                'getBulan' => $bln,
-                'idRombel' => $id_rombel,
-                'nmRombel' => "",
-                'title' => 'Info Absensi',
-                'nav' => 'Reportwal/bulanan'
-            );
-        }else{
-            $bln = $this->request->getPost('bln');
-            
-            $data = array(
-                'getRombel' => $m_rombel->getRombel($id_tapel),
-                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-                'getBulan' => $bln,
-                'idRombel' => $id_rombel,
-                'nmRombel' => nmrombel($id_rombel),
-                'title' => 'Info Absensi',
-                'nav' => 'Reportwal/bulanan'
-            );
-            
-        }
+        $bln = $this->request->getPost('bln') ?? date('m');
+        
+        $data = array(
+            'getRombel' => $myRombels,
+            'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
+            'getBulan' => $bln,
+            'idRombel' => $id_rombel,
+            'nmRombel' => nmrombel($id_rombel),
+            'title' => 'Info Absensi',
+            'nav' => 'Reportwal/bulanan'
+        );
  
         echo view('index/sidebar');
         echo view('index/navbar',  $datanav);
@@ -218,24 +250,27 @@ class Reportwal extends Controller
         $m_siswarombel = new Siswarombel_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'), $id_tapel);
-        $datanav = array(
-            'nama' => session()->get('nama'),
-            'title' => 'Info Absensi',
-            'nav' => 'Reportwal/bulanan'
-        );
+
+        $myRombels = $this->getMyRombels();
+        $id_rombel = $this->request->getVar('id_rombel');
+        if (empty($id_rombel)) {
+            $id_rombel = $this->request->getVar('idrombel');
+        }
+        if (empty($id_rombel)) {
+            $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
+        }
         
         $bln = $this->request->getVar('bln');
             
-            $data = array(
-                'getRombel' => $m_rombel->getRombel($id_tapel),
-                'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
-                'getBulan' => $bln,
-                'idRombel' => $id_rombel,
-                'nmRombel' => nmrombel($id_rombel),
-                'title' => 'Info Absensi',
-                'nav' => 'Reportwal/bulanan'
-            );
+        $data = array(
+            'getRombel' => $myRombels,
+            'getSiswa' => $m_siswarombel->getSiswarombel($id_rombel),
+            'getBulan' => $bln,
+            'idRombel' => $id_rombel,
+            'nmRombel' => nmrombel($id_rombel),
+            'title' => 'Info Absensi',
+            'nav' => 'Reportwal/bulanan'
+        );
 
         echo view('print/bulananrombel', $data);
     }
@@ -251,32 +286,36 @@ class Reportwal extends Controller
         $tgl = date('Y-m-d');
         $id_tapel = session()->get('id_tapel');
         echo view('func_siswa');
-        $id_rombel = rombelwalikelas_or_bk(session()->get('id_user'),$id_tapel);
+
+        $myRombels = $this->getMyRombels();
+        $id_rombel = $this->request->getPost('id_rombel');
+        if (empty($id_rombel)) {
+            $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
+        }
+
         $datanav = array(
             'nama' => session()->get('nama'),
             'title' => 'Info Absensi Persiswa',
             'nav' => 'Reportwal/persiswa'
         );
 
-        if(empty($this->request->getPost('id_siswa'))){
+        $id_siswa = $this->request->getPost('id_siswa');
+
+        if(empty($id_siswa) || $id_siswa == 'Pilih'){
             $data = array(
                 'getAbsensi' => $model->getAbsensihari($tgl),
                 'getSiswa' => $m_siswa->getSiswarombel($id_rombel),
                 'getNama' => "",
                 'nmRombel' => "",
                 'idSiswa' => "",
+                'getRombel' => $myRombels,
+                'idRombel' => $id_rombel,
                 'title' => 'Info Absensi Persiswa',
                 'nav' => 'Reportwal/persiswa'
             );
         }else{
-            $id_siswa = $this->request->getPost('id_siswa');
             
-            // Jika user klik Lihat Data tapi tidak memilih siswa (value "Pilih")
-            if ($id_siswa == 'Pilih' || empty($id_siswa)) {
-                return redirect()->to('/Reportwal/persiswa');
-            }
-
-            //ambil data siswq
+            //ambil data siswa
             $query = $db->query("SELECT no_induk,nm_siswa,nm_rombel FROM t_siswa 
             JOIN t_siswa_rombel ON t_siswa_rombel.id_siswa = t_siswa.id_siswa
             JOIN t_rombel ON t_rombel.id_rombel = t_siswa_rombel.id_rombel
@@ -289,13 +328,14 @@ class Reportwal extends Controller
                 'getNama' => $row ? $row->nm_siswa : '',
                 'nmRombel' => $row ? $row->nm_rombel : '',
                 'idSiswa' => $id_siswa,
+                'getRombel' => $myRombels,
+                'idRombel' => $id_rombel,
                 'title' => 'Info Absensi Persiswa',
                 'nav' => 'Reportwal/persiswa'
             );
         }
         
         echo view('index/sidebar');
-         
         echo view('index/navbar',  $datanav);
         echo view('report/persiswarombel', $data);
         echo view('index/footer');
@@ -310,7 +350,9 @@ class Reportwal extends Controller
         $m_siswa = new Siswa_model;
         $id_tapel = session()->get('id_tapel');
         echo view('func');
-        $id_rombel = rombelwalikelas(session()->get('id_user'));
+        
+        $myRombels = $this->getMyRombels();
+        $id_rombel = !empty($myRombels) ? array_keys($myRombels)[0] : 0;
 
         $datanav = array(
             'nama' => session()->get('nama'),

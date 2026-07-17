@@ -38,23 +38,27 @@
                                             </div>
                                             
                                         </div>
-                                        <form method="post" action="<?= base_url('Absensisiswa/pertanggal'); ?>">
+                                        <form method="post" action="<?= base_url($nav); ?>">
                                         <div class="card-body table-border-style">
                                             <div class="row">
                                                 <div class="col-2">
-                                                    <input type="date" class="form-control" name="tgl1" required>
+                                                    <input type="date" class="form-control" name="tgl1" value="<?= $getTanggal1 ?>" required>
                                                 </div>
                                                 <div class="col-2">
-                                                    <input type="date" class="form-control" name="tgl2" required>
+                                                    <input type="date" class="form-control" name="tgl2" value="<?= $getTanggal2 ?>" required>
                                                 </div>
+                                                <?php if (isset($getRombel) && count($getRombel) > 1) { ?>
                                                 <div class="col-3">
                                                     <select class="form-control" name="id_rombel" required>
-                                                        <option>Pilih Kelas</option>
+                                                        <option disabled value="">Pilih Kelas</option>
                                                         <?php foreach ($getRombel as $data) { ?>
-                                                        <option value="<?=$data['id_rombel'] ?>"><?=$data['nm_rombel'] ?></option>
+                                                        <option value="<?=$data['id_rombel'] ?>" <?= $data['id_rombel'] == $idRombel ? 'selected' : '' ?>><?=$data['nm_rombel'] ?></option>
                                                         <?php } ?>
                                                     </select>
                                                 </div>
+                                                <?php } else { ?>
+                                                    <input type="hidden" name="id_rombel" value="<?= $idRombel ?>">
+                                                <?php } ?>
                                                
                                                 <div class="col-2">
                                                 <button type="submit" class="btn btn-danger">Cari Data</button>

@@ -124,6 +124,7 @@ class Import extends Controller
     {
         
         $model = new Siswa_model;
+        $id_tapel = session()->get('id_tapel');
        
         $file_excel = $this->request->getFile('file');
 		$ext = $file_excel->getClientExtension();
@@ -164,6 +165,49 @@ class Import extends Controller
 				} else {
 				    $success = $model->saveSiswa($simpandata);
 			    }
+
+                // If a 10th column (index 9) is provided, assign student directly to that rombel in target tapel
+                if (isset($row[9]) && trim($row[9]) !== '') {
+                    $rombel_val = trim($row[9]);
+                    $id_rombel = null;
+                    if (is_numeric($rombel_val)) {
+                        $id_rombel = (int)$rombel_val;
+                    } else {
+                        // Lookup by name in current active tapel
+                        $rombel_row = $db->table('t_rombel')
+                            ->where('nm_rombel', $rombel_val)
+                            ->where('id_tapel', $id_tapel)
+                            ->get()->getRowArray();
+                        if (!empty($rombel_row)) {
+                            $id_rombel = $rombel_row['id_rombel'];
+                        }
+                    }
+
+                    if ($id_rombel) {
+                        $idsiswa_row = $db->table('t_siswa')->getWhere(['no_induk' => $nis])->getRow();
+                        if ($idsiswa_row) {
+                            $idsiswa = $idsiswa_row->id_siswa;
+                            $cek_rombel = $db->table('t_siswa_rombel')
+                                ->getWhere(['id_siswa' => $idsiswa, 'id_tapel' => $id_tapel])
+                                ->getResult();
+
+                            $rombel_data = [
+                                'id_siswa' => $idsiswa,
+                                'id_rombel' => $id_rombel,
+                                'id_tapel' => $id_tapel
+                            ];
+
+                            if (count($cek_rombel) > 0) {
+                                $db->table('t_siswa_rombel')
+                                    ->where('id_siswa', $idsiswa)
+                                    ->where('id_tapel', $id_tapel)
+                                    ->update($rombel_data);
+                            } else {
+                                $db->table('t_siswa_rombel')->insert($rombel_data);
+                            }
+                        }
+                    }
+                }
 		}
 
         if($success){

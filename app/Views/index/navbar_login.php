@@ -27,7 +27,7 @@
 					<form class="pt-3" action="<?= base_url('Cpanel/process'); ?>" method="post">
 						<div class="form-group mb-3 text-left">
 							<label>Username</label>
-							<input type="text" class="form-control" name="email" placeholder="NIP / NISN" required>
+							<input type="text" class="form-control" name="email" placeholder="Username / NIP" required>
 						</div>
 						<div class="form-group mb-4 text-left">
 							<label>Password</label>

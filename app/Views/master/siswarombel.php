@@ -31,10 +31,11 @@
                                         <div class="card-header">
                                             <div class="row">
                                                 <div class="col-10">
-                                                <h5>Tabel data Setting Kelas Siswa</h5>
+                                                    <h5>Tabel data Setting Kelas Siswa</h5>
                                                 </div>
-                                               
-                                                
+                                                <div class="col-2 text-right">
+                                                    <button class="btn btn-warning btn-sm" type="button" data-toggle="modal" data-target="#promoteModal"><i class="feather icon-arrow-up"></i> Naik Kelas</button>
+                                                </div>
                                             </div>
                                             
                                        
@@ -191,3 +192,78 @@
             </div>
         </div>
     </div>
+
+<!-- Promote Class Modal -->
+<div class="modal fade" id="promoteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+                    
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Kenaikan Kelas</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+                        
+            <!-- Modal body -->
+            <form class="was-validated" method="post" action="<?= base_url('Siswarombel/promote'); ?>">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        Fitur ini menyalin semua siswa aktif dari Kelas Asal (Tahun Pelajaran Sebelumnya) ke Kelas Tujuan (Tahun Pelajaran Saat Ini).
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>Tahun Pelajaran Asal</label>
+                                <select class="form-control" name="source_tapel" id="source_tapel" required>
+                                    <option selected disabled value="">Pilih</option>
+                                    <?php 
+                                    $db = \Config\Database::connect();
+                                    $tapels = $db->table('r_tapel')->orderBy('nm_tapel', 'DESC')->get()->getResultArray();
+                                    foreach ($tapels as $t) { ?>
+                                    <option value="<?=$t['id_tapel'] ?>"><?=$t['nm_tapel'] ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label>Rombel Asal</label>
+                                <select class="form-control" name="source_rombel" id="source_rombel" required>
+                                    <option selected disabled value="">Pilih Tahun Pelajaran Terlebih Dahulu</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                     
+                    <button type="submit" class="btn btn-warning btn-block">Proses Kenaikan Kelas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#source_tapel').on('change', function() {
+            var id_tapel = $(this).val();
+            if (id_tapel) {
+                $.ajax({
+                    url: '<?= base_url('Siswarombel/getRombelsByTapel'); ?>/' + id_tapel,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        var $select = $('#source_rombel');
+                        $select.empty();
+                        $select.append('<option selected disabled value="">Pilih Rombel Asal</option>');
+                        $select.append('<option value="all">Semua Kelas</option>');
+                        $.each(data, function(key, val) {
+                            $select.append('<option value="' + val.id_rombel + '">' + val.nm_rombel + '</option>');
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>

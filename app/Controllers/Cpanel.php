@@ -75,15 +75,8 @@ class Cpanel extends Controller
         }else{
             //cek guru - try multiple fields with TRIM to handle whitespace
             $email_trimmed = trim($email);
-            $user_gr = null;
-
             // Try nip
             $user_gr = $db->query("SELECT * FROM t_ptk WHERE TRIM(nip) = ? LIMIT 1", [$email_trimmed])->getRow();
-
-            // Fallback: try nomor_absensi
-            if(!$user_gr){
-                $user_gr = $db->query("SELECT * FROM t_ptk WHERE TRIM(nomor_absensi) = ? LIMIT 1", [$email_trimmed])->getRow();
-            }
 
             // Fallback: try nik
             if(!$user_gr){

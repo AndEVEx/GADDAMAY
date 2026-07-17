@@ -90,6 +90,15 @@
     }
 </script>
 
+<script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $('.loader-bg').fadeOut('slow', function() {
+                $(this).remove();
+            });
+        }, 200);
+    });
+</script>
 </body>
 
 </html>

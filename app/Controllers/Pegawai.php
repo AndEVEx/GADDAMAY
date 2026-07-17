@@ -71,7 +71,7 @@ class Pegawai extends Controller
 
         //validasi input
         if(!$this->validate([
-            "no_finger" => 'required|is_unique[t_ptk.nomor_absensi]'
+            "no_finger" => 'permit_empty|is_unique[t_ptk.nomor_absensi]'
         ])){
             session()->setFlashdata('error','Ditambahkan, Nomor finger tidak boleh sama');
             return redirect()->to('/Pegawai');

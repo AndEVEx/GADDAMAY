@@ -845,38 +845,10 @@ function jumterlambatblnadmin($bln) {
     return $sts;
 }
 function jmlpoint($id_ptk,$bln) {
-    $db = \Config\Database::connect();
-    $builder = $db->table('t_point');
-    $builder->where('id_ptk', $id_ptk);
-    $builder->where('MONTH(tgl_point)', $bln);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       //jumlah point
-        $query = $db->query("SELECT sum(nilai) as point FROM t_point where id_ptk='$id_ptk' and MONTH(tgl_point)='$bln'");
-        $row = $query->getRow();
-        $sts = $row->point;
-    }else{
-        $sts=0;
-    }
-    
-    return $sts;
+    return 0;
 }
 function jmlpointtgl($id_ptk,$tgl) {
-    $db = \Config\Database::connect();
-    $builder = $db->table('t_point');
-    $builder->where('id_ptk', $id_ptk);
-    $builder->where('tgl_point', $tgl);
-    $all =  $builder->countAllResults();
-    if($all>0){
-       //jumlah point
-        $query = $db->query("SELECT nilai FROM t_point where id_ptk='$id_ptk' and tgl_point='$tgl'");
-        $row = $query->getRow();
-        $sts = $row->nilai;
-    }else{
-        $sts=0;
-    }
-    
-    return $sts;
+    return 0;
 }
 
 function harilibur($kode) {

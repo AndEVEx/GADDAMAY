@@ -43,21 +43,32 @@
                                             <div class="row">
                                                 <div class="col-3">
                                                     <select class="form-control" name="bln" required>
-                                                        <option>Pilih Bulan</option>
-                                                        <option value="1">Januari</option>
-                                                        <option value="2">Februari</option>
-                                                        <option value="3">Maret</option>
-                                                        <option value="4">April</option>
-                                                        <option value="5">Mei</option>
-                                                        <option value="6">Juni</option>
-                                                        <option value="7">Juli</option>
-                                                        <option value="8">Agustus</option>
-                                                        <option value="9">September</option>
-                                                        <option value="10">Oktober</option>
-                                                        <option value="11">November</option>
-                                                        <option value="12">Desember</option>
+                                                        <option disabled value="">Pilih Bulan</option>
+                                                        <option value="1" <?= $getBulan == 1 ? 'selected' : '' ?>>Januari</option>
+                                                        <option value="2" <?= $getBulan == 2 ? 'selected' : '' ?>>Februari</option>
+                                                        <option value="3" <?= $getBulan == 3 ? 'selected' : '' ?>>Maret</option>
+                                                        <option value="4" <?= $getBulan == 4 ? 'selected' : '' ?>>April</option>
+                                                        <option value="5" <?= $getBulan == 5 ? 'selected' : '' ?>>Mei</option>
+                                                        <option value="6" <?= $getBulan == 6 ? 'selected' : '' ?>>Juni</option>
+                                                        <option value="7" <?= $getBulan == 7 ? 'selected' : '' ?>>Juli</option>
+                                                        <option value="8" <?= $getBulan == 8 ? 'selected' : '' ?>>Agustus</option>
+                                                        <option value="9" <?= $getBulan == 9 ? 'selected' : '' ?>>September</option>
+                                                        <option value="10" <?= $getBulan == 10 ? 'selected' : '' ?>>Oktober</option>
+                                                        <option value="11" <?= $getBulan == 11 ? 'selected' : '' ?>>November</option>
+                                                        <option value="12" <?= $getBulan == 12 ? 'selected' : '' ?>>Desember</option>
                                                     </select>
                                                 </div>
+                                                <?php if (isset($getRombel) && count($getRombel) > 1) { ?>
+                                                <div class="col-3">
+                                                    <select class="form-control" name="id_rombel" required>
+                                                        <?php foreach ($getRombel as $r) { ?>
+                                                            <option value="<?= $r['id_rombel'] ?>" <?= $r['id_rombel'] == $idRombel ? 'selected' : '' ?>><?= $r['nm_rombel'] ?></option>
+                                                        <?php } ?>
+                                                    </select>
+                                                </div>
+                                                <?php } else { ?>
+                                                    <input type="hidden" name="id_rombel" value="<?= $idRombel ?>">
+                                                <?php } ?>
                                                 
                                                 <div class="col-2">
                                                 <button type="submit" class="btn btn-danger">Cari Data</button>

@@ -66,8 +66,8 @@
                                                         </tr>
                                                         <tr>
                                                             <td>2</td>
-                                                            <td>Format Import Siswa</td>
-                                                            <td><img src="<?=base_url()?>/image/excel.png" width="30" height="30"> <a href="<?=base_url()?>/file/format_import_siswa.xls">Downlaod</a></td>
+                                                            <td>Format Import Siswa + Rombel</td>
+                                                            <td><img src="<?=base_url()?>/image/excel.png" width="30" height="30"> <a href="<?=base_url()?>/file/format_import_siswa_dan_kelas.xlsx">Download</a></td>
                                                         </tr>
                                                         <tr>
                                                             <td>3</td>

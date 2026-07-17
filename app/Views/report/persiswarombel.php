@@ -216,10 +216,18 @@
                                                     $tanggal = date('Y').'-'.date('m').'-'.$i;
                                                     $namahari = date('l', strtotime($tanggal));
                                                     $sts_absen = sts_absen($idSiswa,$tanggal);
+                                                    $card_bg = 'bg-primary';
+                                                    if ($sts_absen == "Masuk" || $sts_absen == "Terlambat") {
+                                                        $card_bg = 'bg-success';
+                                                    } elseif ($sts_absen == "Alpha" || $sts_absen == "Sakit" || $sts_absen == "Izin" || $sts_absen == "Libur" || $sts_absen == "Libur HB") {
+                                                        $card_bg = 'bg-danger';
+                                                    } elseif ($sts_absen == "-") {
+                                                        $card_bg = 'bg-secondary';
+                                                    }
                                                 ?>
                                                 <div class="col-2">
                                                     <a href="" data-toggle="modal" data-target="#detail<?=$i;?>">
-                                                    <div class="card text-white <?php if($sts_absen=="Libur" || $sts_absen=="Libur HB"){?> bg-danger <?php }elseif($sts_absen=="Cuti"){?> bg-info <?php }else{ ?>bg-primary <?php } ?> mb-3" style="max-width: 10rem;">
+                                                    <div class="card text-white <?= $card_bg ?> mb-3" style="max-width: 10rem;">
                                                         <div class="card-header"><?=hari($namahari);?>, tgl <?=$i;?></div>
                                                         <div class="card-body">
                                                             <h5 class="card-title text-white"><?=$sts_absen;?></h5>
