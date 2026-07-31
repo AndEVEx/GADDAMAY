@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\JadwalPelajaran;
+use App\Models\JamPelajaran;
+use App\Models\MotivasiPantun;
+use App\Notifications\KelasAkanDimulaiNotification;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+
+class NotifyTeachersCommand extends Command
+{
+    protected $signature = 'agenda:notify-teachers';
+    protected $description = 'Kirim notifikasi ke guru 5 menit sebelum jadwal mengajar';
+
+    public function handle(): int
+    {
+        $now = Carbon::now('Asia/Jakarta');
+        $hariIni = $now->dayOfWeekIso; // 1=Senin
+
+        if ($hariIni > 5) {
+            $this->info('Weekend - no notifications.');
+            return self::SUCCESS;
+        }
+
+        // Find period that starts in ~5 minutes
+        $targetTime = $now->copy()->addMinutes(5)->format('H:i');
+        $jam = JamPelajaran::where('waktu_mulai', '<=', $targetTime . ':59')
+            ->where('waktu_mulai', '>=', $targetTime . ':00')
+            ->first();
+
+        if (!$jam) {
+            return self::SUCCESS;
+        }
+
+        // Find jadwal for this period today
+        $jadwals = JadwalPelajaran::where('hari', $hariIni)
+            ->where('jam_ke_mulai', $jam->jam_ke)
+            ->whereNotNull('mapel_id') // Skip kegiatan khusus
+            ->with(['rombel', 'mataPelajaran', 'jadwalGuru.guru'])
+            ->get();
+
+        $motivasi = MotivasiPantun::sebelumMengajar()->inRandomOrder()->first();
+        $notifiedCount = 0;
+
+        foreach ($jadwals as $jadwal) {
+            foreach ($jadwal->jadwalGuru as $jg) {
+                $guru = $jg->guru;
+                if (!$guru) continue;
+
+                // Check if already notified today for this jadwal
+                $alreadyNotified = $guru->notifications()
+                    ->where('data->jadwal_id', $jadwal->id)
+                    ->whereDate('created_at', $now->toDateString())
+                    ->exists();
+
+                if ($alreadyNotified) continue;
+
+                $guru->notify(new KelasAkanDimulaiNotification(
+                    $jadwal,
+                    $motivasi?->isi ?? 'Semangat mengajar!'
+                ));
+                $notifiedCount++;
+            }
+        }
+
+        $this->info("Notified {$notifiedCount} teachers for period {$jam->jam_ke}.");
+        return self::SUCCESS;
+    }
+}
