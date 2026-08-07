@@ -25,6 +25,56 @@ class ImportKktp extends Component
     public int $importedCount = 0;
     public bool $showResult = false;
 
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Sheet1');
+        
+        // Metadata section
+        $sheet->setCellValue('B2', 'FORMAT KKTP (KRITERIA KETERCAPAIAN TUJUAN PEMBELAJARAN) MGMP');
+        $sheet->setCellValue('B4', 'Mata Pelajaran:');
+        $sheet->setCellValue('D4', '[Nama Mata Pelajaran]');
+        $sheet->setCellValue('B5', 'Tingkat/Fase:');
+        $sheet->setCellValue('D5', '[Tingkat/Fase]');
+        $sheet->setCellValue('B6', 'Kelas');
+        $sheet->setCellValue('D6', '[Kelas]');
+        $sheet->setCellValue('B7', 'Semester:');
+        $sheet->setCellValue('D7', '[Ganjil/Genap]');
+        $sheet->setCellValue('B8', 'Tahun Pelajaran:');
+        $sheet->setCellValue('D8', '[2026/2027]');
+        $sheet->setCellValue('B9', 'Nama Guru:');
+        $sheet->setCellValue('D9', '[Nama Guru]');
+        
+        // Table header
+        $sheet->setCellValue('B11', 'No.');
+        $sheet->setCellValue('C11', 'Pertemuan Ke-');
+        $sheet->setCellValue('D11', 'Capaian Pembelajaran (CP)');
+        $sheet->setCellValue('E11', 'Tujuan Pembelajaran (TP)');
+        
+        $sheet->getStyle('B11:E11')->getFont()->setBold(true);
+        $sheet->getStyle('B11:E11')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('B11:E11')->getFont()->getColor()->setRGB('FFFFFF');
+        
+        // Sample rows
+        for ($i = 1; $i <= 25; $i++) {
+            $row = 11 + $i;
+            $sheet->setCellValue('B' . $row, $i);
+            $sheet->setCellValue('C' . $row, 'Pertemuan ' . $i);
+        }
+        
+        foreach (['B', 'C', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+        $filename = 'template_kktp.xlsx';
+        $tempPath = storage_path('app/' . $filename);
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($tempPath);
+        
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+    }
+
     public function parse()
     {
         $this->validate(['file' => 'required|mimes:xlsx,xls|max:5120']);

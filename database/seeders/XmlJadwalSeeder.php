@@ -32,11 +32,12 @@ class XmlJadwalSeeder extends Seeder
 
     public function run(): void
     {
-        $xmlPath = 'C:\\Users\\User\\Downloads\\2.xml';
+        $xmlPath = config('app.xml_jadwal_path', storage_path('app/temp_jadwal.xml'));
 
         if (!file_exists($xmlPath)) {
-            $this->command->error("XML file not found: {$xmlPath}");
-            return;
+            $message = "XML file not found: {$xmlPath}";
+            $this->command?->error($message);
+            throw new \RuntimeException($message);
         }
 
         $content = file_get_contents($xmlPath);
@@ -45,7 +46,7 @@ class XmlJadwalSeeder extends Seeder
         $xml = simplexml_load_string($content);
 
         if (!$xml) {
-            $this->command->error('Failed to parse XML.');
+            $this->command?->error('Failed to parse XML.');
             return;
         }
 
@@ -58,7 +59,7 @@ class XmlJadwalSeeder extends Seeder
             $this->seedKetuaKelas();
         });
 
-        $this->command->info('XML jadwal seeded successfully!');
+        $this->command?->info('XML jadwal seeded successfully!');
     }
 
     private function seedPeriods($xml): void
@@ -73,7 +74,7 @@ class XmlJadwalSeeder extends Seeder
                 ['waktu_mulai' => $mulai, 'waktu_selesai' => $selesai]
             );
         }
-        $this->command->info('Periods seeded: ' . count($xml->periods->period));
+        $this->command?->info('Periods seeded: ' . count($xml->periods->period));
     }
 
     private function seedTeachers($xml): void
@@ -109,7 +110,7 @@ class XmlJadwalSeeder extends Seeder
             $guruCount++;
         }
 
-        $this->command->info("Teachers seeded: {$guruCount} guru, {$nonGuruCount} non-guru (keterangan)");
+        $this->command?->info("Teachers seeded: {$guruCount} guru, {$nonGuruCount} non-guru (keterangan)");
     }
 
     private function seedClasses($xml): void
@@ -127,7 +128,7 @@ class XmlJadwalSeeder extends Seeder
             $this->classMap[$ascId] = $rombel->id;
         }
 
-        $this->command->info('Classes seeded: ' . count($xml->classes->class));
+        $this->command?->info('Classes seeded: ' . count($xml->classes->class));
     }
 
     private function seedSubjects($xml): void
@@ -157,7 +158,7 @@ class XmlJadwalSeeder extends Seeder
             $mapelCount++;
         }
 
-        $this->command->info("Subjects seeded: {$mapelCount} mapel, {$nonMapelCount} non-mapel (kegiatan_khusus)");
+        $this->command?->info("Subjects seeded: {$mapelCount} mapel, {$nonMapelCount} non-mapel (kegiatan_khusus)");
     }
 
     private function seedLessonsAndCards($xml): void
@@ -254,7 +255,7 @@ class XmlJadwalSeeder extends Seeder
             $jadwalCount++;
         }
 
-        $this->command->info("Schedule entries created: {$jadwalCount}");
+        $this->command?->info("Schedule entries created: {$jadwalCount}");
     }
 
     private function seedKetuaKelas(): void
@@ -273,7 +274,7 @@ class XmlJadwalSeeder extends Seeder
             );
             $count++;
         }
-        $this->command->info("Ketua kelas created: {$count}");
+        $this->command?->info("Ketua kelas created: {$count}");
     }
 
     private function isNonGuru(string $name): bool

@@ -3,11 +3,10 @@
         <div class="card-body p-4">
             {{-- Logo & Title --}}
             <div class="text-center mb-4">
-                <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle mb-3" style="width: 72px; height: 72px;">
-                    <i class="bi bi-journal-bookmark-fill text-primary" style="font-size: 2rem;"></i>
-                </div>
-                <h1 class="h4 fw-bold text-dark mb-1">Agenda Guru</h1>
-                <p class="text-muted small">SMKN 2 Indramayu</p>
+                <img src="/icons/logo-sekolah.png" alt="Logo SMKN 2 Indramayu" 
+                     class="mb-3" style="width: 80px; height: 80px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <h1 class="h4 fw-bold text-dark mb-1">AgenDamay</h1>
+                <p class="text-muted small">Agenda Guru SMKN 2 Indramayu</p>
             </div>
 
             {{-- Login Form --}}
@@ -56,6 +55,6 @@
     </div>
 
     <p class="text-center text-white-50 small mt-3">
-        &copy; {{ date('Y') }} SMKN 2 Indramayu
+        Made with every kind of <i class="bi bi-heart-fill text-danger"></i> &copy; 2026 SMKN 2 Indramayu
     </p>
 </div>

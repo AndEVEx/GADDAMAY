@@ -12,22 +12,47 @@
         <div class="col-3"><div class="card text-center py-2"><div class="fw-bold text-warning">{{ $totalJadwal }}</div><div class="small text-muted">Jadwal</div></div></div>
     </div>
 
+    {{-- Template Info --}}
+    <div class="card mb-3 border-info animate-fade-in-up">
+        <div class="card-body py-3">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-info-circle text-info fs-4"></i>
+                <div class="flex-fill">
+                    <div class="fw-bold small">Format: aSc Timetables XML</div>
+                    <div class="text-muted small">Export dari aSc Timetables → File → Export → XML format</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Upload Card --}}
-    <div class="card mb-3">
-        <div class="card-header"><i class="bi bi-file-earmark-code me-2"></i>Upload XML</div>
+    <div class="card mb-3 animate-fade-in-up">
+        <div class="card-header"><i class="bi bi-file-earmark-code me-2"></i>Upload File XML aSc Timetables</div>
         <div class="card-body">
             <div class="mb-3">
-                <input type="file" wire:model="xmlFile" accept=".xml" class="form-control @error('xmlFile') is-invalid @enderror">
+                <label class="form-label fw-bold">Pilih File XML</label>
+                <input type="file" wire:model="xmlFile" accept=".xml" class="form-control @error('xmlFile') is-invalid @enderror" style="min-height: 48px;">
                 @error('xmlFile') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 <div class="form-text">File XML dari aSc Timetables (maks 10MB)</div>
             </div>
 
             @if($xmlFile)
-            <button wire:click="import" class="btn btn-primary w-100" wire:loading.attr="disabled" {{ $importing ? 'disabled' : '' }}>
-                <span wire:loading.remove wire:target="import"><i class="bi bi-cloud-upload me-2"></i>Import Jadwal</span>
-                <span wire:loading wire:target="import"><span class="spinner-border spinner-border-sm me-2"></span>Mengimport...</span>
-            </button>
+            <div class="alert alert-info small py-2 mb-3">
+                <i class="bi bi-file-earmark-check me-1"></i>
+                File siap: <strong>{{ $xmlFile->getClientOriginalName() }}</strong> 
+                ({{ number_format($xmlFile->getSize() / 1024, 1) }} KB)
+            </div>
             @endif
+
+            <button wire:click="import" class="btn btn-primary w-100" style="min-height: 48px;"
+                    wire:loading.attr="disabled" {{ !$xmlFile ? 'disabled' : '' }}>
+                <span wire:loading.remove wire:target="import">
+                    <i class="bi bi-cloud-upload me-2"></i>Import Jadwal
+                </span>
+                <span wire:loading wire:target="import">
+                    <span class="spinner-border spinner-border-sm me-2"></span>Mengimport...
+                </span>
+            </button>
 
             @if($imported)
             <div class="alert alert-success mt-3 small">

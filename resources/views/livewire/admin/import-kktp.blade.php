@@ -30,6 +30,10 @@
     @elseif(!$parsed)
         <div class="card mb-4 animate-fade-in-up">
             <div class="card-body">
+                <button wire:click="downloadTemplate" class="btn btn-outline-info mb-3" style="min-height: 48px;">
+                    <i class="bi bi-download me-2"></i>Download Template KKTP (.xlsx)
+                </button>
+
                 <div class="mb-4">
                     <label class="form-label fw-bold">Pilih File Excel (.xlsx)</label>
                     <input type="file" wire:model="file" class="form-control form-control-lg" accept=".xlsx, .xls">

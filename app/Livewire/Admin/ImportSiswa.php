@@ -20,6 +20,43 @@ class ImportSiswa extends Component
     public $file;
     public bool $confirmClearAll = false;
 
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Siswa');
+        
+        // Headers
+        $sheet->setCellValue('A1', 'nama');
+        $sheet->setCellValue('B1', 'nis');
+        $sheet->setCellValue('C1', 'kelas');
+        
+        // Example data
+        $sheet->setCellValue('A2', 'Ahmad Fauzi');
+        $sheet->setCellValue('B2', '12345');
+        $sheet->setCellValue('C2', 'X TKJ 1');
+        
+        $sheet->setCellValue('A3', 'Siti Nurhaliza');
+        $sheet->setCellValue('B3', '12346');
+        $sheet->setCellValue('C3', 'X TKJ 1');
+        
+        // Style header
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:C1')->getFont()->getColor()->setRGB('FFFFFF');
+        
+        foreach (['A', 'B', 'C'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+        $filename = 'template_import_siswa.xlsx';
+        $tempPath = storage_path('app/' . $filename);
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($tempPath);
+        
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+    }
+
     public function import()
     {
         $this->validate([

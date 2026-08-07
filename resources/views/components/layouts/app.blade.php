@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#1a56db">
-    <meta name="description" content="Sistem Agenda Guru SMKN 2 Indramayu - Manajemen Pembelajaran Digital">
+    <meta name="description" content="AgenDamay - Sistem Agenda Guru SMKN 2 Indramayu">
 
-    <title>{{ $title ?? 'Agenda Guru' }} — SMKN 2 Indramayu</title>
+    <title>{{ $title ?? 'AgenDamay' }} — AgenDamay SMKN 2 Indramayu</title>
 
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" type="image/png" href="/icons/logo-sekolah.png">
+    <link rel="apple-touch-icon" href="/icons/logo-sekolah.png">
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,8 +31,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
         <div class="container-fluid px-3">
             <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/" wire:navigate>
-                <i class="bi bi-journal-bookmark-fill"></i>
-                <span class="d-none d-sm-inline">Agenda Guru</span>
+                <img src="/icons/logo-sekolah.png" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
+                <span class="d-none d-sm-inline">AgenDamay</span>
             </a>
 
             <div class="d-flex align-items-center gap-2">
@@ -82,6 +82,11 @@
     <main class="container-fluid px-3 py-3">
         {{ $slot }}
     </main>
+
+    {{-- Footer --}}
+    <footer class="text-center py-3 text-muted small" style="margin-bottom: 80px;">
+        Made with every kind of <i class="bi bi-heart-fill text-danger"></i> &copy; 2026 SMKN 2 Indramayu
+    </footer>
 
     {{-- Bottom Navigation (Mobile) --}}
     @auth
