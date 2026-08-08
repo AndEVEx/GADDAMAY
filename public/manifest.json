@@ -3,9 +3,10 @@
     "short_name": "AgenDamay",
     "description": "AgenDamay - Sistem Agenda Guru SMKN 2 Indramayu",
     "start_url": "/",
-    "display": "standalone",
+    "display": "fullscreen",
+    "display_override": ["fullscreen", "standalone", "minimal-ui"],
     "orientation": "portrait",
-    "background_color": "#f0f2f5",
+    "background_color": "#1a56db",
     "theme_color": "#1a56db",
     "icons": [
         {
