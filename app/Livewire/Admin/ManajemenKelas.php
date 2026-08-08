@@ -143,6 +143,47 @@ class ManajemenKelas extends Component
         }
     }
 
+    public function exportExcel()
+    {
+        $rombels = Rombel::withCount('siswa')
+            ->orderBy('tingkat')
+            ->orderBy('nama_kelas')
+            ->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Kelas');
+
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Nama Kelas');
+        $sheet->setCellValue('C1', 'Tingkat / Fase');
+        $sheet->setCellValue('D1', 'Jumlah Siswa');
+
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:D1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $row = 2;
+        $no = 1;
+        foreach ($rombels as $rombel) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $rombel->nama_kelas);
+            $sheet->setCellValue('C' . $row, 'Tingkat ' . $rombel->tingkat);
+            $sheet->setCellValue('D' . $row, $rombel->siswa_count . ' Siswa');
+            $row++;
+        }
+
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_data_kelas_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
     public function render()
     {
         $rombels = Rombel::withCount('siswa')
