@@ -41,6 +41,8 @@ Route::post(EndpointResolver::uploadPath(), [LivewireCustomFileUploadController:
 Route::post('/{livewire_path}/upload-file', [LivewireCustomFileUploadController::class, 'handle'])
     ->where('livewire_path', 'livewire.*');
 
+use App\Livewire\Auth\GantiPassword;
+
 // ============================================================
 // PUBLIC ROUTES
 // ============================================================
@@ -52,6 +54,8 @@ Route::post('/logout', function () {
     session()->regenerateToken();
     return redirect()->route('login');
 })->name('logout')->middleware('auth');
+
+Route::get('/ganti-password', GantiPassword::class)->middleware('auth')->name('ganti-password');
 
 Route::get('/', function () {
     if (!auth()->check()) return redirect()->route('login');

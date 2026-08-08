@@ -30,28 +30,45 @@
     @auth
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
         <div class="container-fluid px-3">
-            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/" wire:navigate>
-                <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
-                <span class="d-none d-sm-inline">AgenDamay</span>
-            </a>
+            <div class="d-flex align-items-center gap-2">
+                {{-- Sidebar Trigger Button --}}
+                <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" style="min-height: 38px;">
+                    <i class="bi bi-list fs-5"></i>
+                    <span class="d-none d-sm-inline fw-semibold small">Menu</span>
+                </button>
+
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate>
+                    <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
+                    <span class="d-none d-sm-inline">AgenDamay</span>
+                </a>
+            </div>
 
             <div class="d-flex align-items-center gap-2">
                 {{-- Notification Bell --}}
                 @livewire('components.notification-bell')
 
-                {{-- User Menu --}}
+                {{-- User Dropdown Menu --}}
                 <div class="dropdown">
                     <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="min-height: 40px;">
                         <i class="bi bi-person-circle"></i>
                         <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><span class="dropdown-item-text text-muted small">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span></li>
-                        <li><hr class="dropdown-divider"></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li class="px-3 py-2 bg-light rounded-top border-bottom mb-1">
+                            <div class="fw-bold text-dark small">{{ Auth::user()->name }}</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">{{ Auth::user()->email }}</div>
+                            <span class="badge bg-primary mt-1">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="{{ route('ganti-password') }}" wire:navigate>
+                                <i class="bi bi-key-fill text-warning me-2"></i>Ganti Password
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item text-danger">
+                                <button type="submit" class="dropdown-item py-2 text-danger">
                                     <i class="bi bi-box-arrow-right me-2"></i>Keluar
                                 </button>
                             </form>
@@ -61,6 +78,104 @@
             </div>
         </div>
     </nav>
+
+    {{-- Offcanvas Sidebar Drawer --}}
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="appSidebar" aria-labelledby="appSidebarLabel" style="width: 290px;">
+        <div class="offcanvas-header text-white" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
+            <div class="d-flex align-items-center gap-2" id="appSidebarLabel">
+                <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
+                <div>
+                    <h6 class="mb-0 fw-bold">AgenDamay</h6>
+                    <small style="font-size: 0.75rem; opacity: 0.85;">SMKN 2 Indramayu</small>
+                </div>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-3">
+            {{-- Tombol Kembali / Back --}}
+            <button onclick="history.back()" class="btn btn-outline-secondary btn-sm w-100 mb-3 d-flex align-items-center justify-content-center gap-2 py-2" style="min-height: 42px;">
+                <i class="bi bi-arrow-left fs-6"></i>
+                <span class="fw-semibold">Kembali ke Halaman Sebelumnya</span>
+            </button>
+
+            <div class="text-muted small fw-bold text-uppercase px-2 mb-2">Navigasi Utama</div>
+            <div class="list-group list-group-flush mb-3">
+                @php $role = Auth::user()->role; @endphp
+
+                @if($role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-speedometer2 me-2"></i>Dashboard Admin
+                    </a>
+                    <a href="{{ route('admin.jadwal') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.jadwal') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar3 me-2"></i>Manajemen Jadwal
+                    </a>
+                    <a href="{{ route('admin.import') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.import') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-file-earmark-code me-2"></i>Import Jadwal (XML)
+                    </a>
+                    <a href="{{ route('admin.guru') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.guru') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-people-fill me-2"></i>Manajemen Guru
+                    </a>
+                    <a href="{{ route('admin.users') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.users') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-person-fill-lock me-2"></i>Manajemen User
+                    </a>
+                    <a href="{{ route('admin.kelas') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.kelas') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-door-open-fill me-2"></i>Manajemen Kelas
+                    </a>
+                    <a href="{{ route('admin.siswa') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.siswa') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-person-badge-fill me-2"></i>Manajemen Siswa
+                    </a>
+                    <a href="{{ route('admin.mapel') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.mapel') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-book-fill me-2"></i>Manajemen Mapel
+                    </a>
+                    <a href="{{ route('admin.import-kktp') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.import-kktp') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-file-earmark-excel me-2"></i>Import KKTP (Excel)
+                    </a>
+                    <a href="{{ route('admin.motivasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.motivasi') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-chat-quote-fill me-2"></i>Motivasi & Pantun
+                    </a>
+                    <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-graph-up-arrow me-2"></i>Monitoring Realtime
+                    </a>
+                    <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-bar-chart-line me-2"></i>Progress TP
+                    </a>
+                @elseif(in_array($role, ['guru', 'ketua_mgmp']))
+                    <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-house-fill me-2"></i>Beranda Guru
+                    </a>
+                    <a href="{{ route('guru.jurnal') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.jurnal*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-journal-text me-2"></i>Jurnal Mengajar
+                    </a>
+                    @if($role === 'ketua_mgmp')
+                        <a href="{{ route('mgmp.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.dashboard') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-diagram-3-fill me-2"></i>Dashboard MGMP
+                        </a>
+                        <a href="{{ route('mgmp.tp') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.tp') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-list-check me-2"></i>Manajemen TP
+                        </a>
+                    @endif
+                @elseif(in_array($role, ['kepsek', 'waka']))
+                    <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-graph-up-arrow me-2"></i>Monitoring Agenda
+                    </a>
+                    <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-bar-chart-line me-2"></i>Progress TP
+                    </a>
+                @elseif($role === 'ketua_kelas')
+                    <a href="{{ route('ketua.verifikasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ketua.verifikasi') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-qr-code-scan me-2"></i>Verifikasi Token
+                    </a>
+                @endif
+            </div>
+
+            <div class="text-muted small fw-bold text-uppercase px-2 mb-2">Akun Saya</div>
+            <div class="list-group list-group-flush">
+                <a href="{{ route('ganti-password') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ganti-password') ? 'active' : '' }}" wire:navigate>
+                    <i class="bi bi-key-fill text-warning me-2"></i>Ganti Password
+                </a>
+            </div>
+        </div>
+    </div>
     @endauth
 
     {{-- Flash Messages --}}
