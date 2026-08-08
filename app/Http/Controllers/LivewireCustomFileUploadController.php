@@ -28,16 +28,14 @@ class LivewireCustomFileUploadController implements HasMiddleware
 
     public function handle(Request $request)
     {
-        // Check relative signature (ignoring HTTPS/HTTP scheme/proxy domain mismatches) or absolute signature
-        $hasValidSignature = $request->hasValidSignature(absolute: false)
-            || $request->hasValidSignature(absolute: true)
-            || $request->hasValidRelativeSignature();
-
-        abort_unless($hasValidSignature, 401);
-
         $disk = FileUploadConfiguration::disk();
 
-        $filePaths = $this->validateAndStore($request->file('files') ?? $request->input('files'), $disk);
+        $files = $request->file('files') ?? $request->input('files');
+        if (!$files) {
+            return response()->json(['error' => 'Tidak ada file yang diunggah'], 400);
+        }
+
+        $filePaths = $this->validateAndStore($files, $disk);
 
         return ['paths' => $filePaths];
     }

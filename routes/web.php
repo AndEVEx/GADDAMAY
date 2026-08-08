@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\HandleRequests\EndpointResolver;
 use App\Http\Controllers\LivewireCustomFileUploadController;
+use App\Http\Controllers\DirectImportController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Guru\DashboardGuru;
 use App\Livewire\Guru\MulaiKelas;
@@ -33,10 +34,12 @@ use App\Livewire\Monitoring\ProgressTp;
 use App\Livewire\Admin\ImportKktp;
 
 // ============================================================
-// LIVEWIRE FILE UPLOAD OVERRIDE ROUTE (Fix 401 signature error on HTTPS proxies)
+// LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
 // ============================================================
 Route::post(EndpointResolver::uploadPath(), [LivewireCustomFileUploadController::class, 'handle'])
     ->name('livewire.upload-file');
+Route::post('/{livewire_path}/upload-file', [LivewireCustomFileUploadController::class, 'handle'])
+    ->where('livewire_path', 'livewire.*');
 
 // ============================================================
 // PUBLIC ROUTES
@@ -112,6 +115,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/motivasi', ManajemenMotivasiPantun::class)->name('admin.motivasi');
     Route::get('/koreksi', KoreksiAgenda::class)->name('admin.koreksi');
     Route::get('/override/{agenda}', OverrideAgenda::class)->name('admin.override');
+
+    // Direct Form Upload Fallbacks (Fail-safe HTTP POST routes)
+    Route::post('/direct-import-jadwal', [DirectImportController::class, 'importJadwal'])->name('admin.direct-import-jadwal');
+    Route::post('/direct-import-siswa', [DirectImportController::class, 'importSiswa'])->name('admin.direct-import-siswa');
+    Route::post('/direct-import-kktp', [DirectImportController::class, 'importKktp'])->name('admin.direct-import-kktp');
+    Route::post('/direct-import-guru', [DirectImportController::class, 'importGuru'])->name('admin.direct-import-guru');
+    Route::post('/direct-import-kelas', [DirectImportController::class, 'importKelas'])->name('admin.direct-import-kelas');
+    Route::post('/direct-import-mapel', [DirectImportController::class, 'importMapel'])->name('admin.direct-import-mapel');
+    Route::post('/direct-import-user', [DirectImportController::class, 'importUser'])->name('admin.direct-import-user');
 });
 
 // ============================================================

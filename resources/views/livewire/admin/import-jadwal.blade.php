@@ -25,9 +25,11 @@
         </div>
     </div>
 
-    {{-- Upload Card --}}
+    {{-- Upload Card (Livewire) --}}
     <div class="card mb-3 animate-fade-in-up">
-        <div class="card-header"><i class="bi bi-file-earmark-code me-2"></i>Upload File XML aSc Timetables</div>
+        <div class="card-header bg-primary bg-opacity-10 fw-bold">
+            <i class="bi bi-file-earmark-code me-2"></i>Upload File XML (Opsi 1: Livewire)
+        </div>
         <div class="card-body">
             <div class="mb-3">
                 <label class="form-label fw-bold">Pilih File XML</label>
@@ -60,6 +62,26 @@
                 <pre class="mb-0 mt-2 small bg-light p-2 rounded">{{ $result }}</pre>
             </div>
             @endif
+        </div>
+    </div>
+
+    {{-- Direct Form Upload Card (Fail-Safe Alternative) --}}
+    <div class="card mb-3 border-success animate-fade-in-up">
+        <div class="card-header bg-success bg-opacity-10 fw-bold text-success">
+            <i class="bi bi-upload me-2"></i>Upload & Import Langsung (Opsi 2: Form HTTP Direct)
+        </div>
+        <div class="card-body">
+            <p class="small text-muted mb-3">Gunakan opsi ini jika browser/server memblokir upload JavaScript Livewire.</p>
+            <form action="{{ route('admin.direct-import-jadwal') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Pilih File XML (aSc Timetables)</label>
+                    <input type="file" name="xmlFile" accept=".xml" class="form-control" style="min-height: 48px;" required>
+                </div>
+                <button type="submit" class="btn btn-success w-100" style="min-height: 48px;">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Upload & Import Langsung
+                </button>
+            </form>
         </div>
     </div>
 
