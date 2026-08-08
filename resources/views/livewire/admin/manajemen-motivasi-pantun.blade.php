@@ -29,12 +29,12 @@
     </div>
 
     {{-- Action Buttons --}}
-    <div class="d-flex flex-wrap gap-2 mb-3">
+    <div class="d-flex gap-2 mb-3 flex-wrap">
         <button wire:click="create" class="btn btn-primary" style="min-height: 48px;">
             <i class="bi bi-plus-circle me-1"></i> Tambah Motivasi / Pantun
         </button>
         <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
-            <i class="bi bi-file-earmark-excel me-2"></i>Export Excel (.xlsx)
+            <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
         </button>
     </div>
 
