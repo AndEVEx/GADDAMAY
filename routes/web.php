@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Livewire\Mechanisms\HandleRequests\EndpointResolver;
+use App\Http\Controllers\LivewireCustomFileUploadController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Guru\DashboardGuru;
 use App\Livewire\Guru\MulaiKelas;
@@ -29,6 +31,12 @@ use App\Livewire\Admin\OverrideAgenda;
 use App\Livewire\Monitoring\DashboardMonitoring;
 use App\Livewire\Monitoring\ProgressTp;
 use App\Livewire\Admin\ImportKktp;
+
+// ============================================================
+// LIVEWIRE FILE UPLOAD OVERRIDE ROUTE (Fix 401 signature error on HTTPS proxies)
+// ============================================================
+Route::post(EndpointResolver::uploadPath(), [LivewireCustomFileUploadController::class, 'handle'])
+    ->name('livewire.upload-file');
 
 // ============================================================
 // PUBLIC ROUTES
