@@ -5,7 +5,7 @@ return [
         'disk' => null,
         'rules' => ['required', 'file', 'max:12288'],
         'directory' => null,
-        'middleware' => 'throttle:60,1',
+        'middleware' => ['web'],
         'preview_mimes' => [
             'png', 'gif', 'bmp', 'svg', 'wav', 'mp4',
             'mov', 'avi', 'wmv', 'mp3', 'm4a',
