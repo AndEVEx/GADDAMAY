@@ -140,6 +140,82 @@ class ManajemenMapel extends Component
         }
     }
 
+    public function exportExcel()
+    {
+        $mapels = MataPelajaran::orderBy('nama_mapel')->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Mapel');
+
+        $sheet->setCellValue('A1', 'No.');
+        $sheet->setCellValue('B1', 'Kode Mapel');
+        $sheet->setCellValue('C1', 'Nama Mata Pelajaran');
+
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:C1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $row = 2;
+        foreach ($mapels as $index => $m) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $m->kode_mapel ?? '-');
+            $sheet->setCellValue('C' . $row, $m->nama_mapel);
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_mata_pelajaran_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportExcel()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Mapel');
+
+        // Headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Kode Mapel');
+        $sheet->setCellValue('C1', 'Nama Mata Pelajaran');
+        
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:C1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $mapels = MataPelajaran::when($this->search, function($q) {
+                $q->where('nama_mapel', 'like', "%{$this->search}%")
+                  ->orWhere('kode_mapel', 'like', "%{$this->search}%");
+            })
+            ->orderBy('nama_mapel')->get();
+
+        $row = 2;
+        $no = 1;
+        foreach ($mapels as $mapel) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $mapel->kode_mapel);
+            $sheet->setCellValue('C' . $row, $mapel->nama_mapel);
+            $row++;
+        }
+
+        foreach (range('A', 'C') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_mapel_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
     public function render()
     {
         $mapels = MataPelajaran::when($this->search, function($q) {

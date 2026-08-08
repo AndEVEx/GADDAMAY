@@ -147,6 +147,119 @@ class ManajemenJadwal extends Component
         $this->dispatch('show-toast', message: 'Jadwal pelajaran berhasil dihapus!', type: 'success');
     }
 
+    public function exportExcel()
+    {
+        $jadwals = JadwalPelajaran::with(['rombel', 'mataPelajaran', 'guru'])
+            ->orderBy('hari')
+            ->orderBy('jam_ke_mulai')
+            ->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Jadwal');
+
+        $sheet->setCellValue('A1', 'No.');
+        $sheet->setCellValue('B1', 'Hari');
+        $sheet->setCellValue('C1', 'Jam Ke');
+        $sheet->setCellValue('D1', 'Kelas / Rombel');
+        $sheet->setCellValue('E1', 'Mata Pelajaran / Kegiatan');
+        $sheet->setCellValue('F1', 'Guru Pengajar');
+
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:F1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:F1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $row = 2;
+        foreach ($jadwals as $index => $j) {
+            $jamText = ($j->jam_ke_mulai == $j->jam_ke_selesai)
+                ? "Ke-{$j->jam_ke_mulai}"
+                : "Ke-{$j->jam_ke_mulai} s.d {$j->jam_ke_selesai}";
+
+            $mapelOrKhusus = $j->kegiatan_khusus ?? ($j->mataPelajaran->nama_mapel ?? '-');
+            $guruNames = $j->guru->pluck('name')->join(', ');
+            if (empty($guruNames) && !empty($j->keterangan)) {
+                $guruNames = $j->keterangan;
+            }
+
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $j->hari_label);
+            $sheet->setCellValue('C' . $row, $jamText);
+            $sheet->setCellValue('D' . $row, $j->rombel->nama_kelas ?? '-');
+            $sheet->setCellValue('E' . $row, $mapelOrKhusus);
+            $sheet->setCellValue('F' . $row, $guruNames ?: '-');
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_jadwal_pelajaran_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportExcel()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Jadwal');
+
+        // Headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Hari');
+        $sheet->setCellValue('C1', 'Jam Ke');
+        $sheet->setCellValue('D1', 'Kelas');
+        $sheet->setCellValue('E1', 'Mata Pelajaran / Kegiatan');
+        $sheet->setCellValue('F1', 'Guru Pengajar');
+        
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:F1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:F1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $jadwals = JadwalPelajaran::with(['rombel', 'mataPelajaran', 'guru'])
+            ->when($this->filterHari, fn($q) => $q->where('hari', $this->filterHari))
+            ->when($this->filterRombel, fn($q) => $q->where('rombel_id', $this->filterRombel))
+            ->when($this->filterMapel, fn($q) => $q->where('mapel_id', $this->filterMapel))
+            ->when($this->search, function($q) {
+                $q->where('keterangan', 'like', "%{$this->search}%")
+                  ->orWhere('kegiatan_khusus', 'like', "%{$this->search}%")
+                  ->orWhereHas('mataPelajaran', fn($m) => $m->where('nama_mapel', 'like', "%{$this->search}%"))
+                  ->orWhereHas('rombel', fn($r) => $r->where('nama_kelas', 'like', "%{$this->search}%"));
+            })
+            ->orderBy('hari')
+            ->orderBy('rombel_id')
+            ->orderBy('jam_ke_mulai')->get();
+
+        $row = 2;
+        $no = 1;
+        foreach ($jadwals as $j) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $j->hari_label);
+            $sheet->setCellValue('C' . $row, $j->jam_ke_mulai . ' - ' . $j->jam_ke_selesai);
+            $sheet->setCellValue('D' . $row, $j->rombel->nama_kelas ?? '-');
+            
+            $mapelAtauKegiatan = $j->kegiatan_khusus ? $j->kegiatan_khusus : ($j->mataPelajaran->nama_mapel ?? 'Tanpa Mapel');
+            $sheet->setCellValue('E' . $row, $mapelAtauKegiatan);
+            
+            $guru = $j->guru->pluck('name')->join(', ') ?: 'Belum ditentukan';
+            $sheet->setCellValue('F' . $row, $guru);
+            $row++;
+        }
+
+        foreach (range('A', 'F') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_jadwal_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
     public function render()
     {
         $rombels = Rombel::orderBy('tingkat')->orderBy('nama_kelas')->get();

@@ -30,9 +30,14 @@
     @elseif(!$parsed)
         <div class="card mb-4 animate-fade-in-up">
             <div class="card-body">
-                <button wire:click="downloadTemplate" class="btn btn-outline-info mb-3" style="min-height: 48px;">
-                    <i class="bi bi-download me-2"></i>Download Template KKTP (.xlsx)
-                </button>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button wire:click="downloadTemplate" class="btn btn-outline-info" style="min-height: 48px;">
+                        <i class="bi bi-download me-2"></i>Download Template KKTP (.xlsx)
+                    </button>
+                    <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
+                        <i class="bi bi-file-earmark-excel me-2"></i>Export Excel (.xlsx)
+                    </button>
+                </div>
 
                 <div class="mb-4">
                     <label class="form-label fw-bold">Pilih File Excel (.xlsx)</label>

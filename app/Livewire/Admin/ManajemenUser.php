@@ -171,6 +171,91 @@ class ManajemenUser extends Component
         }
     }
 
+    public function exportExcel()
+    {
+        $users = User::orderBy('name')->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data User');
+
+        $sheet->setCellValue('A1', 'No.');
+        $sheet->setCellValue('B1', 'Nama User');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Role');
+        $sheet->setCellValue('E1', 'Tanggal Dibuat');
+
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:E1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $row = 2;
+        foreach ($users as $index => $user) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $user->name);
+            $sheet->setCellValue('C' . $row, $user->email);
+            $sheet->setCellValue('D' . $row, ucfirst(str_replace('_', ' ', $user->role)));
+            $sheet->setCellValue('E' . $row, $user->created_at?->format('Y-m-d H:i') ?? '-');
+            $row++;
+        }
+
+        foreach (['A', 'B', 'C', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_data_user_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportExcel()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data User');
+
+        // Headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Nama');
+        $sheet->setCellValue('C1', 'Email');
+        $sheet->setCellValue('D1', 'Role');
+        $sheet->setCellValue('E1', 'Tanggal Dibuat');
+        
+        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:E1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $users = User::when($this->search, function($q) {
+                $q->where('name', 'like', "%{$this->search}%")
+                  ->orWhere('email', 'like', "%{$this->search}%");
+            })
+            ->when($this->filterRole, fn($q) => $q->where('role', $this->filterRole))
+            ->orderBy('name')->get();
+
+        $row = 2;
+        $no = 1;
+        foreach ($users as $user) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $user->name);
+            $sheet->setCellValue('C' . $row, $user->email);
+            $sheet->setCellValue('D' . $row, ucfirst(str_replace('_', ' ', $user->role)));
+            $sheet->setCellValue('E' . $row, $user->created_at->format('Y-m-d H:i:s'));
+            $row++;
+        }
+
+        foreach (range('A', 'E') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_user_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
     public function render()
     {
         $users = User::when($this->search, function($q) {

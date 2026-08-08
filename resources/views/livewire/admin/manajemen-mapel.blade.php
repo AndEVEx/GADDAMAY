@@ -13,6 +13,9 @@
                 <button wire:click="downloadTemplate" class="btn btn-outline-info" style="min-height: 48px;">
                     <i class="bi bi-download me-2"></i>Download Template (.xlsx)
                 </button>
+                <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
+                    <i class="bi bi-file-earmark-excel me-2"></i>Export Excel (.xlsx)
+                </button>
             </div>
             <div class="mb-3">
                 <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" class="form-control" style="min-height: 48px;">
@@ -31,10 +34,15 @@
         </div>
     </div>
 
-    {{-- Add Button --}}
-    <button wire:click="create" class="btn btn-primary mb-3" style="min-height: 48px;">
-        <i class="bi bi-plus-circle me-1"></i> Tambah Mata Pelajaran
-    </button>
+    {{-- Add & Export Buttons --}}
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+        <button wire:click="create" class="btn btn-primary" style="min-height: 48px;">
+            <i class="bi bi-plus-circle me-1"></i> Tambah Mata Pelajaran
+        </button>
+        <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
+            <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
+        </button>
+    </div>
 
     {{-- Form Modal / Card --}}
     @if($showForm)
