@@ -29,9 +29,19 @@ class XmlJadwalSeeder extends Seeder
     private array $subjectMap = []; // asc_id => mapel_id or null (non-mapel)
     private array $subjectNames = []; // asc_id => name (for kegiatan_khusus)
     private array $lessonMap = []; // lesson_id => {classids, subjectid, teacherids}
+    private ?string $cachedGuruPassword = null;
+    private ?string $cachedKetuaPassword = null;
 
     public function run(): void
     {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+        DB::disableQueryLog();
+
+        // Pre-compute bcrypt hashes ONCE to avoid hundreds of slow Bcrypt hashing calls
+        $this->cachedGuruPassword = Hash::make('password123');
+        $this->cachedKetuaPassword = Hash::make('ketua123');
+
         $xmlPath = config('app.xml_jadwal_path', storage_path('app/temp_jadwal.xml'));
 
         if (!file_exists($xmlPath)) {
@@ -41,13 +51,15 @@ class XmlJadwalSeeder extends Seeder
         }
 
         $content = file_get_contents($xmlPath);
-        // Convert from windows-1252 to UTF-8
+        // Convert from windows-1252 to UTF-8 and fix XML declaration
         $content = mb_convert_encoding($content, 'UTF-8', 'Windows-1252');
+        $content = preg_replace('/encoding="[^"]+"/', 'encoding="UTF-8"', $content);
         $xml = simplexml_load_string($content);
 
         if (!$xml) {
-            $this->command?->error('Failed to parse XML.');
-            return;
+            $message = 'Gagal membaca format XML. File XML tidak valid atau corrupt.';
+            $this->command?->error($message);
+            throw new \RuntimeException($message);
         }
 
         DB::transaction(function () use ($xml) {
@@ -101,7 +113,7 @@ class XmlJadwalSeeder extends Seeder
                 ['email' => $email],
                 [
                     'name' => $name,
-                    'password' => 'password123',
+                    'password' => $this->cachedGuruPassword,
                     'role' => 'guru',
                 ]
             );
@@ -268,7 +280,7 @@ class XmlJadwalSeeder extends Seeder
                 ['email' => "ketua.{$slug}@smkn2indramayu.sch.id"],
                 [
                     'name' => "Ketua Kelas {$rombel->nama_kelas}",
-                    'password' => 'ketua123',
+                    'password' => $this->cachedKetuaPassword,
                     'role' => 'ketua_kelas',
                 ]
             );

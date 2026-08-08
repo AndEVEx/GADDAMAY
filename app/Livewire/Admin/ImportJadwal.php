@@ -13,6 +13,7 @@ use App\Models\Rombel;
 use App\Models\MataPelajaran;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 #[Layout('components.layouts.app')]
 #[Title('Import Jadwal')]
@@ -28,6 +29,9 @@ class ImportJadwal extends Component
 
     public function import()
     {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
         $this->validate(['xmlFile' => 'required|file|max:10240']);
 
         $this->importing = true;
@@ -41,6 +45,10 @@ class ImportJadwal extends Component
 
             // Override the XML path in config and run seeder
             config(['app.xml_jadwal_path' => $tempPath]);
+
+            // Truncate old schedule entries to prevent duplicate schedules on re-import
+            JadwalGuru::truncate();
+            JadwalPelajaran::truncate();
 
             Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\XmlJadwalSeeder', '--force' => true]);
 
