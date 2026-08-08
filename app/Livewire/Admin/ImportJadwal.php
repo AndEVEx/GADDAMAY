@@ -14,6 +14,7 @@ use App\Models\MataPelajaran;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 #[Layout('components.layouts.app')]
 #[Title('Import Jadwal')]
@@ -46,9 +47,11 @@ class ImportJadwal extends Component
             // Override the XML path in config and run seeder
             config(['app.xml_jadwal_path' => $tempPath]);
 
-            // Truncate old schedule entries to prevent duplicate schedules on re-import
+            // Truncate old schedule entries with foreign key checks disabled
+            Schema::disableForeignKeyConstraints();
             JadwalGuru::truncate();
             JadwalPelajaran::truncate();
+            Schema::enableForeignKeyConstraints();
 
             Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\XmlJadwalSeeder', '--force' => true]);
 
@@ -67,27 +70,39 @@ class ImportJadwal extends Component
 
     public function clearAll()
     {
+        Schema::disableForeignKeyConstraints();
         JadwalGuru::truncate();
         JadwalPelajaran::truncate();
+        Schema::enableForeignKeyConstraints();
+
         $this->confirmClear = false;
         $this->dispatch('show-toast', message: 'Semua jadwal berhasil dihapus!', type: 'success');
     }
 
     public function clearGuru()
     {
+        Schema::disableForeignKeyConstraints();
         User::where('role', 'guru')->delete();
+        Schema::enableForeignKeyConstraints();
+
         $this->dispatch('show-toast', message: 'Semua guru berhasil dihapus!', type: 'success');
     }
 
     public function clearKelas()
     {
+        Schema::disableForeignKeyConstraints();
         Rombel::truncate();
+        Schema::enableForeignKeyConstraints();
+
         $this->dispatch('show-toast', message: 'Semua kelas berhasil dihapus!', type: 'success');
     }
 
     public function clearMapel()
     {
+        Schema::disableForeignKeyConstraints();
         MataPelajaran::truncate();
+        Schema::enableForeignKeyConstraints();
+
         $this->dispatch('show-toast', message: 'Semua mata pelajaran berhasil dihapus!', type: 'success');
     }
 

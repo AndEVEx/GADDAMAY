@@ -16,6 +16,7 @@ use App\Imports\SiswaImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class DirectImportController extends Controller
@@ -36,8 +37,10 @@ class DirectImportController extends Controller
 
             config(['app.xml_jadwal_path' => $tempPath]);
 
+            Schema::disableForeignKeyConstraints();
             JadwalGuru::truncate();
             JadwalPelajaran::truncate();
+            Schema::enableForeignKeyConstraints();
 
             Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\XmlJadwalSeeder', '--force' => true]);
 
