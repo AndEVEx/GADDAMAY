@@ -165,45 +165,6 @@ class ManajemenGuru extends Component
 
     public function exportExcel()
     {
-        $gurus = User::where('role', 'guru')->orderBy('name')->get();
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Data Guru');
-
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Nama Guru');
-        $sheet->setCellValue('C1', 'Email');
-        $sheet->setCellValue('D1', 'Role');
-        $sheet->setCellValue('E1', 'Tanggal Dibuat');
-
-        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
-        $sheet->getStyle('A1:E1')->getFont()->getColor()->setRGB('FFFFFF');
-
-        $row = 2;
-        foreach ($gurus as $index => $guru) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $guru->name);
-            $sheet->setCellValue('C' . $row, $guru->email);
-            $sheet->setCellValue('D' . $row, ucfirst(str_replace('_', ' ', $guru->role)));
-            $sheet->setCellValue('E' . $row, $guru->created_at?->format('Y-m-d H:i') ?? '-');
-            $row++;
-        }
-
-        foreach (['A', 'B', 'C', 'D', 'E'] as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $filename = 'export_data_guru_' . date('Y-m-d') . '.xlsx';
-        $path = storage_path('app/' . $filename);
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
-
-        return response()->download($path, $filename)->deleteFileAfterSend(true);
-    }
-
-    public function exportExcel()
-    {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Guru');
@@ -256,3 +217,4 @@ class ManajemenGuru extends Component
         return view('livewire.admin.manajemen-guru', ['users' => $users]);
     }
 }
+

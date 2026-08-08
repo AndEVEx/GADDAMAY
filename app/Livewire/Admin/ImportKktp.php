@@ -156,43 +156,6 @@ class ImportKktp extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
-    public function exportExcel()
-    {
-        $tps = TujuanPembelajaran::with('mataPelajaran')->orderBy('mapel_id')->orderBy('order_sequence')->get();
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Data KKTP TP');
-
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Mata Pelajaran');
-        $sheet->setCellValue('C1', 'Kode TP');
-        $sheet->setCellValue('D1', 'Deskripsi TP');
-
-        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
-        $sheet->getStyle('A1:D1')->getFont()->getColor()->setRGB('FFFFFF');
-
-        $row = 2;
-        foreach ($tps as $index => $tp) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $tp->mataPelajaran->nama_mapel ?? '-');
-            $sheet->setCellValue('C' . $row, $tp->kode_tp);
-            $sheet->setCellValue('D' . $row, $tp->deskripsi_tp);
-            $row++;
-        }
-
-        foreach (['A', 'B', 'C', 'D'] as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $filename = 'export_kktp_tp_' . date('Y-m-d') . '.xlsx';
-        $path = storage_path('app/' . $filename);
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
-
-        return response()->download($path, $filename)->deleteFileAfterSend(true);
-    }
-
     public function render()
     {
         $mapels = MataPelajaran::orderBy('nama_mapel')->get();
@@ -204,3 +167,4 @@ class ImportKktp extends Component
         ]);
     }
 }
+

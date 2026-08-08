@@ -149,60 +149,6 @@ class ManajemenJadwal extends Component
 
     public function exportExcel()
     {
-        $jadwals = JadwalPelajaran::with(['rombel', 'mataPelajaran', 'guru'])
-            ->orderBy('hari')
-            ->orderBy('jam_ke_mulai')
-            ->get();
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Data Jadwal');
-
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Hari');
-        $sheet->setCellValue('C1', 'Jam Ke');
-        $sheet->setCellValue('D1', 'Kelas / Rombel');
-        $sheet->setCellValue('E1', 'Mata Pelajaran / Kegiatan');
-        $sheet->setCellValue('F1', 'Guru Pengajar');
-
-        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:F1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
-        $sheet->getStyle('A1:F1')->getFont()->getColor()->setRGB('FFFFFF');
-
-        $row = 2;
-        foreach ($jadwals as $index => $j) {
-            $jamText = ($j->jam_ke_mulai == $j->jam_ke_selesai)
-                ? "Ke-{$j->jam_ke_mulai}"
-                : "Ke-{$j->jam_ke_mulai} s.d {$j->jam_ke_selesai}";
-
-            $mapelOrKhusus = $j->kegiatan_khusus ?? ($j->mataPelajaran->nama_mapel ?? '-');
-            $guruNames = $j->guru->pluck('name')->join(', ');
-            if (empty($guruNames) && !empty($j->keterangan)) {
-                $guruNames = $j->keterangan;
-            }
-
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $j->hari_label);
-            $sheet->setCellValue('C' . $row, $jamText);
-            $sheet->setCellValue('D' . $row, $j->rombel->nama_kelas ?? '-');
-            $sheet->setCellValue('E' . $row, $mapelOrKhusus);
-            $sheet->setCellValue('F' . $row, $guruNames ?: '-');
-            $row++;
-        }
-
-        foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $filename = 'export_jadwal_pelajaran_' . date('Y-m-d') . '.xlsx';
-        $path = storage_path('app/' . $filename);
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
-
-        return response()->download($path, $filename)->deleteFileAfterSend(true);
-    }
-
-    public function exportExcel()
-    {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Jadwal');
@@ -289,3 +235,4 @@ class ManajemenJadwal extends Component
         ]);
     }
 }
+

@@ -144,45 +144,6 @@ class ManajemenMotivasiPantun extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
-    public function exportExcel()
-    {
-        $items = MotivasiPantun::orderBy('tipe')->orderBy('created_at', 'desc')->get();
-
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Data Motivasi Pantun');
-
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Tipe');
-        $sheet->setCellValue('C1', 'Kategori');
-        $sheet->setCellValue('D1', 'Isi');
-        $sheet->setCellValue('E1', 'Status');
-
-        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
-        $sheet->getStyle('A1:E1')->getFont()->getColor()->setRGB('FFFFFF');
-
-        $row = 2;
-        foreach ($items as $index => $item) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, ucfirst($item->tipe));
-            $sheet->setCellValue('C' . $row, ucfirst($item->kategori));
-            $sheet->setCellValue('D' . $row, $item->isi);
-            $sheet->setCellValue('E' . $row, $item->is_aktif ? 'Aktif' : 'Nonaktif');
-            $row++;
-        }
-
-        foreach (['A', 'B', 'C', 'D', 'E'] as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $filename = 'export_motivasi_pantun_' . date('Y-m-d') . '.xlsx';
-        $path = storage_path('app/' . $filename);
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
-
-        return response()->download($path, $filename)->deleteFileAfterSend(true);
-    }
-
     public function render()
     {
         $items = MotivasiPantun::when($this->search, fn($q) => $q->where('isi', 'like', "%{$this->search}%"))
@@ -194,3 +155,4 @@ class ManajemenMotivasiPantun extends Component
         return view('livewire.admin.manajemen-motivasi-pantun', ['items' => $items]);
     }
 }
+

@@ -20,8 +20,6 @@ class ManajemenUser extends Component
 
     protected $paginationTheme = 'bootstrap';
 
-    public $importFile;
-
     public string $search = '';
     public string $filterRole = '';
     public bool $showForm = false;
@@ -34,14 +32,14 @@ class ManajemenUser extends Component
     public bool $confirmDelete = false;
     public string $deleteId = '';
     public string $deleteName = '';
+    public $importFile;
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterRole() { $this->resetPage(); }
 
     public function create()
     {
-        $this->reset(['editId', 'nama', 'email', 'password', 'role', 'editing']);
-        $this->role = 'guru';
+        $this->resetForm();
         $this->showForm = true;
     }
 
@@ -60,27 +58,25 @@ class ManajemenUser extends Component
     public function save()
     {
         $rules = [
-            'nama' => 'required|min:2',
-            'email' => 'required|email|unique:users,email' . ($this->editing ? ",{$this->editId}" : ''),
-            'role' => 'required|in:admin,kepsek,waka,ketua_mgmp,guru,ketua_kelas',
+            'nama' => 'required|min:3',
+            'email' => 'required|email|unique:user,email,' . ($this->editing ? $this->editId : 'NULL') . ',id',
+            'role' => 'required|in:admin,guru,kepsek,waka,ketua_mgmp,ketua_kelas',
         ];
+
         if (!$this->editing) {
             $rules['password'] = 'required|min:6';
         }
+
         $this->validate($rules);
 
         if ($this->editing) {
             $user = User::findOrFail($this->editId);
-            $old = $user->toArray();
-            $user->update([
-                'name' => $this->nama,
-                'email' => $this->email,
-                'role' => $this->role,
-            ]);
-            if ($this->password) {
-                $user->update(['password' => Hash::make($this->password)]);
+            $data = ['name' => $this->nama, 'email' => $this->email, 'role' => $this->role];
+            if (!empty($this->password)) {
+                $data['password'] = Hash::make($this->password);
             }
-            AuditLogService::logUpdate($user, $old);
+            $user->update($data);
+            AuditLogService::logUpdate($user);
             $this->dispatch('show-toast', message: 'User berhasil diperbarui!', type: 'success');
         } else {
             $user = User::create([
@@ -94,7 +90,7 @@ class ManajemenUser extends Component
         }
 
         $this->showForm = false;
-        $this->reset(['editId', 'nama', 'email', 'password', 'role', 'editing']);
+        $this->resetForm();
     }
 
     public function confirmDeleteUser(string $id)
@@ -109,7 +105,6 @@ class ManajemenUser extends Component
     {
         $user = User::findOrFail($this->deleteId);
         AuditLogService::logDelete($user);
-        $user->jadwalGuru()->delete();
         $user->delete();
         $this->confirmDelete = false;
         $this->dispatch('show-toast', message: 'User berhasil dihapus!', type: 'success');
@@ -119,7 +114,12 @@ class ManajemenUser extends Component
     {
         $user = User::findOrFail($id);
         $user->update(['password' => Hash::make('password123')]);
-        $this->dispatch('show-toast', message: "Password user {$user->name} direset ke 'password123'", type: 'info');
+        $this->dispatch('show-toast', message: "Password {$user->name} direset ke 'password123'", type: 'info');
+    }
+
+    private function resetForm()
+    {
+        $this->reset(['nama', 'email', 'password', 'role', 'editId', 'editing']);
     }
 
     public function downloadTemplate()
@@ -131,7 +131,7 @@ class ManajemenUser extends Component
         $sheet->setCellValue('B1', 'email');
         $sheet->setCellValue('C1', 'password');
         $sheet->setCellValue('D1', 'role');
-        $sheet->setCellValue('A2', 'Admin SMKN');
+        $sheet->setCellValue('A2', 'Ahmad Admin');
         $sheet->setCellValue('B2', 'admin@smkn2indramayu.sch.id');
         $sheet->setCellValue('C2', 'password123');
         $sheet->setCellValue('D2', 'admin');
@@ -150,7 +150,7 @@ class ManajemenUser extends Component
         try {
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->importFile->getRealPath());
             $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-            $header = array_shift($rows);
+            array_shift($rows);
             $count = 0;
             foreach ($rows as $row) {
                 $nama = trim($row['A'] ?? '');
@@ -158,9 +158,9 @@ class ManajemenUser extends Component
                 $password = trim($row['C'] ?? 'password123');
                 $role = trim($row['D'] ?? 'guru');
                 if (empty($nama) || empty($email)) continue;
-                \App\Models\User::updateOrCreate(
+                User::updateOrCreate(
                     ['email' => $email],
-                    ['name' => $nama, 'password' => \Illuminate\Support\Facades\Hash::make($password), 'role' => $role]
+                    ['name' => $nama, 'password' => Hash::make($password), 'role' => $role]
                 );
                 $count++;
             }
@@ -173,50 +173,10 @@ class ManajemenUser extends Component
 
     public function exportExcel()
     {
-        $users = User::orderBy('name')->get();
-
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data User');
 
-        $sheet->setCellValue('A1', 'No.');
-        $sheet->setCellValue('B1', 'Nama User');
-        $sheet->setCellValue('C1', 'Email');
-        $sheet->setCellValue('D1', 'Role');
-        $sheet->setCellValue('E1', 'Tanggal Dibuat');
-
-        $sheet->getStyle('A1:E1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
-        $sheet->getStyle('A1:E1')->getFont()->getColor()->setRGB('FFFFFF');
-
-        $row = 2;
-        foreach ($users as $index => $user) {
-            $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $user->name);
-            $sheet->setCellValue('C' . $row, $user->email);
-            $sheet->setCellValue('D' . $row, ucfirst(str_replace('_', ' ', $user->role)));
-            $sheet->setCellValue('E' . $row, $user->created_at?->format('Y-m-d H:i') ?? '-');
-            $row++;
-        }
-
-        foreach (['A', 'B', 'C', 'D', 'E'] as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        $filename = 'export_data_user_' . date('Y-m-d') . '.xlsx';
-        $path = storage_path('app/' . $filename);
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
-
-        return response()->download($path, $filename)->deleteFileAfterSend(true);
-    }
-
-    public function exportExcel()
-    {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Data User');
-
-        // Headers
         $sheet->setCellValue('A1', 'No');
         $sheet->setCellValue('B1', 'Nama');
         $sheet->setCellValue('C1', 'Email');
@@ -241,7 +201,7 @@ class ManajemenUser extends Component
             $sheet->setCellValue('B' . $row, $user->name);
             $sheet->setCellValue('C' . $row, $user->email);
             $sheet->setCellValue('D' . $row, ucfirst(str_replace('_', ' ', $user->role)));
-            $sheet->setCellValue('E' . $row, $user->created_at->format('Y-m-d H:i:s'));
+            $sheet->setCellValue('E' . $row, $user->created_at?->format('Y-m-d H:i:s') ?? '-');
             $row++;
         }
 
