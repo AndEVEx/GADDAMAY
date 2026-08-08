@@ -3,7 +3,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             <div class="toast-body">${e}</div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
-    `,n.appendChild(r),setTimeout(()=>r.remove(),4e3)};function Is(){let e=document.createElement(`div`);return e.id=`toast-container`,e.className=`toast-container position-fixed top-0 end-0 p-3`,e.style.zIndex=`9999`,document.body.appendChild(e),e}document.addEventListener(`livewire:init`,()=>{Livewire.on(`show-toast`,e=>{window.showToast(e[0].message,e[0].type||`success`)}),Livewire.on(`show-motivasi`,e=>{Ls(e[0].isi,e[0].tipe)})});function Ls(e,t){let n=t===`pantun`?`📜`:`✨`,r=document.createElement(`div`);r.className=`motivasi-popup`,r.innerHTML=`
+    `,n.appendChild(r),setTimeout(()=>r.remove(),4e3)};function Is(){let e=document.createElement(`div`);return e.id=`toast-container`,e.className=`toast-container position-fixed top-0 end-0 p-3`,e.style.zIndex=`9999`,document.body.appendChild(e),e}document.addEventListener(`livewire:init`,()=>{Livewire.on(`show-toast`,e=>{let t=Array.isArray(e)?e[0]:e?.detail||e||{},n=t?.message||(typeof t==`string`?t:``),r=t?.type||`success`;n&&window.showToast(n,r)}),Livewire.on(`show-motivasi`,e=>{let t=Array.isArray(e)?e[0]:e?.detail||e||{};t&&t.isi&&Ls(t.isi,t.tipe||`motivasi`)})});function Ls(e,t){let n=t===`pantun`?`📜`:`✨`,r=document.createElement(`div`);r.className=`motivasi-popup`,r.innerHTML=`
         <div class="motivasi-content">
             <div class="motivasi-emoji">${n}</div>
             <div class="motivasi-text">${e}</div>

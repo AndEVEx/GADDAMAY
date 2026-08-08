@@ -120,15 +120,23 @@ function createToastContainer() {
 }
 
 // ============================================================
-// Livewire event listeners
+// Livewire event listeners (Null-safe parameter extraction)
 // ============================================================
 document.addEventListener('livewire:init', () => {
-    Livewire.on('show-toast', (data) => {
-        window.showToast(data[0].message, data[0].type || 'success');
+    Livewire.on('show-toast', (event) => {
+        const data = Array.isArray(event) ? event[0] : (event?.detail || event || {});
+        const message = data?.message || (typeof data === 'string' ? data : '');
+        const type = data?.type || 'success';
+        if (message) {
+            window.showToast(message, type);
+        }
     });
 
-    Livewire.on('show-motivasi', (data) => {
-        showMotivasiPopup(data[0].isi, data[0].tipe);
+    Livewire.on('show-motivasi', (event) => {
+        const data = Array.isArray(event) ? event[0] : (event?.detail || event || {});
+        if (data && data.isi) {
+            showMotivasiPopup(data.isi, data.tipe || 'motivasi');
+        }
     });
 });
 
