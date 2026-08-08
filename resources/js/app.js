@@ -158,3 +158,22 @@ function showMotivasiPopup(isi, tipe) {
     });
     document.body.appendChild(popup);
 }
+
+// ============================================================
+// Fullscreen Toggle Helper
+// ============================================================
+window.toggleFullscreen = function() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+            document.documentElement.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
+    }
+};

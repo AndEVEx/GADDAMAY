@@ -48,6 +48,11 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
+                {{-- Fullscreen Toggle Button --}}
+                <button onclick="toggleFullscreen()" class="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center p-1" style="width: 36px; height: 36px;" title="Layar Penuh">
+                    <i class="bi bi-arrows-fullscreen"></i>
+                </button>
+
                 {{-- Notification Bell --}}
                 @livewire('components.notification-bell')
 

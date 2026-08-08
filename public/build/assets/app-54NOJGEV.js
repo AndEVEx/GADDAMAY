@@ -11,4 +11,4 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                 Siap Mengajar! 💪
             </button>
         </div>
-    `,r.addEventListener(`click`,e=>{e.target===r&&r.remove()}),document.body.appendChild(r)}
+    `,r.addEventListener(`click`,e=>{e.target===r&&r.remove()}),document.body.appendChild(r)}window.toggleFullscreen=function(){!document.fullscreenElement&&!document.webkitFullscreenElement?document.documentElement.requestFullscreen?document.documentElement.requestFullscreen():document.documentElement.webkitRequestFullscreen&&document.documentElement.webkitRequestFullscreen():document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen&&document.webkitExitFullscreen()};
