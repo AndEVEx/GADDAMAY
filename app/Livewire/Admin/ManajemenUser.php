@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Models\User;
 use App\Services\AuditLogService;
 use Illuminate\Support\Facades\Hash;
@@ -15,8 +16,11 @@ use Illuminate\Support\Facades\Hash;
 class ManajemenUser extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     protected $paginationTheme = 'bootstrap';
+
+    public $importFile;
 
     public string $search = '';
     public string $filterRole = '';
@@ -116,6 +120,55 @@ class ManajemenUser extends Component
         $user = User::findOrFail($id);
         $user->update(['password' => Hash::make('password123')]);
         $this->dispatch('show-toast', message: "Password user {$user->name} direset ke 'password123'", type: 'info');
+    }
+
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data User');
+        $sheet->setCellValue('A1', 'nama');
+        $sheet->setCellValue('B1', 'email');
+        $sheet->setCellValue('C1', 'password');
+        $sheet->setCellValue('D1', 'role');
+        $sheet->setCellValue('A2', 'Admin SMKN');
+        $sheet->setCellValue('B2', 'admin@smkn2indramayu.sch.id');
+        $sheet->setCellValue('C2', 'password123');
+        $sheet->setCellValue('D2', 'admin');
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:D1')->getFont()->getColor()->setRGB('FFFFFF');
+        foreach (['A','B','C','D'] as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        $path = storage_path('app/template_import_user.xlsx');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+        return response()->download($path, 'template_import_user.xlsx')->deleteFileAfterSend(true);
+    }
+
+    public function importData()
+    {
+        $this->validate(['importFile' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->importFile->getRealPath());
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            $header = array_shift($rows);
+            $count = 0;
+            foreach ($rows as $row) {
+                $nama = trim($row['A'] ?? '');
+                $email = trim($row['B'] ?? '');
+                $password = trim($row['C'] ?? 'password123');
+                $role = trim($row['D'] ?? 'guru');
+                if (empty($nama) || empty($email)) continue;
+                \App\Models\User::updateOrCreate(
+                    ['email' => $email],
+                    ['name' => $nama, 'password' => \Illuminate\Support\Facades\Hash::make($password), 'role' => $role]
+                );
+                $count++;
+            }
+            $this->reset('importFile');
+            $this->dispatch('show-toast', message: "Berhasil import {$count} user!", type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('show-toast', message: 'Gagal import: ' . $e->getMessage(), type: 'danger');
+        }
     }
 
     public function render()

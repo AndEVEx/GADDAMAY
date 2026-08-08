@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Models\MataPelajaran;
 use App\Services\AuditLogService;
 
@@ -14,8 +15,11 @@ use App\Services\AuditLogService;
 class ManajemenMapel extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     protected $paginationTheme = 'bootstrap';
+
+    public $importFile;
 
     public string $search = '';
     public bool $showForm = false;
@@ -91,6 +95,49 @@ class ManajemenMapel extends Component
         $mapel->delete();
         $this->confirmDelete = false;
         $this->dispatch('show-toast', message: 'Mata pelajaran berhasil dihapus!', type: 'success');
+    }
+
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Mapel');
+        $sheet->setCellValue('A1', 'nama_mapel');
+        $sheet->setCellValue('B1', 'kode_mapel');
+        $sheet->setCellValue('A2', 'Matematika');
+        $sheet->setCellValue('B2', 'MTK');
+        $sheet->getStyle('A1:B1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:B1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:B1')->getFont()->getColor()->setRGB('FFFFFF');
+        foreach (['A','B'] as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        $path = storage_path('app/template_import_mapel.xlsx');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+        return response()->download($path, 'template_import_mapel.xlsx')->deleteFileAfterSend(true);
+    }
+
+    public function importData()
+    {
+        $this->validate(['importFile' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->importFile->getRealPath());
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            $header = array_shift($rows);
+            $count = 0;
+            foreach ($rows as $row) {
+                $nama_mapel = trim($row['A'] ?? '');
+                $kode_mapel = trim($row['B'] ?? '');
+                if (empty($nama_mapel) || empty($kode_mapel)) continue;
+                \App\Models\MataPelajaran::updateOrCreate(
+                    ['nama_mapel' => $nama_mapel],
+                    ['kode_mapel' => $kode_mapel]
+                );
+                $count++;
+            }
+            $this->reset('importFile');
+            $this->dispatch('show-toast', message: "Berhasil import {$count} mata pelajaran!", type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('show-toast', message: 'Gagal import: ' . $e->getMessage(), type: 'danger');
+        }
     }
 
     public function render()

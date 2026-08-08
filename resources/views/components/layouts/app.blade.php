@@ -11,8 +11,8 @@
 
     {{-- PWA --}}
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="/icons/logo-sekolah.png">
-    <link rel="apple-touch-icon" href="/icons/logo-sekolah.png">
+    <link rel="icon" type="image/png" href="{{ \App\Helpers\LogoHelper::getBase64() }}">
+    <link rel="apple-touch-icon" href="{{ \App\Helpers\LogoHelper::getBase64() }}">
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
         <div class="container-fluid px-3">
             <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/" wire:navigate>
-                <img src="/icons/logo-sekolah.png" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
+                <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
                 <span class="d-none d-sm-inline">AgenDamay</span>
             </a>
 

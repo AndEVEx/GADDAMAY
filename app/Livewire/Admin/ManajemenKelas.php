@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Models\Rombel;
 use App\Services\AuditLogService;
 
@@ -14,8 +15,11 @@ use App\Services\AuditLogService;
 class ManajemenKelas extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     protected $paginationTheme = 'bootstrap';
+
+    public $importFile;
 
     public string $search = '';
     public string $filterTingkat = '';
@@ -94,6 +98,49 @@ class ManajemenKelas extends Component
         $rombel->delete();
         $this->confirmDelete = false;
         $this->dispatch('show-toast', message: 'Kelas berhasil dihapus!', type: 'success');
+    }
+
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Kelas');
+        $sheet->setCellValue('A1', 'nama_kelas');
+        $sheet->setCellValue('B1', 'tingkat');
+        $sheet->setCellValue('A2', 'X TKJ 1');
+        $sheet->setCellValue('B2', '10');
+        $sheet->getStyle('A1:B1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:B1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:B1')->getFont()->getColor()->setRGB('FFFFFF');
+        foreach (['A','B'] as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        $path = storage_path('app/template_import_kelas.xlsx');
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+        return response()->download($path, 'template_import_kelas.xlsx')->deleteFileAfterSend(true);
+    }
+
+    public function importData()
+    {
+        $this->validate(['importFile' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->importFile->getRealPath());
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            $header = array_shift($rows);
+            $count = 0;
+            foreach ($rows as $row) {
+                $nama_kelas = trim($row['A'] ?? '');
+                $tingkat = trim($row['B'] ?? '');
+                if (empty($nama_kelas) || empty($tingkat)) continue;
+                \App\Models\Rombel::updateOrCreate(
+                    ['nama_kelas' => $nama_kelas],
+                    ['tingkat' => $tingkat]
+                );
+                $count++;
+            }
+            $this->reset('importFile');
+            $this->dispatch('show-toast', message: "Berhasil import {$count} kelas!", type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('show-toast', message: 'Gagal import: ' . $e->getMessage(), type: 'danger');
+        }
     }
 
     public function render()
