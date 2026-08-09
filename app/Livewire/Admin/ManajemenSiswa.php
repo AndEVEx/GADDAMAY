@@ -6,18 +6,23 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Models\Siswa;
 use App\Models\Rombel;
 use App\Services\AuditLogService;
+use App\Imports\SiswaImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 #[Layout('components.layouts.app')]
 #[Title('Manajemen Siswa')]
 class ManajemenSiswa extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     protected $paginationTheme = 'bootstrap';
 
+    public $importFile;
     public string $search = '';
     public string $filterRombel = '';
     public bool $showForm = false;
@@ -104,13 +109,61 @@ class ManajemenSiswa extends Component
         $this->dispatch('show-toast', message: 'Data siswa berhasil dihapus!', type: 'success');
     }
 
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Siswa');
+        
+        $sheet->setCellValue('A1', 'nama');
+        $sheet->setCellValue('B1', 'nis');
+        $sheet->setCellValue('C1', 'kelas');
+        
+        $sheet->setCellValue('A2', 'Ahmad Fauzi');
+        $sheet->setCellValue('B2', '12345');
+        $sheet->setCellValue('C2', 'X TKJ 1');
+        
+        $sheet->setCellValue('A3', 'Siti Nurhaliza');
+        $sheet->setCellValue('B3', '12346');
+        $sheet->setCellValue('C3', 'X TKJ 1');
+        
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:C1')->getFont()->getColor()->setRGB('FFFFFF');
+        
+        foreach (['A', 'B', 'C'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+        $filename = 'template_import_siswa.xlsx';
+        $tempPath = storage_path('app/' . $filename);
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save($tempPath);
+        
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function importData()
+    {
+        $this->validate([
+            'importFile' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            Excel::import(new SiswaImport, $this->importFile->getRealPath());
+            $this->reset('importFile');
+            $this->dispatch('show-toast', message: 'Data siswa berhasil diimport!', type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('show-toast', message: 'Gagal mengimport data: ' . $e->getMessage(), type: 'danger');
+        }
+    }
+
     public function exportExcel()
     {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Siswa');
 
-        // Headers
         $sheet->setCellValue('A1', 'No');
         $sheet->setCellValue('B1', 'NIS');
         $sheet->setCellValue('C1', 'Nama Siswa');
@@ -168,4 +221,3 @@ class ManajemenSiswa extends Component
         ]);
     }
 }
-

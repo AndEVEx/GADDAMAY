@@ -3,6 +3,31 @@
         <h1><i class="bi bi-person-badge-fill me-2"></i>Manajemen Siswa</h1>
     </div>
 
+    {{-- Import Section --}}
+    <div class="card mb-3 animate-fade-in-up">
+        <div class="card-header bg-success bg-opacity-10">
+            <h6 class="mb-0"><i class="bi bi-cloud-upload me-2"></i>Import Data Siswa (.xlsx / .csv)</h6>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button wire:click="downloadTemplate" class="btn btn-outline-info" style="min-height: 48px;">
+                    <i class="bi bi-download me-2"></i>Download Template (.xlsx)
+                </button>
+                <a href="{{ route('admin.import-siswa') }}" class="btn btn-outline-primary" style="min-height: 48px; display: inline-flex; align-items: center;" wire:navigate>
+                    <i class="bi bi-file-earmark-excel me-2"></i>Halaman Import Khusus
+                </a>
+            </div>
+            <div class="mb-3">
+                <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" class="form-control" style="min-height: 48px;">
+                <div class="form-text">Pastikan nama kelas di file Excel sesuai dengan nama kelas yang sudah terdaftar di sistem.</div>
+            </div>
+            <button wire:click="importData" class="btn btn-success w-100" style="min-height: 48px;" {{ !$importFile ? 'disabled' : '' }}>
+                <span wire:loading.remove wire:target="importData"><i class="bi bi-cloud-upload me-2"></i>Import Data Siswa</span>
+                <span wire:loading wire:target="importData"><span class="spinner-border spinner-border-sm me-2"></span>Mengimport...</span>
+            </button>
+        </div>
+    </div>
+
     {{-- Search & Filter --}}
     <div class="card mb-3 animate-fade-in-up">
         <div class="card-body p-3">
