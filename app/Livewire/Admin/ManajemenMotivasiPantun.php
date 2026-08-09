@@ -6,6 +6,7 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Models\MotivasiPantun;
 use App\Services\AuditLogService;
 
@@ -14,9 +15,11 @@ use App\Services\AuditLogService;
 class ManajemenMotivasiPantun extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     protected $paginationTheme = 'bootstrap';
 
+    public $importFile;
     public string $search = '';
     public string $filterTipe = '';
     public string $filterKategori = '';
@@ -102,6 +105,78 @@ class ManajemenMotivasiPantun extends Component
         $this->dispatch('show-toast', message: 'Motivasi / Pantun berhasil dihapus!', type: 'success');
     }
 
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Template Motivasi');
+
+        // Headers
+        $sheet->setCellValue('A1', 'isi');
+        $sheet->setCellValue('B1', 'tipe');
+        $sheet->setCellValue('C1', 'kategori');
+
+        // Sample Data
+        $sheet->setCellValue('A2', 'Berlayar ke pulau membawa kail, Jangan lupa membawa bekal. Semangat terus anak yang rajin, Sukses kelak pasti terkejar.');
+        $sheet->setCellValue('B2', 'pantun');
+        $sheet->setCellValue('C2', 'sebelum_mengajar');
+
+        $sheet->setCellValue('A3', 'Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan Anda dapat mengubah dunia.');
+        $sheet->setCellValue('B3', 'kata_mutiara');
+        $sheet->setCellValue('C3', 'siap_mengajar');
+
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:C1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:C1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        foreach (['A', 'B', 'C'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'template_import_motivasi_pantun.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function importData()
+    {
+        $this->validate([
+            'importFile' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($this->importFile->getRealPath());
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            array_shift($rows);
+            $count = 0;
+
+            foreach ($rows as $row) {
+                $isi = trim($row['A'] ?? '');
+                $tipe = strtolower(trim($row['B'] ?? 'pantun'));
+                $kategori = strtolower(trim($row['C'] ?? 'sebelum_mengajar'));
+
+                if (empty($isi)) continue;
+
+                $tipeValid = in_array($tipe, ['pantun', 'kata_mutiara']) ? $tipe : 'pantun';
+                $kategoriValid = in_array($kategori, ['sebelum_mengajar', 'siap_mengajar']) ? $kategori : 'sebelum_mengajar';
+
+                MotivasiPantun::create([
+                    'isi' => $isi,
+                    'tipe' => $tipeValid,
+                    'kategori' => $kategoriValid,
+                ]);
+                $count++;
+            }
+
+            $this->reset('importFile');
+            $this->dispatch('show-toast', message: "Berhasil meng-import {$count} motivasi / pantun!", type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('show-toast', message: 'Gagal meng-import: ' . $e->getMessage(), type: 'danger');
+        }
+    }
+
     public function exportExcel()
     {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -129,7 +204,7 @@ class ManajemenMotivasiPantun extends Component
             $sheet->setCellValue('A' . $row, $no++);
             $sheet->setCellValue('B' . $row, $item->tipe === 'pantun' ? 'Pantun' : 'Motivasi');
             $sheet->setCellValue('C' . $row, $item->isi);
-            $sheet->setCellValue('D' . $row, 'Aktif'); // Assuming they are all active if there's no status field
+            $sheet->setCellValue('D' . $row, 'Aktif');
             $row++;
         }
 
@@ -155,4 +230,3 @@ class ManajemenMotivasiPantun extends Component
         return view('livewire.admin.manajemen-motivasi-pantun', ['items' => $items]);
     }
 }
-
