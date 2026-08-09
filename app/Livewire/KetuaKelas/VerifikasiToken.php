@@ -6,7 +6,6 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use App\Models\AgendaHarian;
-use App\Models\MotivasiPantun;
 use Carbon\Carbon;
 
 #[Layout('components.layouts.app')]
@@ -15,9 +14,6 @@ class VerifikasiToken extends Component
 {
     public string $token = '';
     public ?AgendaHarian $agenda = null;
-    public bool $showMotivasi = false;
-    public string $motivasiText = '';
-    public string $motivasiTipe = '';
     public string $errorMessage = '';
 
     public function verifikasi()
@@ -41,25 +37,8 @@ class VerifikasiToken extends Component
             'status' => 'token_terverifikasi',
         ]);
 
-        // Show motivasi popup
-        $motivasi = MotivasiPantun::siapMengajar()->inRandomOrder()->first();
-        if ($motivasi) {
-            $this->motivasiText = $motivasi->isi;
-            $this->motivasiTipe = $motivasi->tipe;
-            $this->showMotivasi = true;
-        }
+        $this->dispatch('show-toast', message: 'Verifikasi berhasil! Mengalihkan ke ambil foto...', type: 'success');
 
-        $this->dispatch('show-toast', message: 'Verifikasi berhasil! Kelas dimulai.', type: 'success');
-    }
-
-    public function tutupMotivasi()
-    {
-        $this->showMotivasi = false;
-    }
-
-    public function goToFoto()
-    {
-        $this->showMotivasi = false;
         return redirect()->route('ketua.foto', $this->agenda->id);
     }
 

@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use App\Models\AgendaHarian;
 use App\Models\TujuanPembelajaran;
+use App\Models\MotivasiPantun;
 
 #[Layout('components.layouts.app')]
 #[Title('Isi Materi')]
@@ -21,6 +22,15 @@ class IsiMateri extends Component
         $this->agenda = $agenda->load(['jadwalPelajaran.rombel', 'jadwalPelajaran.mataPelajaran', 'tujuanPembelajaran']);
         $this->materi = $agenda->materi_diajarkan ?? '';
         $this->selectedTp = $agenda->tujuanPembelajaran->pluck('id')->toArray();
+
+        // Dispatch Motivasi / Kata Mutiara popup to Guru device after handshake
+        $motivasi = MotivasiPantun::siapMengajar()->inRandomOrder()->first();
+        if ($motivasi) {
+            $this->dispatch('show-motivasi', [
+                'isi' => $motivasi->isi,
+                'tipe' => $motivasi->tipe,
+            ]);
+        }
     }
 
     public function getTpListProperty()
