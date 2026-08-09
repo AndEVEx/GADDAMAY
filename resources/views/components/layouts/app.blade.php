@@ -33,7 +33,7 @@
     {{-- Top Navigation Bar --}}
     @auth
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
-        <div class="container-fluid px-3">
+        <div class="container-fluid px-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
                 {{-- Sidebar Trigger Button --}}
                 <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" style="min-height: 38px;">
@@ -42,15 +42,14 @@
                 </button>
 
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate style="text-decoration: none;">
-                    <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 44px; height: 44px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                     <div class="d-flex flex-column text-start">
-                        <span class="fw-extrabold text-white" style="font-size: 1.1rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
-                        <span class="text-white-50" style="font-size: 0.65rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
+                        <span class="fw-extrabold text-white" style="font-size: 1.15rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
+                        <span class="text-white-50 d-none d-md-inline" style="font-size: 0.65rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 ms-auto">
                 {{-- User Dropdown Menu --}}
                 <div class="dropdown">
                     <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2 px-2" type="button" data-bs-toggle="dropdown" style="min-height: 40px;">
@@ -99,15 +98,17 @@
     <div class="offcanvas offcanvas-start" tabindex="-1" id="appSidebar" aria-labelledby="appSidebarLabel" style="width: 290px;">
         <div class="offcanvas-header text-white" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
             <div class="d-flex align-items-center gap-2" id="appSidebarLabel">
-                <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
+                <div class="bg-white p-1 rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 42px; height: 42px;">
+                    <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 34px; height: 34px; object-fit: contain;">
+                </div>
                 <div>
-                    <h6 class="mb-0 fw-bold">AgenDamay</h6>
-                    <small style="font-size: 0.75rem; opacity: 0.85;">SMKN 2 Indramayu</small>
+                    <h6 class="mb-0 fw-extrabold text-white" style="letter-spacing: 0.3px;">AgenDAmay</h6>
+                    <small class="text-white-50" style="font-size: 0.65rem;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</small>
                 </div>
             </div>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body p-3">
+        <div class="offcanvas-body p-3" style="padding-bottom: 130px !important; overflow-y: auto;">
             {{-- Tombol Kembali / Back --}}
             <button onclick="history.back()" class="btn btn-outline-secondary btn-sm w-100 mb-3 d-flex align-items-center justify-content-center gap-2 py-2" style="min-height: 42px;">
                 <i class="bi bi-arrow-left fs-6"></i>
@@ -185,7 +186,7 @@
             </div>
 
             <div class="text-muted small fw-bold text-uppercase px-2 mb-2">Akun Saya</div>
-            <div class="list-group list-group-flush">
+            <div class="list-group list-group-flush mb-4">
                 <a href="{{ route('ganti-password') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ganti-password') ? 'active' : '' }}" wire:navigate>
                     <i class="bi bi-key-fill text-warning me-2"></i>Ganti Password
                 </a>
