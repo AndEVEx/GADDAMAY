@@ -44,26 +44,33 @@ class DashboardMonitoring extends Component
     {
         $rombels = Rombel::orderBy('tingkat')->orderBy('nama_kelas')->get();
 
-        return $rombels->map(function ($rombel) {
-            // Find jadwal for this rombel at current time
-            $jadwal = JadwalPelajaran::where('hari', $this->hariIni)
-                ->where('rombel_id', $rombel->id)
-                ->when($this->selectedJam, function ($q) {
-                    $q->where('jam_ke_mulai', '<=', $this->selectedJam)
-                      ->where('jam_ke_selesai', '>=', $this->selectedJam);
-                })
-                ->with(['mataPelajaran', 'jadwalGuru.guru'])
-                ->first();
+        if (is_null($this->selectedJam)) {
+            return $rombels->map(fn($rombel) => [
+                'rombel' => $rombel,
+                'status' => 'abu',
+                'label' => 'Pilih jam pelajaran',
+                'jadwal' => null,
+                'agenda' => null,
+            ]);
+        }
 
-            if (is_null($this->selectedJam)) {
-                return [
-                    'rombel' => $rombel,
-                    'status' => 'abu',
-                    'label' => 'Pilih jam pelajaran',
-                    'jadwal' => null,
-                    'agenda' => null,
-                ];
-            }
+        // Batch fetch all jadwals for selected jam in 1 single query (Eliminates 35+ queries)
+        $allJadwals = JadwalPelajaran::where('hari', $this->hariIni)
+            ->where('jam_ke_mulai', '<=', $this->selectedJam)
+            ->where('jam_ke_selesai', '>=', $this->selectedJam)
+            ->with(['mataPelajaran', 'jadwalGuru.guru'])
+            ->get()
+            ->keyBy('rombel_id');
+
+        // Batch fetch all agendas for today in 1 single query (Eliminates 35+ queries)
+        $allAgendas = AgendaHarian::whereIn('jadwal_pelajaran_id', $allJadwals->pluck('id'))
+            ->where('tanggal', $this->tanggal)
+            ->with('guru')
+            ->get()
+            ->keyBy('jadwal_pelajaran_id');
+
+        return $rombels->map(function ($rombel) use ($allJadwals, $allAgendas) {
+            $jadwal = $allJadwals->get($rombel->id);
 
             if (!$jadwal) {
                 return [
@@ -75,7 +82,6 @@ class DashboardMonitoring extends Component
                 ];
             }
 
-            // Check if kegiatan khusus
             if ($jadwal->isKegiatanKhusus()) {
                 return [
                     'rombel' => $rombel,
@@ -86,11 +92,7 @@ class DashboardMonitoring extends Component
                 ];
             }
 
-            // Find agenda for today
-            $agenda = AgendaHarian::where('jadwal_pelajaran_id', $jadwal->id)
-                ->where('tanggal', $this->tanggal)
-                ->with('guru')
-                ->first();
+            $agenda = $allAgendas->get($jadwal->id);
 
             if (!$agenda) {
                 return [
@@ -102,7 +104,6 @@ class DashboardMonitoring extends Component
                 ];
             }
 
-            // Check guru kehadiran
             if (in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit'])) {
                 return [
                     'rombel' => $rombel,
@@ -123,7 +124,6 @@ class DashboardMonitoring extends Component
                 ];
             }
 
-            // Check photo
             $hasFoto = !empty($agenda->foto_bukti_path);
             $handshakeDone = in_array($agenda->status, ['berjalan', 'selesai']);
 

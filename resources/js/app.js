@@ -98,23 +98,33 @@ window.StopwatchEngine = {
 window.showToast = function(message, type = 'success') {
     const toastContainer = document.getElementById('toast-container') || createToastContainer();
     const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-bg-${type} border-0 show`;
+    toast.className = `toast align-items-center text-bg-${type} border-0 show shadow-lg rounded-3 fw-bold mb-2`;
     toast.setAttribute('role', 'alert');
+    toast.style.fontWeight = '700';
+    toast.style.fontSize = '0.95rem';
+    toast.style.borderRadius = '12px';
+    toast.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+
     toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        <div class="d-flex align-items-center justify-content-between px-3 py-2" style="min-height: 52px;">
+            <div class="toast-body p-0 fw-bold d-flex align-items-center my-auto flex-fill me-2" style="font-weight: 800; font-size: 0.95rem; line-height: 1.3;">${message}</div>
+            <button type="button" class="btn-close btn-close-white my-auto ms-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
     `;
     toastContainer.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
 };
 
 function createToastContainer() {
     const container = document.createElement('div');
     container.id = 'toast-container';
-    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.className = 'toast-container position-fixed top-0 start-50 translate-middle-x p-3';
     container.style.zIndex = '9999';
+    container.style.width = '90%';
+    container.style.maxWidth = '460px';
     document.body.appendChild(container);
     return container;
 }

@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#1a56db">
     <meta name="description" content="AgenDamay - Sistem Agenda Guru SMKN 2 Indramayu">
 
-    <title>{{ $title ?? 'AgenDamay' }} — AgenDamay SMKN 2 Indramayu</title>
+    <title>{{ $title ?? 'AgenDAmay' }} — AgenDAmay SMKN 2 Indramayu</title>
 
     {{-- PWA Fullscreen Meta Tags --}}
     <link rel="manifest" href="/manifest.json">
@@ -42,10 +42,10 @@
                 </button>
 
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate style="text-decoration: none;">
-                    <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 34px; height: 34px; border-radius: 6px;">
+                    <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 44px; height: 44px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                     <div class="d-flex flex-column text-start">
-                        <span class="fw-bold text-white" style="font-size: 0.95rem; line-height: 1.1;">AgenDamay</span>
-                        <span class="text-white-50" style="font-size: 0.65rem; font-weight: 400; line-height: 1.1; margin-top: 1px;">Agenda Digital SMKN 2 Indramayu</span>
+                        <span class="fw-extrabold text-white" style="font-size: 1.1rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
+                        <span class="text-white-50" style="font-size: 0.65rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
             </div>

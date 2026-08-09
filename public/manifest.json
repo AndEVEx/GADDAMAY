@@ -1,7 +1,7 @@
 {
-    "name": "AgenDamay - SMKN 2 Indramayu",
-    "short_name": "AgenDamay",
-    "description": "AgenDamay - Sistem Agenda Guru SMKN 2 Indramayu",
+    "name": "AgenDAmay - SMKN 2 Indramayu",
+    "short_name": "AgenDAmay",
+    "description": "AgenDAmay - Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari",
     "start_url": "/",
     "display": "fullscreen",
     "display_override": ["fullscreen", "standalone", "minimal-ui"],

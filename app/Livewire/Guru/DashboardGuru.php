@@ -32,12 +32,13 @@ class DashboardGuru extends Component
             ->orderBy('jam_ke_mulai')
             ->get();
 
-        // Also get kegiatan khusus for this day (no guru assignment needed)
+        // Get unique kegiatan khusus for this day (deduplicate Upacara, Istirahat, etc.)
         $kegiatanKhusus = JadwalPelajaran::where('hari', $this->hariIni)
             ->whereNotNull('kegiatan_khusus')
             ->whereNull('mapel_id')
             ->orderBy('jam_ke_mulai')
-            ->get();
+            ->get()
+            ->unique(fn($item) => trim($item->kegiatan_khusus) . '-' . $item->jam_ke_mulai);
 
         // Merge and sort
         $all = $jadwals->merge($kegiatanKhusus)->sortBy('jam_ke_mulai');

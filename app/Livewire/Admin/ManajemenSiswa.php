@@ -145,16 +145,19 @@ class ManajemenSiswa extends Component
 
     public function importData()
     {
-        $this->validate([
-            'importFile' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-        ]);
-
         try {
+            $this->validate([
+                'importFile' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            ]);
+
             Excel::import(new SiswaImport, $this->importFile->getRealPath());
-            $this->reset('importFile');
             $this->dispatch('show-toast', message: 'Data siswa berhasil diimport!', type: 'success');
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            $this->dispatch('show-toast', message: 'File tidak valid: ' . implode(', ', $ve->validator->errors()->all()), type: 'danger');
         } catch (\Exception $e) {
             $this->dispatch('show-toast', message: 'Gagal mengimport data: ' . $e->getMessage(), type: 'danger');
+        } finally {
+            $this->reset('importFile');
         }
     }
 

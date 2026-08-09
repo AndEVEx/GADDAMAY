@@ -5,8 +5,8 @@
             <div class="text-center mb-4">
                 <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo SMKN 2 Indramayu" 
                      class="mb-3" style="width: 80px; height: 80px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
-                <h1 class="h4 fw-bold text-dark mb-1">AgenDamay</h1>
-                <p class="text-muted small">Agenda Guru SMKN 2 Indramayu</p>
+                <h1 class="h4 fw-bold text-dark mb-1">AgenDAmay</h1>
+                <p class="text-muted small">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</p>
             </div>
 
             {{-- Login Form --}}

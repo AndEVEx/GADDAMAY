@@ -21,7 +21,7 @@
                 <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" class="form-control" style="min-height: 48px;">
                 <div class="form-text">Pastikan nama kelas di file Excel sesuai dengan nama kelas yang sudah terdaftar di sistem.</div>
             </div>
-            <button wire:click="importData" class="btn btn-success w-100" style="min-height: 48px;" {{ !$importFile ? 'disabled' : '' }}>
+            <button wire:click="importData" class="btn btn-success w-100" style="min-height: 48px;" wire:loading.attr="disabled" {{ !$importFile ? 'disabled' : '' }}>
                 <span wire:loading.remove wire:target="importData"><i class="bi bi-cloud-upload me-2"></i>Import Data Siswa</span>
                 <span wire:loading wire:target="importData"><span class="spinner-border spinner-border-sm me-2"></span>Mengimport...</span>
             </button>
