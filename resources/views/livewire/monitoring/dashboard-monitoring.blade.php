@@ -1,97 +1,121 @@
 <div wire:poll.30s>
-    <div class="page-header">
+    {{-- Page Header --}}
+    <div class="page-header shadow-sm mb-3">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1><i class="bi bi-graph-up me-2"></i>Monitoring</h1>
-                <p class="subtitle mb-0">
+                <h1 class="text-white fw-bold mb-1"><i class="bi bi-graph-up me-2"></i>Monitoring</h1>
+                <p class="subtitle mb-0 text-white-50 small">
                     {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}
                 </p>
             </div>
         </div>
         
-        <div class="mt-3 d-flex align-items-center">
-            <label class="me-2 fw-bold">Pilih Jam:</label>
+        {{-- Jam Selector Controls --}}
+        <div class="mt-3 d-flex align-items-center flex-wrap gap-2">
+            <label class="me-1 fw-bold text-white" style="font-size: 0.95rem; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">Pilih Jam:</label>
+            
             <div class="dropdown">
-                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 48px;">
-                    Jam ke-{{ $selectedJam ?? '?' }}
+                <button class="btn btn-light text-primary fw-extrabold dropdown-toggle shadow-sm px-3 py-2 d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 44px; border-radius: 12px; font-weight: 800; font-size: 0.95rem;">
+                    <span>Jam ke-{{ $selectedJam ?? '?' }}</span>
                 </button>
-                <ul class="dropdown-menu">
+                <ul class="dropdown-menu shadow-lg py-1" style="border-radius: 12px; max-height: 280px; overflow-y: auto;">
                     @for($i = 1; $i <= 10; $i++)
-                        <li><button class="dropdown-item" wire:click="setJam({{ $i }})">Jam ke-{{ $i }}</button></li>
+                        <li>
+                            <button class="dropdown-item py-2 fw-semibold {{ $selectedJam == $i ? 'active bg-primary text-white' : '' }}" wire:click="setJam({{ $i }})">
+                                Jam ke-{{ $i }}
+                            </button>
+                        </li>
                     @endfor
                 </ul>
             </div>
-            <span class="badge bg-light text-dark">
-                <i class="bi bi-broadcast animate-pulse text-success"></i> Live
+
+            {{-- Live Badge Indicator --}}
+            <span class="badge bg-success text-white px-3 py-2 ms-2 d-inline-flex align-items-center gap-2 shadow-sm" style="border-radius: 12px; font-size: 0.9rem !important;">
+                <i class="bi bi-broadcast fs-5 animate-pulse text-white"></i>
+                <span class="fw-extrabold" style="letter-spacing: 0.5px;">LIVE</span>
             </span>
         </div>
     </div>
 
-    {{-- Summary --}}
+    {{-- Summary Statistics Grid (2x2 Grid) --}}
     <div class="row g-2 mb-3">
-        <div class="col">
-            <div class="card text-center py-2 border-start border-3 border-success">
-                <div class="fw-bold text-success">{{ $summary['hijau'] ?? 0 }}</div>
-                <div class="small text-muted">Lengkap</div>
+        {{-- Row 1: Lengkap & Izin --}}
+        <div class="col-6">
+            <div class="card text-center py-3 shadow-sm border-start border-4 border-success">
+                <div class="fw-extrabold fs-3 text-success mb-0" style="line-height: 1.1;">{{ $summary['hijau'] ?? 0 }}</div>
+                <div class="fw-semibold small text-muted">Lengkap</div>
             </div>
         </div>
-        <div class="col">
-            <div class="card text-center py-2 border-start border-3 border-warning">
-                <div class="fw-bold text-warning">{{ $summary['kuning'] ?? 0 }}</div>
-                <div class="small text-muted">Belum Foto</div>
+        <div class="col-6">
+            <div class="card text-center py-3 shadow-sm border-start border-4" style="border-color: #ea580c !important;">
+                <div class="fw-extrabold fs-3 mb-0" style="color: #ea580c; line-height: 1.1;">{{ $summary['oranye'] ?? 0 }}</div>
+                <div class="fw-semibold small text-muted">Izin</div>
             </div>
         </div>
-        <div class="col">
-            <div class="card text-center py-2 border-start border-3 border-danger">
-                <div class="fw-bold text-danger">{{ $summary['merah'] ?? 0 }}</div>
-                <div class="small text-muted">Belum Mulai</div>
+
+        {{-- Row 2: Belum Foto & Belum Mulai --}}
+        <div class="col-6">
+            <div class="card text-center py-3 shadow-sm border-start border-4 border-warning">
+                <div class="fw-extrabold fs-3 text-warning mb-0" style="line-height: 1.1;">{{ $summary['kuning'] ?? 0 }}</div>
+                <div class="fw-semibold small text-muted">Belum Foto</div>
             </div>
         </div>
-        <div class="col">
-            <div class="card text-center py-2 border-start border-3" style="border-color: #ea580c !important;">
-                <div class="fw-bold" style="color: #ea580c;">{{ $summary['oranye'] ?? 0 }}</div>
-                <div class="small text-muted">Izin</div>
+        <div class="col-6">
+            <div class="card text-center py-3 shadow-sm border-start border-4 border-danger">
+                <div class="fw-extrabold fs-3 text-danger mb-0" style="line-height: 1.1;">{{ $summary['merah'] ?? 0 }}</div>
+                <div class="fw-semibold small text-muted">Belum Mulai</div>
             </div>
         </div>
     </div>
 
-    {{-- Rombel Grid --}}
+    {{-- Rombel Grid (Rata Tengah) --}}
     <div class="row g-2">
         @foreach($monitoringData as $item)
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="monitoring-card card-{{ $item['status'] }}" data-bs-toggle="modal" data-bs-target="#detailModal"
-                 wire:click="$dispatch('show-detail', { rombelId: '{{ $item['rombel']->id }}' })">
-                <div class="fw-bold small mb-1">{{ $item['rombel']->nama_kelas }}</div>
+            <div class="monitoring-card card-{{ $item['status'] }} text-center p-3 d-flex flex-column align-items-center justify-content-center h-100" 
+                 data-bs-toggle="modal" data-bs-target="#detailModal"
+                 wire:click="$dispatch('show-detail', { rombelId: '{{ $item['rombel']->id }}' })"
+                 style="cursor: pointer; text-align: center;">
+                
+                {{-- Nama Kelas (Rata Tengah) --}}
+                <div class="fw-bold fs-6 mb-1 text-center w-100 text-dark">{{ $item['rombel']->nama_kelas }}</div>
 
                 @if($item['jadwal'] && !$item['jadwal']->isKegiatanKhusus())
-                    <div class="small text-muted mb-1">{{ $item['jadwal']->mataPelajaran?->nama_mapel }}</div>
+                    <div class="small text-muted text-center w-100 mb-1" style="font-size: 0.8rem; line-height: 1.2;">
+                        {{ $item['jadwal']->mataPelajaran?->nama_mapel }}
+                    </div>
                     @if($item['agenda'])
-                        <div class="small text-muted">{{ $item['agenda']->guru?->name }}</div>
+                        <div class="small text-muted text-center w-100" style="font-size: 0.75rem;">
+                            <i class="bi bi-person me-1"></i>{{ $item['agenda']->guru?->name }}
+                        </div>
                     @else
-                        <div class="small text-muted">{{ $item['jadwal']->jadwalGuru->first()?->guru?->name ?? '-' }}</div>
+                        <div class="small text-muted text-center w-100" style="font-size: 0.75rem;">
+                            <i class="bi bi-person me-1"></i>{{ $item['jadwal']->jadwalGuru->first()?->guru?->name ?? '-' }}
+                        </div>
                     @endif
                 @endif
 
-                <div class="mt-2">
-                    <span class="status-badge status-{{ $item['status'] }}">
+                {{-- Status Badge (Rata Tengah) --}}
+                <div class="mt-2 text-center w-100">
+                    <span class="status-badge status-{{ $item['status'] }} mx-auto">
                         {{ $item['label'] }}
                     </span>
                 </div>
 
                 @if($item['status'] === 'hijau' && $item['agenda']?->foto_bukti_path)
-                    <div class="mt-2">
-                        <span class="badge bg-success bg-opacity-10 text-success small">
-                            <i class="bi bi-camera-fill"></i> Lihat Foto
+                    <div class="mt-2 text-center w-100">
+                        <span class="badge bg-success bg-opacity-10 text-success small mx-auto">
+                            <i class="bi bi-camera-fill me-1"></i> Lihat Foto
                         </span>
                     </div>
                 @endif
 
                 @if($item['status'] === 'merah')
-                    <div class="mt-2">
+                    <div class="mt-2 text-center w-100">
                         @if(auth()->user()->canOverride())
-                        <a href="{{ route('admin.koreksi') }}" class="btn btn-outline-danger btn-sm" style="min-height: 32px; font-size: 0.7rem;"
+                        <a href="{{ route('admin.koreksi') }}" class="btn btn-outline-danger btn-sm mx-auto" style="min-height: 32px; font-size: 0.7rem;"
                            wire:navigate onclick="event.stopPropagation()">
-                            <i class="bi bi-pencil"></i> Koreksi
+                            <i class="bi bi-pencil me-1"></i> Koreksi
                         </a>
                         @endif
                     </div>
@@ -102,8 +126,8 @@
     </div>
 
     {{-- Quick Links --}}
-    <div class="mt-4">
-        <a href="{{ route('monitoring.progress') }}" class="btn btn-outline-primary w-100" wire:navigate>
+    <div class="mt-4 mb-3">
+        <a href="{{ route('monitoring.progress') }}" class="btn btn-outline-primary w-100 py-2 fw-semibold" style="min-height: 48px;" wire:navigate>
             <i class="bi bi-bar-chart me-2"></i>Lihat Progress TP
         </a>
     </div>
