@@ -41,44 +41,51 @@
                     <span class="d-none d-sm-inline fw-semibold small">Menu</span>
                 </button>
 
-                <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate>
-                    <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 32px; height: 32px; border-radius: 6px;">
-                    <span class="d-none d-sm-inline">AgenDamay</span>
+                <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate style="text-decoration: none;">
+                    <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 34px; height: 34px; border-radius: 6px;">
+                    <div class="d-flex flex-column text-start">
+                        <span class="fw-bold text-white" style="font-size: 0.95rem; line-height: 1.1;">AgenDamay</span>
+                        <span class="text-white-50" style="font-size: 0.65rem; font-weight: 400; line-height: 1.1; margin-top: 1px;">Agenda Digital SMKN 2 Indramayu</span>
+                    </div>
                 </a>
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                {{-- Fullscreen Toggle Button --}}
-                <button onclick="toggleFullscreen()" class="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center p-1" style="width: 36px; height: 36px;" title="Layar Penuh">
-                    <i class="bi bi-arrows-fullscreen"></i>
-                </button>
-
-                {{-- Notification Bell --}}
-                @livewire('components.notification-bell')
-
                 {{-- User Dropdown Menu --}}
                 <div class="dropdown">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" style="min-height: 40px;">
-                        <i class="bi bi-person-circle"></i>
-                        <span class="d-none d-md-inline">{{ Auth::user()->name }}</span>
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2 px-2" type="button" data-bs-toggle="dropdown" style="min-height: 40px;">
+                        <i class="bi bi-person-circle fs-6"></i>
+                        <span class="d-none d-md-inline fw-semibold small">{{ Auth::user()->name }}</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                        <li class="px-3 py-2 bg-light rounded-top border-bottom mb-1">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg py-1" style="min-width: 250px; border-radius: 0.75rem;">
+                        <li class="px-3 py-2 bg-light border-bottom mb-1">
                             <div class="fw-bold text-dark small">{{ Auth::user()->name }}</div>
-                            <div class="text-muted" style="font-size: 0.75rem;">{{ Auth::user()->email }}</div>
-                            <span class="badge bg-primary mt-1">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
+                            <div class="text-muted" style="font-size: 0.72rem;">{{ Auth::user()->email }}</div>
+                            <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
+                        </li>
+                        <li class="px-2 py-1">
+                            @livewire('components.notification-bell')
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <button onclick="toggleFullscreen()" class="dropdown-item py-2 d-flex align-items-center">
+                                <i class="bi bi-arrows-fullscreen text-info me-2 fs-6"></i>
+                                <span class="small">Layar Penuh (Fullscreen)</span>
+                            </button>
                         </li>
                         <li>
-                            <a class="dropdown-item py-2" href="{{ route('ganti-password') }}" wire:navigate>
-                                <i class="bi bi-key-fill text-warning me-2"></i>Ganti Password
+                            <a class="dropdown-item py-2 d-flex align-items-center" href="{{ route('ganti-password') }}" wire:navigate>
+                                <i class="bi bi-key-fill text-warning me-2 fs-6"></i>
+                                <span class="small">Ganti Password</span>
                             </a>
                         </li>
                         <li><hr class="dropdown-divider my-1"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item py-2 text-danger">
-                                    <i class="bi bi-box-arrow-right me-2"></i>Keluar
+                                <button type="submit" class="dropdown-item py-2 text-danger d-flex align-items-center">
+                                    <i class="bi bi-box-arrow-right me-2 fs-6"></i>
+                                    <span class="small">Keluar</span>
                                 </button>
                             </form>
                         </li>

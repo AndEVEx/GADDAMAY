@@ -42,16 +42,23 @@ class DashboardGuru extends Component
         // Merge and sort
         $all = $jadwals->merge($kegiatanKhusus)->sortBy('jam_ke_mulai');
 
-        // Attach agenda status for each jadwal
-        return $all->map(function ($jadwal) use ($user) {
-            $agenda = AgendaHarian::where('jadwal_pelajaran_id', $jadwal->id)
-                ->where('tanggal', $this->tanggal)
-                ->where(function ($q) use ($user) {
-                    $q->where('guru_id', $user->id)
-                      ->orWhere('guru_pengganti_id', $user->id);
-                })
-                ->first();
+        if ($all->isEmpty()) {
+            return collect();
+        }
 
+        // Batch load all agenda harian for today in 1 single query (Eliminates N+1 query lag)
+        $agendas = AgendaHarian::whereIn('jadwal_pelajaran_id', $all->pluck('id'))
+            ->where('tanggal', $this->tanggal)
+            ->where(function ($q) use ($user) {
+                $q->where('guru_id', $user->id)
+                  ->orWhere('guru_pengganti_id', $user->id);
+            })
+            ->get()
+            ->keyBy('jadwal_pelajaran_id');
+
+        // Attach agenda status for each jadwal
+        return $all->map(function ($jadwal) use ($agendas) {
+            $agenda = $agendas->get($jadwal->id);
             $jadwal->agenda = $agenda;
             $jadwal->status_label = $this->getStatusLabel($agenda);
             $jadwal->can_start = $this->canStart($jadwal, $agenda);
