@@ -156,7 +156,7 @@ class ManajemenUser extends Component
                 $nama = trim($row['A'] ?? '');
                 $email = trim($row['B'] ?? '');
                 $password = trim($row['C'] ?? 'password123');
-                $role = trim($row['D'] ?? 'guru');
+                $role = User::normalizeRole(trim($row['D'] ?? 'guru'));
                 if (empty($nama) || empty($email)) continue;
                 User::updateOrCreate(
                     ['email' => $email],

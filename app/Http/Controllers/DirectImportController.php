@@ -181,8 +181,7 @@ class DirectImportController extends Controller
             foreach ($rows as $row) {
                 $nama = trim($row['A'] ?? '');
                 $email = trim($row['B'] ?? '');
-                $pass = trim($row['C'] ?? '');
-                $role = trim($row['D'] ?? 'guru');
+                $role = User::normalizeRole(trim($row['D'] ?? 'guru'));
                 if (empty($nama) || empty($email)) continue;
 
                 User::updateOrCreate(

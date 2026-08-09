@@ -48,6 +48,37 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Normalize human-readable role strings to valid database ENUM values.
+     */
+    public static function normalizeRole(?string $role): string
+    {
+        if (empty($role)) {
+            return 'guru';
+        }
+
+        $normalized = strtolower(trim($role));
+        $normalized = str_replace([' ', '-'], '_', $normalized);
+
+        return match ($normalized) {
+            'admin', 'administrator' => 'admin',
+            'kepsek', 'kepala_sekolah', 'headmaster' => 'kepsek',
+            'waka', 'wakil_kepala_sekolah', 'wakasek' => 'waka',
+            'ketua_mgmp', 'mgmp' => 'ketua_mgmp',
+            'ketua_kelas', 'km', 'ketua' => 'ketua_kelas',
+            'guru', 'pengajar', 'teacher' => 'guru',
+            default => in_array($normalized, ['admin', 'kepsek', 'waka', 'ketua_mgmp', 'guru', 'ketua_kelas']) ? $normalized : 'guru',
+        };
+    }
+
+    /**
+     * Mutator for role attribute to auto-normalize role strings.
+     */
+    protected function setRoleAttribute($value): void
+    {
+        $this->attributes['role'] = self::normalizeRole($value);
+    }
+
     // =========================================================================
     // Relationships
     // =========================================================================
