@@ -29,6 +29,7 @@ use App\Livewire\Admin\ManajemenUser;
 use App\Livewire\Admin\ManajemenMotivasiPantun;
 use App\Livewire\Admin\KoreksiAgenda;
 use App\Livewire\Admin\OverrideAgenda;
+use App\Livewire\Admin\ImportKktp;
 use App\Livewire\Monitoring\DashboardMonitoring;
 use App\Livewire\Monitoring\ProgressTp;
 use App\Livewire\Guru\FotoGuru;
