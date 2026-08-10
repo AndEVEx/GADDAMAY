@@ -2,9 +2,14 @@
     showModal: false, 
     modalAgenda: null,
     openDetail(agenda) { 
+        if (!agenda || !agenda.id) return;
         this.modalAgenda = agenda; 
         this.showModal = true; 
-    } 
+    },
+    closeModal() {
+        this.showModal = false;
+        this.modalAgenda = null;
+    }
 }">
     <div class="page-header mb-3">
         <h1><i class="bi bi-journal-text me-2"></i>Jurnal Mengajar {{ $rombel->nama_kelas }}</h1>
@@ -134,20 +139,20 @@
     @endforelse
 
     {{-- Detail Modal Viewer --}}
-    <div x-show="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.75); z-index: 1060;" @click.self="showModal = false" x-cloak>
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                <div class="modal-header bg-primary text-white border-0">
-                    <div>
-                        <span class="badge bg-white text-primary fw-bold me-2" x-text="'📌 Pertemuan Ke-' + modalAgenda?.pertemuan_ke"></span>
-                        <span class="modal-title fw-bold" x-text="modalAgenda?.tanggal + ' &bull; ' + modalAgenda?.mapel"></span>
-                        <div class="small text-white-50 mt-1">Kelas {{ $rombel->nama_kelas }} &bull; <span x-text="'Minggu ke-' + modalAgenda?.week_of_month"></span></div>
+    <div x-show="showModal" class="modal fade" :class="{ 'show d-block': showModal }" tabindex="-1" style="background: rgba(0,0,0,0.75); z-index: 1060;" @click.self="closeModal()" x-cloak>
+        <template x-if="showModal && modalAgenda">
+            <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                    <div class="modal-header bg-primary text-white border-0">
+                        <div>
+                            <span class="badge bg-white text-primary fw-bold me-2" x-text="'📌 Pertemuan Ke-' + modalAgenda.pertemuan_ke"></span>
+                            <span class="modal-title fw-bold" x-text="modalAgenda.tanggal + ' &bull; ' + modalAgenda.mapel"></span>
+                            <div class="small text-white-50 mt-1">Kelas {{ $rombel->nama_kelas }} &bull; <span x-text="'Minggu ke-' + modalAgenda.week_of_month"></span></div>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" @click="closeModal()"></button>
                     </div>
-                    <button type="button" class="btn-close btn-close-white" @click="showModal = false"></button>
-                </div>
-                
-                <div class="modal-body p-3 text-dark">
-                    <template x-if="modalAgenda">
+                    
+                    <div class="modal-body p-3 text-dark">
                         <div>
                             {{-- Status Badge --}}
                             <div class="mb-3">
@@ -227,19 +232,19 @@
                                 </div>
                             </div>
                         </div>
-                    </template>
-                </div>
+                    </div>
 
-                <div class="modal-footer bg-light justify-content-between">
-                    <a x-show="modalAgenda?.id" :href="'/guru/detail/' + modalAgenda?.id" class="btn btn-primary btn-sm px-3 fw-bold" style="border-radius: 8px;" wire:navigate>
-                        <i class="bi bi-eye me-1"></i>Buka Halaman Detail Penuh
-                    </a>
-                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" @click="showModal = false" style="border-radius: 8px;">
-                        Tutup
-                    </button>
+                    <div class="modal-footer bg-light justify-content-between">
+                        <a x-show="modalAgenda?.id" :href="'/guru/detail/' + modalAgenda.id" class="btn btn-primary btn-sm px-3 fw-bold" style="border-radius: 8px;" wire:navigate>
+                            <i class="bi bi-eye me-1"></i>Buka Halaman Detail Penuh
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" @click="closeModal()" style="border-radius: 8px;">
+                            Tutup
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </template>
     </div>
 
     <div class="mt-3">

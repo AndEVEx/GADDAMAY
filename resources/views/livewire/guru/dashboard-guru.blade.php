@@ -21,10 +21,10 @@
     @forelse($jadwals as $jadwal)
         <div class="card mb-3 animate-fade-in-up border shadow-sm" style="animation-delay: {{ $loop->index * 0.05 }}s; border-radius: 12px;">
             <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                     
                     {{-- Jam & Status Icon Box Container --}}
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 flex-fill min-w-0" style="overflow: hidden;">
                         @php
                             $boxBg = match($jadwal->agenda?->status) {
                                 'selesai' => 'bg-success bg-opacity-10 text-success',
@@ -41,7 +41,7 @@
                             };
                         @endphp
 
-                        <div class="rounded-3 p-2 text-center {{ $boxBg }}" style="min-width: 62px;">
+                        <div class="rounded-3 p-2 text-center flex-shrink-0 {{ $boxBg }}" style="min-width: 62px;">
                             <i class="bi {{ $statusIcon }} fs-5 d-block mb-1"></i>
                             <div class="fw-bold" style="font-size: 0.78rem;">Jam {{ $jadwal->jam_ke_mulai }}</div>
                             @if($jadwal->jam_ke_mulai !== $jadwal->jam_ke_selesai)
@@ -49,32 +49,36 @@
                             @endif
                         </div>
 
-                        <div>
+                        <div class="min-w-0 flex-fill overflow-hidden" style="min-width: 0;">
                             @if(!empty($jadwal->is_kegiatan_khusus))
-                                <span class="badge bg-secondary bg-opacity-15 text-dark px-2 py-1" style="font-size: 0.8rem;">{{ $jadwal->kegiatan_khusus }}</span>
+                                <span class="badge bg-secondary bg-opacity-15 text-dark px-2 py-1 text-truncate" style="font-size: 0.8rem; max-width: 100%;">{{ $jadwal->kegiatan_khusus }}</span>
                             @else
-                                <div class="fw-bold text-dark" style="font-size: 0.98rem;">
+                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem; line-height: 1.2;" title="{{ $jadwal->mataPelajaran?->nama_mapel }}">
                                     {{ $jadwal->mataPelajaran?->nama_mapel ?? '-' }}
                                 </div>
-                                <div class="text-muted small d-flex align-items-center gap-1">
-                                    <i class="bi bi-door-open text-primary"></i>
-                                    <span class="fw-semibold">{{ $jadwal->rombel?->nama_kelas ?? '-' }}</span>
+                                <div class="text-muted small d-flex align-items-center gap-1 flex-wrap mt-1">
+                                    <div class="d-flex align-items-center gap-1 text-truncate" style="max-width: 100%;">
+                                        <i class="bi bi-door-open text-primary flex-shrink-0"></i>
+                                        <span class="fw-semibold text-truncate">{{ $jadwal->rombel?->nama_kelas ?? '-' }}</span>
+                                    </div>
                                     @if(!empty($jadwal->is_split_by_break))
-                                        <span class="badge bg-info bg-opacity-15 text-info ms-1" style="font-size: 0.65rem;">Terpotong Istirahat</span>
+                                        <span class="badge bg-info bg-opacity-15 text-info text-nowrap" style="font-size: 0.65rem;">Terpotong Istirahat</span>
                                     @endif
                                 </div>
                             @endif
 
                             @if(!empty($jadwal->keterangan))
-                                <span class="badge bg-light text-muted border mt-1 d-inline-block" style="font-size: 0.7rem;">{{ $jadwal->keterangan }}</span>
+                                <span class="badge bg-light text-muted border mt-1 text-truncate d-inline-block" style="font-size: 0.7rem; max-width: 100%;">{{ $jadwal->keterangan }}</span>
                             @endif
                         </div>
                     </div>
 
-                    {{-- Status Text Badge --}}
-                    <span class="status-badge {{ $jadwal->status_label['class'] }}">
-                        {{ $jadwal->status_label['text'] }}
-                    </span>
+                    {{-- Status Text Badge (Fixed Right Boundary) --}}
+                    <div class="flex-shrink-0 ms-1 text-end">
+                        <span class="status-badge {{ $jadwal->status_label['class'] }} text-nowrap" style="font-size: 0.7rem; padding: 0.25rem 0.55rem;">
+                            {{ $jadwal->status_label['text'] }}
+                        </span>
+                    </div>
                 </div>
 
                 {{-- Team Teaching Info --}}
