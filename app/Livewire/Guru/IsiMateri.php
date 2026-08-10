@@ -80,6 +80,15 @@ class IsiMateri extends Component
         return redirect()->route('guru.kehadiran', $this->agenda->id);
     }
 
+    public function batalkanAgenda()
+    {
+        if ($this->agenda) {
+            $this->agenda->delete();
+            $this->dispatch('show-toast', message: 'Sesi agenda berhasil dibatalkan!', type: 'info');
+        }
+        return redirect()->route('guru.dashboard');
+    }
+
     public function render()
     {
         return view('livewire.guru.isi-materi', [

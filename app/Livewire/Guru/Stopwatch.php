@@ -28,12 +28,27 @@ class Stopwatch extends Component
 
     public function akhiriPembelajaran()
     {
-        $this->agenda->update([
-            'waktu_selesai' => Carbon::now('Asia/Jakarta'),
-            'prompter_custom' => $this->prompter,
-        ]);
+        try {
+            $this->agenda->update([
+                'waktu_selesai' => Carbon::now('Asia/Jakarta'),
+                'prompter_custom' => $this->prompter,
+                'status' => 'selesai',
+            ]);
 
-        return redirect()->route('guru.kktp', $this->agenda->id);
+            $this->dispatch('show-toast', message: 'Pembelajaran berhasil diakhiri!', type: 'success');
+            return redirect()->route('guru.dashboard');
+        } catch (\Exception $e) {
+            $this->dispatch('show-toast', message: 'Gagal mengakhiri: ' . $e->getMessage(), type: 'danger');
+        }
+    }
+
+    public function batalkanAgenda()
+    {
+        if ($this->agenda) {
+            $this->agenda->delete();
+            $this->dispatch('show-toast', message: 'Sesi agenda berhasil dibatalkan!', type: 'info');
+        }
+        return redirect()->route('guru.dashboard');
     }
 
     public function render()

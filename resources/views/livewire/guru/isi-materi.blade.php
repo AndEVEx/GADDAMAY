@@ -60,9 +60,14 @@
         </button>
     </form>
 
-    <div class="mt-3">
-        <a href="{{ route('guru.dashboard') }}" class="btn btn-outline-secondary" wire:navigate>
-            <i class="bi bi-arrow-left"></i> Kembali
+    <div class="mt-3 d-flex flex-wrap gap-2">
+        <a href="{{ route('guru.dashboard') }}" class="btn btn-outline-secondary flex-fill" wire:navigate style="min-height: 44px;">
+            <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
         </a>
+        <button type="button" wire:click="batalkanAgenda" 
+                wire:confirm="Yakin ingin membatalkan dan mereset agenda jam ini? (Gunakan ini jika Anda salah memilih jam pelajaran)"
+                class="btn btn-outline-danger flex-fill" style="min-height: 44px;">
+            <i class="bi bi-trash me-1"></i> Batalkan Sesi Ini (Salah Jam)
+        </button>
     </div>
 </div>

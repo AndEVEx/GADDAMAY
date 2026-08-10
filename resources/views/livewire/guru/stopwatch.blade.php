@@ -69,10 +69,23 @@
         </div>
     </div>
 
-    {{-- End Class Button --}}
-    <button wire:click="akhiriPembelajaran" class="btn btn-danger btn-lg w-100"
-            wire:confirm="Yakin ingin mengakhiri pembelajaran?" wire:loading.attr="disabled">
-        <span wire:loading.remove><i class="bi bi-stop-circle me-2"></i>Akhiri Pembelajaran</span>
-        <span wire:loading><span class="spinner-border spinner-border-sm me-2"></span>Mengakhiri...</span>
-    </button>
+    {{-- End Class & Cancel Buttons --}}
+    <div class="d-flex flex-column gap-2 mt-3">
+        <button wire:click="akhiriPembelajaran" class="btn btn-danger btn-lg w-100 fw-bold shadow-sm py-3" style="border-radius: 12px;"
+                wire:confirm="Yakin ingin mengakhiri pembelajaran sesi ini?" wire:loading.attr="disabled">
+            <span wire:loading.remove><i class="bi bi-stop-circle me-2 fs-5"></i>Akhiri Pembelajaran</span>
+            <span wire:loading><span class="spinner-border spinner-border-sm me-2"></span>Mengakhiri...</span>
+        </button>
+
+        <div class="d-flex gap-2">
+            <a href="{{ route('guru.dashboard') }}" class="btn btn-outline-secondary flex-fill" wire:navigate style="min-height: 44px; border-radius: 10px;">
+                <i class="bi bi-arrow-left me-1"></i> Kembali ke Dashboard
+            </a>
+            <button type="button" wire:click="batalkanAgenda" 
+                    wire:confirm="Yakin ingin membatalkan dan mereset agenda jam ini? (Gunakan ini jika Anda salah memilih jam pelajaran)"
+                    class="btn btn-outline-danger flex-fill" style="min-height: 44px; border-radius: 10px;">
+                <i class="bi bi-trash me-1"></i> Batalkan Sesi Ini (Salah Jam)
+            </button>
+        </div>
+    </div>
 </div>

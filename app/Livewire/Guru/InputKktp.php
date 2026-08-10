@@ -26,6 +26,7 @@ class InputKktp extends Component
         // Initialize kktpData for students who are HADIR
         $siswaHadir = $this->agenda->kehadiranMurid
             ->where('status', 'hadir')
+            ->filter(fn($k) => !empty($k->siswa))
             ->pluck('siswa');
         $tps = $this->agenda->tujuanPembelajaran;
 
@@ -69,10 +70,20 @@ class InputKktp extends Component
         return redirect()->route('guru.dashboard');
     }
 
+    public function batalkanAgenda()
+    {
+        if ($this->agenda) {
+            $this->agenda->delete();
+            $this->dispatch('show-toast', message: 'Sesi agenda berhasil dibatalkan!', type: 'info');
+        }
+        return redirect()->route('guru.dashboard');
+    }
+
     public function render()
     {
         $siswaHadir = $this->agenda->kehadiranMurid
             ->where('status', 'hadir')
+            ->filter(fn($k) => !empty($k->siswa))
             ->sortBy('siswa.nama')
             ->pluck('siswa');
         $tps = $this->agenda->tujuanPembelajaran;

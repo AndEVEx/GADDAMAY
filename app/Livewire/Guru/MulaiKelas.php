@@ -65,6 +65,15 @@ class MulaiKelas extends Component
         }
     }
 
+    public function batalkanAgenda()
+    {
+        if ($this->agenda) {
+            $this->agenda->delete();
+            $this->dispatch('show-toast', message: 'Sesi agenda berhasil dibatalkan!', type: 'info');
+        }
+        return redirect()->route('guru.dashboard');
+    }
+
     public function render()
     {
         return view('livewire.guru.mulai-kelas');
