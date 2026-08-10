@@ -35,6 +35,11 @@ class InputKehadiran extends Component
         }
     }
 
+    public function setStatus(int|string $siswaId, string $status)
+    {
+        $this->kehadiran[$siswaId] = $status;
+    }
+
     public function simpan()
     {
         foreach ($this->kehadiran as $siswaId => $status) {

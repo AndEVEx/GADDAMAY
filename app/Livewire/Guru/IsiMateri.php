@@ -75,9 +75,9 @@ class IsiMateri extends Component
         $this->agenda->update(['materi_diajarkan' => $this->materi]);
         $this->agenda->tujuanPembelajaran()->sync($this->selectedTp);
 
-        $this->dispatch('show-toast', message: 'Materi dan TP berhasil disimpan!', type: 'success');
+        $this->dispatch('show-toast', message: 'Materi & TP tersimpan! Silakan ambil foto suasana kelas/murid.', type: 'success');
 
-        return redirect()->route('guru.kehadiran', $this->agenda->id);
+        return redirect()->route('guru.foto-guru', $this->agenda->id);
     }
 
     public function batalkanAgenda()

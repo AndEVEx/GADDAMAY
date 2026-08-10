@@ -49,17 +49,14 @@
                     @endif
                 </div>
                 <div class="d-flex gap-1 flex-shrink-0">
-                    @foreach(['hadir' => 'H', 'sakit' => 'S', 'izin' => 'I', 'alpa' => 'A'] as $status => $label)
-                    <label class="btn btn-sm {{ ($kehadiran[$siswa->id] ?? 'hadir') === $status ? match($status) {
-                        'hadir' => 'btn-success',
-                        'sakit' => 'btn-info',
-                        'izin' => 'btn-warning',
-                        'alpa' => 'btn-danger',
-                    } : 'btn-outline-secondary' }}" style="min-width: 40px; min-height: 40px; display: flex; align-items: center; justify-content: center;">
-                        <input type="radio" wire:model="kehadiran.{{ $siswa->id }}" value="{{ $status }}"
-                               class="btn-check" autocomplete="off">
-                        {{ $label }}
-                    </label>
+                    @foreach(['hadir' => ['label' => 'Hadir', 'badge' => 'btn-success'], 'sakit' => ['label' => 'Sakit', 'badge' => 'btn-info'], 'izin' => ['label' => 'Izin', 'badge' => 'btn-warning'], 'alpa' => ['label' => 'Alpa', 'badge' => 'btn-danger']] as $status => $cfg)
+                        @php $isSelected = ($kehadiran[$siswa->id] ?? 'hadir') === $status; @endphp
+                        <button type="button" 
+                                wire:click="setStatus({{ $siswa->id }}, '{{ $status }}')"
+                                class="btn btn-sm {{ $isSelected ? $cfg['badge'] . ' text-white fw-bold shadow-sm' : 'btn-outline-secondary opacity-50' }} px-2 py-1"
+                                style="min-width: 44px; min-height: 44px; border-radius: 8px;">
+                            {{ strtoupper($status[0]) }}
+                        </button>
                     @endforeach
                 </div>
             </div>

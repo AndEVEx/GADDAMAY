@@ -85,7 +85,7 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
     Route::get('/dashboard', DashboardGuru::class)->name('guru.dashboard');
     Route::get('/jurnal', JurnalTahunan::class)->name('guru.jurnal');
     Route::get('/jurnal/{rombel}', JurnalPerKelas::class)->name('guru.jurnal-kelas');
-    Route::get('/detail/{agenda}', DetailAgenda::class)->name('guru.detail-agenda');
+    Route::get('/detail/{agenda}', DetailAgenda::class)->name('guru.detail-agenda')->withTrashed();
 
     // These require time restriction
     Route::middleware('time-restriction')->group(function () {

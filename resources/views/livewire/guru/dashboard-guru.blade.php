@@ -1,20 +1,20 @@
 <div>
-    {{-- Page Header --}}
-    <div class="page-header mb-3">
-        <div class="d-flex justify-content-between align-items-center">
+    {{-- Clean Welcome Header Card (No Blue Background) --}}
+    <div class="card mb-3 border-0 bg-light shadow-sm" style="border-radius: 12px;">
+        <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-                <h1 class="fw-bold mb-1"><i class="bi bi-house-fill me-2"></i>Dashboard</h1>
-                <p class="subtitle mb-0 text-muted small">Selamat datang, {{ auth()->user()->name }}</p>
+                <h5 class="fw-bold text-dark mb-1">Selamat Datang, {{ auth()->user()->name }}! 👋</h5>
+                <div class="text-muted small">Agenda Digital SMKN 2 Indramayu</div>
             </div>
-            <div class="text-end">
-                <div class="small fw-semibold text-primary">{{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}</div>
+            <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 fw-semibold" style="font-size: 0.85rem; border-radius: 8px;">
+                <i class="bi bi-calendar-event me-1"></i>{{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}
             </div>
         </div>
     </div>
 
-    {{-- Jadwal Hari Ini --}}
+    {{-- Jadwal Hari Ini Header --}}
     <h5 class="fw-bold mb-3 d-flex align-items-center justify-content-between">
-        <span><i class="bi bi-calendar-event me-2 text-primary"></i>Jadwal Mengajar Hari Ini</span>
+        <span><i class="bi bi-journal-check me-2 text-primary"></i>Jadwal Mengajar Hari Ini</span>
         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3" style="font-size: 0.75rem;">{{ $jadwals->count() }} Sesi</span>
     </h5>
 
@@ -22,12 +22,30 @@
         <div class="card mb-3 animate-fade-in-up border shadow-sm" style="animation-delay: {{ $loop->index * 0.05 }}s; border-radius: 12px;">
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    {{-- Jam --}}
+                    
+                    {{-- Jam & Status Icon Box Container --}}
                     <div class="d-flex align-items-center gap-2">
-                        <div class="bg-primary bg-opacity-10 rounded-3 p-2 text-center" style="min-width: 62px;">
-                            <div class="fw-bold text-primary" style="font-size: 0.9rem;">Jam {{ $jadwal->jam_ke_mulai }}</div>
+                        @php
+                            $boxBg = match($jadwal->agenda?->status) {
+                                'selesai' => 'bg-success bg-opacity-10 text-success',
+                                'berjalan' => 'bg-primary bg-opacity-10 text-primary',
+                                'menunggu_token', 'token_terverifikasi' => 'bg-warning bg-opacity-10 text-warning',
+                                default => 'bg-light text-muted border',
+                            };
+                            $statusIcon = match($jadwal->agenda?->status) {
+                                'selesai' => 'bi-check-circle-fill',
+                                'berjalan' => 'bi-play-circle-fill',
+                                'menunggu_token' => 'bi-hourglass-split',
+                                'token_terverifikasi' => 'bi-shield-check',
+                                default => 'bi-clock',
+                            };
+                        @endphp
+
+                        <div class="rounded-3 p-2 text-center {{ $boxBg }}" style="min-width: 62px;">
+                            <i class="bi {{ $statusIcon }} fs-5 d-block mb-1"></i>
+                            <div class="fw-bold" style="font-size: 0.78rem;">Jam {{ $jadwal->jam_ke_mulai }}</div>
                             @if($jadwal->jam_ke_mulai !== $jadwal->jam_ke_selesai)
-                                <div class="text-muted" style="font-size: 0.68rem;">s/d {{ $jadwal->jam_ke_selesai }}</div>
+                                <div style="font-size: 0.65rem;">s/d {{ $jadwal->jam_ke_selesai }}</div>
                             @endif
                         </div>
 
@@ -53,9 +71,8 @@
                         </div>
                     </div>
 
-                    {{-- Status Badge --}}
+                    {{-- Status Text Badge --}}
                     <span class="status-badge {{ $jadwal->status_label['class'] }}">
-                        <i class="bi {{ $jadwal->status_label['icon'] }}"></i>
                         {{ $jadwal->status_label['text'] }}
                     </span>
                 </div>

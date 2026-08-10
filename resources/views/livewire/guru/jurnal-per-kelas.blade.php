@@ -134,7 +134,7 @@
     @endforelse
 
     {{-- Detail Modal Viewer --}}
-    <div x-show="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.75); z-index: 1060;" x-cloak>
+    <div x-show="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.75); z-index: 1060;" @click.self="showModal = false" x-cloak>
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
                 <div class="modal-header bg-primary text-white border-0">
@@ -193,7 +193,8 @@
                                             <div class="fw-bold small mb-1">Foto Murid / Ketua Kelas</div>
                                             <template x-if="modalAgenda.foto_murid">
                                                 <div>
-                                                    <img :src="modalAgenda.foto_murid" class="img-fluid rounded border mb-2" style="max-height: 180px; object-fit: cover;">
+                                                    <img :src="modalAgenda.foto_murid" class="img-fluid rounded border mb-2" style="max-height: 180px; object-fit: cover; cursor: pointer;"
+                                                         onclick="window.openPhotoModal(this.src, 'Foto Murid')">
                                                     <a :href="modalAgenda.foto_murid" download class="btn btn-outline-primary btn-sm w-100 py-1" style="font-size: 0.72rem;">
                                                         <i class="bi bi-download me-1"></i>Unduh Foto
                                                     </a>
@@ -211,7 +212,8 @@
                                             <div class="fw-bold small mb-1">Foto Guru / Suasana Kelas</div>
                                             <template x-if="modalAgenda.foto_guru">
                                                 <div>
-                                                    <img :src="modalAgenda.foto_guru" class="img-fluid rounded border mb-2" style="max-height: 180px; object-fit: cover;">
+                                                    <img :src="modalAgenda.foto_guru" class="img-fluid rounded border mb-2" style="max-height: 180px; object-fit: cover; cursor: pointer;"
+                                                         onclick="window.openPhotoModal(this.src, 'Foto Guru')">
                                                     <a :href="modalAgenda.foto_guru" download class="btn btn-outline-success btn-sm w-100 py-1" style="font-size: 0.72rem;">
                                                         <i class="bi bi-download me-1"></i>Unduh Foto
                                                     </a>
@@ -229,7 +231,7 @@
                 </div>
 
                 <div class="modal-footer bg-light justify-content-between">
-                    <a :href="'/guru/detail/' + modalAgenda?.id" class="btn btn-primary btn-sm px-3 fw-bold" style="border-radius: 8px;">
+                    <a x-show="modalAgenda?.id" :href="'/guru/detail/' + modalAgenda?.id" class="btn btn-primary btn-sm px-3 fw-bold" style="border-radius: 8px;" wire:navigate>
                         <i class="bi bi-eye me-1"></i>Buka Halaman Detail Penuh
                     </a>
                     <button type="button" class="btn btn-outline-secondary btn-sm px-3" @click="showModal = false" style="border-radius: 8px;">
