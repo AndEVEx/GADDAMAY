@@ -17,14 +17,14 @@ class JurnalTahunan extends Component
 
     public function mount()
     {
-        $this->bulan = Carbon::now('Asia/Jakarta')->format('Y-m');
+        $this->bulan = request('bulan', Carbon::now('Asia/Jakarta')->format('Y-m'));
     }
 
     public function render()
     {
         $user = auth()->user();
-        $start = Carbon::parse($this->bulan)->startOfMonth();
-        $end = Carbon::parse($this->bulan)->endOfMonth();
+        $start = Carbon::parse($this->bulan)->startOfMonth()->format('Y-m-d');
+        $end = Carbon::parse($this->bulan)->endOfMonth()->format('Y-m-d');
 
         // Get unique rombels where guru teaches
         $rombels = Rombel::whereHas('jadwalPelajaran.jadwalGuru', fn($q) => $q->where('guru_id', $user->id))
@@ -40,6 +40,9 @@ class JurnalTahunan extends Component
             ->orderBy('nama_kelas')
             ->get();
 
-        return view('livewire.guru.jurnal-tahunan', ['rombels' => $rombels]);
+        return view('livewire.guru.jurnal-tahunan', [
+            'rombels' => $rombels,
+            'namaBulan' => Carbon::parse($this->bulan)->translatedFormat('F Y'),
+        ]);
     }
 }
