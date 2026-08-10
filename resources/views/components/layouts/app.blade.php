@@ -3,30 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#1a56db">
-    <meta name="description" content="AgenDamay - Sistem Agenda Guru SMKN 2 Indramayu">
-
+    <meta name="description" content="AgenDAmay - Agenda Digital SMKN 2 Indramayu">
+    
     <title>{{ $title ?? 'AgenDAmay' }} — AgenDAmay SMKN 2 Indramayu</title>
 
-    {{-- PWA Fullscreen Meta Tags --}}
+    {{-- PWA Assets --}}
     <link rel="manifest" href="/manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AgenDamay">
-    <meta name="mobile-web-app-capable" content="yes">
     <link rel="icon" type="image/png" href="{{ \App\Helpers\LogoHelper::getBase64() }}">
     <link rel="apple-touch-icon" href="{{ \App\Helpers\LogoHelper::getBase64() }}">
 
-    {{-- Google Fonts --}}
+    {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     {{-- Bootstrap Icons --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    {{-- Vite Assets (CSS & JS) --}}
+    @vite(['resources/css/app.scss', 'resources/js/app.js'])
+
     @livewireStyles
 </head>
 <body>
@@ -41,55 +38,16 @@
                     <span class="d-none d-sm-inline fw-semibold small">Menu</span>
                 </button>
 
+                {{-- Brand Link with School Logo --}}
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate style="text-decoration: none;">
+                    <div class="bg-white p-1 rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
+                        <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 30px; height: 30px; object-fit: contain;">
+                    </div>
                     <div class="d-flex flex-column text-start">
                         <span class="fw-extrabold text-white" style="font-size: 1.1rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
-                        <span class="text-white-50" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
+                        <span class="text-white-50 d-none d-sm-inline" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
-            </div>
-
-            <div class="d-flex align-items-center gap-2 ms-auto">
-                {{-- User Dropdown Menu --}}
-                <div class="dropdown">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center gap-2 px-2" type="button" data-bs-toggle="dropdown" style="min-height: 40px;">
-                        <i class="bi bi-person-circle fs-6"></i>
-                        <span class="d-none d-md-inline fw-semibold small">{{ Auth::user()->name }}</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg py-1" style="min-width: 250px; border-radius: 0.75rem;">
-                        <li class="px-3 py-2 bg-light border-bottom mb-1">
-                            <div class="fw-bold text-dark small">{{ Auth::user()->name }}</div>
-                            <div class="text-muted" style="font-size: 0.72rem;">{{ Auth::user()->email }}</div>
-                            <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
-                        </li>
-                        <li class="px-2 py-1">
-                            @livewire('components.notification-bell')
-                        </li>
-                        <li><hr class="dropdown-divider my-1"></li>
-                        <li>
-                            <button onclick="toggleFullscreen()" class="dropdown-item py-2 d-flex align-items-center">
-                                <i class="bi bi-arrows-fullscreen text-info me-2 fs-6"></i>
-                                <span class="small">Layar Penuh (Fullscreen)</span>
-                            </button>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2 d-flex align-items-center" href="{{ route('ganti-password') }}" wire:navigate>
-                                <i class="bi bi-key-fill text-warning me-2 fs-6"></i>
-                                <span class="small">Ganti Password</span>
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider my-1"></li>
-                        <li>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="dropdown-item py-2 text-danger d-flex align-items-center">
-                                    <i class="bi bi-box-arrow-right me-2 fs-6"></i>
-                                    <span class="small">Keluar</span>
-                                </button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
             </div>
         </div>
     </nav>
@@ -185,11 +143,43 @@
                 @endif
             </div>
 
+            {{-- Akun Saya Profile Section inside Sidebar --}}
             <div class="text-muted small fw-bold text-uppercase px-2 mb-2">Akun Saya</div>
-            <div class="list-group list-group-flush mb-4">
-                <a href="{{ route('ganti-password') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ganti-password') ? 'active' : '' }}" wire:navigate>
-                    <i class="bi bi-key-fill text-warning me-2"></i>Ganti Password
-                </a>
+            <div class="card mb-3 border-0 bg-light shadow-sm" style="border-radius: 12px;">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                            <i class="bi bi-person-circle fs-3"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <div class="fw-bold text-dark text-truncate small">{{ Auth::user()->name }}</div>
+                            <div class="text-muted text-truncate" style="font-size: 0.68rem;">{{ Auth::user()->email }}</div>
+                            <span class="badge bg-primary mt-1" style="font-size: 0.65rem;">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="py-1 border-top border-bottom my-2">
+                        @livewire('components.notification-bell')
+                    </div>
+
+                    <div class="list-group list-group-flush">
+                        <button type="button" onclick="toggleFullscreen()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
+                            <i class="bi bi-arrows-fullscreen text-info me-2 fs-6"></i>
+                            <span class="small">Layar Penuh (Fullscreen)</span>
+                        </button>
+                        <a href="{{ route('ganti-password') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2 {{ request()->routeIs('ganti-password') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-key-fill text-warning me-2 fs-6"></i>
+                            <span class="small">Ganti Password</span>
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="mt-1">
+                            @csrf
+                            <button type="submit" class="list-group-item list-group-item-action border-0 rounded text-danger d-flex align-items-center py-2 w-100">
+                                <i class="bi bi-box-arrow-right me-2 fs-6"></i>
+                                <span class="small fw-bold">Keluar</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -220,59 +210,14 @@
         Made with every kind of <i class="bi bi-heart-fill text-danger"></i> &copy; 2026 SMKN 2 Indramayu
     </footer>
 
-    {{-- Bottom Navigation (Mobile) --}}
+    {{-- Toast Notification --}}
+    <div id="toast-container" class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1080;"></div>
+
+    {{-- Bottom Navigation --}}
     @auth
-    @php $role = Auth::user()->role; @endphp
-    <nav class="bottom-nav d-lg-none">
-        @if(in_array($role, ['guru', 'ketua_mgmp']))
-            <a href="{{ route('guru.dashboard') }}" class="nav-item {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-house-fill"></i>
-                <span>Beranda</span>
-            </a>
-            <a href="{{ route('guru.jurnal') }}" class="nav-item {{ request()->routeIs('guru.jurnal*') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-journal-text"></i>
-                <span>Jurnal</span>
-            </a>
-        @elseif($role === 'admin')
-            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-house-fill"></i>
-                <span>Beranda</span>
-            </a>
-            <a href="{{ route('admin.jadwal') }}" class="nav-item {{ request()->routeIs('admin.jadwal') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-calendar3"></i>
-                <span>Jadwal</span>
-            </a>
-            <a href="{{ route('monitoring.dashboard') }}" class="nav-item {{ request()->routeIs('monitoring.*') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-graph-up"></i>
-                <span>Monitor</span>
-            </a>
-        @elseif(in_array($role, ['kepsek', 'waka']))
-            <a href="{{ route('monitoring.dashboard') }}" class="nav-item {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-house-fill"></i>
-                <span>Monitor</span>
-            </a>
-            <a href="{{ route('monitoring.progress') }}" class="nav-item {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-graph-up"></i>
-                <span>Progress TP</span>
-            </a>
-        @elseif($role === 'ketua_kelas')
-            <a href="{{ route('ketua.verifikasi') }}" class="nav-item {{ request()->routeIs('ketua.*') ? 'active' : '' }}" wire:navigate>
-                <i class="bi bi-qr-code-scan"></i>
-                <span>Verifikasi</span>
-            </a>
-        @endif
-    </nav>
+        @include('components.bottom-nav')
     @endauth
 
     @livewireScripts
-
-    <script>
-        // Prevent zoom on double-tap
-        document.addEventListener('touchend', function(e) {
-            const now = Date.now();
-            if (now - (this.lastTouchEnd || 0) < 300) { e.preventDefault(); }
-            this.lastTouchEnd = now;
-        }, false);
-    </script>
 </body>
 </html>
