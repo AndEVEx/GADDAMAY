@@ -16,6 +16,17 @@ class VerifikasiToken extends Component
     public ?AgendaHarian $agenda = null;
     public string $errorMessage = '';
 
+    public function mount()
+    {
+        $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        // Find existing verified or active agenda for today to prevent idle reset
+        $this->agenda = AgendaHarian::whereIn('status', ['token_terverifikasi', 'berjalan'])
+            ->where('tanggal', $today)
+            ->with(['jadwalPelajaran.rombel', 'jadwalPelajaran.mataPelajaran', 'guru'])
+            ->latest('updated_at')
+            ->first();
+    }
+
     public function verifikasi()
     {
         $this->errorMessage = '';

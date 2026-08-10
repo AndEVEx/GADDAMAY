@@ -7,6 +7,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
 use App\Models\AgendaHarian;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 #[Layout('components.layouts.app')]
 #[Title('Ambil Foto')]
@@ -16,18 +18,43 @@ class AmbilFoto extends Component
 
     public AgendaHarian $agenda;
     public $foto;
+    public string $fotoBase64 = '';
     public bool $uploaded = false;
 
     public function mount(AgendaHarian $agenda)
     {
         $this->agenda = $agenda->load(['jadwalPelajaran.rombel', 'jadwalPelajaran.mataPelajaran', 'guru']);
+        if (!empty($this->agenda->foto_bukti_path)) {
+            $this->uploaded = true;
+        }
     }
 
-    public function updatedFoto()
+    public function simpanFotoBase64(string $base64Data)
     {
-        $this->validate([
-            'foto' => 'required|image|max:5120', // max 5MB
-        ]);
+        if (empty($base64Data)) {
+            $this->dispatch('show-toast', message: 'Gambar tidak valid!', type: 'danger');
+            return;
+        }
+
+        try {
+            // Decode base64 image data
+            $imageData = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
+            $imageData = base64_decode($imageData);
+
+            $filename = 'foto-bukti/' . Str::uuid() . '.jpg';
+            Storage::disk('public')->put($filename, $imageData);
+
+            $this->agenda->update([
+                'foto_bukti_path' => $filename,
+                'status' => 'berjalan',
+                'waktu_mulai' => now(),
+            ]);
+
+            $this->uploaded = true;
+            $this->dispatch('show-toast', message: 'Foto bukti berwatermark berhasil disimpan! Kelas dimulai.', type: 'success');
+        } catch (\Exception $e) {
+            $this->dispatch('show-toast', message: 'Gagal menyimpan foto: ' . $e->getMessage(), type: 'danger');
+        }
     }
 
     public function simpanFoto()
@@ -44,8 +71,8 @@ class AmbilFoto extends Component
             'waktu_mulai' => now(),
         ]);
 
+        $this->uploaded = true;
         $this->dispatch('show-toast', message: 'Foto bukti berhasil disimpan! Kelas dimulai.', type: 'success');
-        return redirect()->route('ketua.verifikasi');
     }
 
     public function render()

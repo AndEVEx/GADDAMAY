@@ -50,7 +50,7 @@
             </div>
         </div>
     @elseif($agenda->status === 'menunggu_token')
-        <div class="card" wire:poll.5s="refreshStatus">
+        <div class="card" wire:poll.10s="refreshStatus">
             <div class="card-body text-center py-4">
                 <div class="small text-muted mb-2">Token OTP</div>
                 <div class="otp-display mb-3">{{ $token }}</div>
@@ -61,9 +61,14 @@
                 <div class="status-badge status-kuning mx-auto mb-3">
                     <i class="bi bi-hourglass-split"></i> Menunggu verifikasi Ketua Kelas...
                 </div>
-                <button wire:click="generateToken" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-arrow-clockwise"></i> Generate Ulang
-                </button>
+                <div class="d-flex justify-content-center gap-2">
+                    <button wire:click="refreshStatus" class="btn btn-primary btn-sm">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Cek Status
+                    </button>
+                    <button wire:click="generateToken" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-key me-1"></i> Generate Ulang
+                    </button>
+                </div>
             </div>
         </div>
     @elseif($agenda->status === 'berjalan')

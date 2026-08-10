@@ -4,6 +4,27 @@
         <p class="subtitle mb-0">Masukkan kode OTP dari guru pengajar</p>
     </div>
 
+    @if($agenda && in_array($agenda->status, ['token_terverifikasi', 'berjalan']))
+    {{-- Status Card for Already Verified Agenda --}}
+    <div class="card mb-3 animate-fade-in-up border-success">
+        <div class="card-body text-center py-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-circle mb-3" style="width: 72px; height: 72px;">
+                <i class="bi bi-shield-check text-success" style="font-size: 2.2rem;"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Token OTP Terverifikasi!</h5>
+            <p class="text-muted small mb-3">
+                {{ $agenda->guru?->name }} &bull; {{ $agenda->jadwalPelajaran?->mataPelajaran?->nama_mapel }}
+                <br>Kelas: {{ $agenda->jadwalPelajaran?->rombel?->nama_kelas }}
+            </p>
+            <a href="{{ route('ketua.foto', $agenda->id) }}" class="btn btn-success btn-lg w-100 fw-bold shadow-sm py-3" style="border-radius: 12px;" wire:navigate>
+                <i class="bi bi-camera-fill me-2"></i>Buka Kamera Ambil Foto Bukti
+            </a>
+            <button type="button" wire:click="$set('agenda', null)" class="btn btn-link btn-sm text-muted mt-2 text-decoration-none">
+                <i class="bi bi-arrow-repeat me-1"></i>Verifikasi Token Baru
+            </button>
+        </div>
+    </div>
+    @else
     {{-- Token Input Form --}}
     <div class="card mb-3 animate-fade-in-up">
         <div class="card-body py-4">
@@ -31,11 +52,12 @@
                     </div>
                 @endif
 
-                <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm" style="min-height: 52px; border-radius: 12px;" wire:loading.attr="disabled">
+                <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm py-3" style="border-radius: 12px;" wire:loading.attr="disabled">
                     <span wire:loading.remove><i class="bi bi-check-circle me-2"></i>Verifikasi Token</span>
                     <span wire:loading><span class="spinner-border spinner-border-sm me-2"></span>Memverifikasi...</span>
                 </button>
             </form>
         </div>
     </div>
+    @endif
 </div>

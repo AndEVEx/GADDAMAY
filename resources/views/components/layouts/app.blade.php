@@ -43,8 +43,8 @@
 
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate style="text-decoration: none;">
                     <div class="d-flex flex-column text-start">
-                        <span class="fw-extrabold text-white" style="font-size: 1.15rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
-                        <span class="text-white-50 d-none d-md-inline" style="font-size: 0.65rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
+                        <span class="fw-extrabold text-white" style="font-size: 1.1rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
+                        <span class="text-white-50" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
             </div>
@@ -103,7 +103,7 @@
                 </div>
                 <div>
                     <h6 class="mb-0 fw-extrabold text-white" style="letter-spacing: 0.3px;">AgenDAmay</h6>
-                    <small class="text-white-50" style="font-size: 0.65rem;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</small>
+                    <small class="text-white-50" style="font-size: 0.7rem;">SMKN 2 Indramayu</small>
                 </div>
             </div>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>

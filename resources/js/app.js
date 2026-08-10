@@ -170,6 +170,102 @@ function showMotivasiPopup(isi, tipe) {
 }
 
 // ============================================================
+// Watermark Camera Utility
+// ============================================================
+window.WatermarkCamera = {
+    async processAndWatermark(imageSource, metadata = {}) {
+        return new Promise((resolve, reject) => {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                const maxWidth = 1000;
+                let srcWidth = imageSource.videoWidth || imageSource.naturalWidth || imageSource.width;
+                let srcHeight = imageSource.videoHeight || imageSource.naturalHeight || imageSource.height;
+
+                if (!srcWidth || !srcHeight) {
+                    throw new Error("Sumber gambar tidak valid atau belum siap.");
+                }
+
+                const scaleFactor = Math.min(1, maxWidth / srcWidth);
+                canvas.width = srcWidth * scaleFactor;
+                canvas.height = srcHeight * scaleFactor;
+
+                const w = canvas.width;
+                const h = canvas.height;
+
+                // 1. Draw photo to canvas
+                ctx.drawImage(imageSource, 0, 0, w, h);
+
+                // 2. Banner Gradient Gelap
+                const bannerHeight = Math.max(120, h * 0.22);
+                const gradient = ctx.createLinearGradient(0, h - bannerHeight - 40, 0, h);
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                gradient.addColorStop(0.3, 'rgba(15, 23, 42, 0.75)');
+                gradient.addColorStop(1, 'rgba(15, 23, 42, 0.95)');
+
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, h - bannerHeight - 40, w, bannerHeight + 40);
+
+                // 3. Aksen Garis Kiri
+                const paddingLeft = 24;
+                const strokeWidth = 5;
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(paddingLeft, h - bannerHeight + 10, strokeWidth, bannerHeight - 30);
+
+                // 4. Metadata Text
+                ctx.textBaseline = 'top';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 4;
+
+                const textX = paddingLeft + strokeWidth + 14;
+                let currentY = h - bannerHeight + 10;
+
+                // A. Header Badge
+                ctx.font = 'bold 18px "Inter", "Segoe UI", sans-serif';
+                ctx.fillStyle = '#38bdf8';
+                const headerText = `AGEN DAMAY | ${metadata.namaSekolah || 'SMKN 2 INDRAMAYU'}`;
+                ctx.fillText(headerText.toUpperCase(), textX, currentY);
+                currentY += 26;
+
+                // B. Kelas & Mapel
+                ctx.font = '600 22px "Inter", "Segoe UI", sans-serif';
+                ctx.fillStyle = '#ffffff';
+                const mainInfo = `${metadata.namaKelas || 'Kelas'} • ${metadata.namaMapel || 'Mata Pelajaran'}`;
+                ctx.fillText(mainInfo, textX, currentY);
+                currentY += 28;
+
+                // C. Guru & Waktu
+                const now = new Date();
+                const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' };
+                const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+                const dateStr = now.toLocaleDateString('id-ID', optionsDate);
+                const timeStr = now.toLocaleTimeString('id-ID', optionsTime);
+
+                ctx.font = '400 15px "Inter", "Segoe UI", sans-serif';
+                ctx.fillStyle = '#cbd5e1';
+                const detailText = `Pengajar: ${metadata.namaGuru || 'Guru'} | ${dateStr} - ${timeStr} WIB`;
+                ctx.fillText(detailText, textX, currentY);
+                currentY += 24;
+
+                // D. Tagline
+                const tagline = metadata.tagline || 'Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari';
+                ctx.font = 'italic 500 13px "Inter", "Segoe UI", sans-serif';
+                ctx.fillStyle = '#f1f5f9';
+                ctx.fillText(`"${tagline}"`, textX, currentY);
+
+                // 5. Compress to Base64 JPEG
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.70);
+                resolve(compressedBase64);
+
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+};
+
+// ============================================================
 // Fullscreen Toggle Helper
 // ============================================================
 window.toggleFullscreen = function() {
