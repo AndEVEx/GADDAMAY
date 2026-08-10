@@ -31,7 +31,8 @@ use App\Livewire\Admin\KoreksiAgenda;
 use App\Livewire\Admin\OverrideAgenda;
 use App\Livewire\Monitoring\DashboardMonitoring;
 use App\Livewire\Monitoring\ProgressTp;
-use App\Livewire\Admin\ImportKktp;
+use App\Livewire\Guru\FotoGuru;
+use App\Livewire\Guru\DetailAgenda;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -83,11 +84,13 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
     Route::get('/dashboard', DashboardGuru::class)->name('guru.dashboard');
     Route::get('/jurnal', JurnalTahunan::class)->name('guru.jurnal');
     Route::get('/jurnal/{rombel}', JurnalPerKelas::class)->name('guru.jurnal-kelas');
+    Route::get('/detail/{agenda}', DetailAgenda::class)->name('guru.detail-agenda');
 
     // These require time restriction
     Route::middleware('time-restriction')->group(function () {
         Route::get('/mulai/{jadwal}', MulaiKelas::class)->name('guru.mulai');
         Route::get('/materi/{agenda}', IsiMateri::class)->name('guru.materi');
+        Route::get('/foto-guru/{agenda}', FotoGuru::class)->name('guru.foto-guru');
         Route::get('/stopwatch/{agenda}', Stopwatch::class)->name('guru.stopwatch');
         Route::get('/kehadiran/{agenda}', InputKehadiran::class)->name('guru.kehadiran');
         Route::get('/kktp/{agenda}', InputKktp::class)->name('guru.kktp');

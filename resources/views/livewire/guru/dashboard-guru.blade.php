@@ -93,8 +93,8 @@
                         </div>
                     @elseif($jadwal->agenda->status === 'selesai')
                         <div class="d-flex gap-2">
-                            <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-outline-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
-                                <i class="bi bi-pencil me-1"></i> Detail / Edit Agenda
+                            <a href="{{ route('guru.detail-agenda', $jadwal->agenda->id) }}" class="btn btn-outline-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
+                                <i class="bi bi-eye me-1"></i> Lihat Detail Agenda (Selesai)
                             </a>
                         </div>
                     @endif

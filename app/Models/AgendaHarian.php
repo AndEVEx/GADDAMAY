@@ -31,6 +31,7 @@ class AgendaHarian extends Model
         'waktu_selesai',
         'status',
         'foto_bukti_path',
+        'foto_guru_path',
         'prompter_custom',
         'refleksi',
         'status_kehadiran_guru',

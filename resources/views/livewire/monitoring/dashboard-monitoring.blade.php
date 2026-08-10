@@ -1,4 +1,4 @@
-<div wire:poll.30s>
+<div wire:poll.30s x-data="{ showModal: false, modalPhotoUrl: '', modalTitle: '', openPhoto(url, title) { this.modalPhotoUrl = url; this.modalTitle = title; this.showModal = true; } }">
     {{-- Page Header --}}
     <div class="page-header shadow-sm mb-3">
         <div class="d-flex justify-content-between align-items-center">
@@ -68,16 +68,13 @@
         </div>
     </div>
 
-    {{-- Rombel Grid (Rata Tengah) --}}
+    {{-- Rombel Grid --}}
     <div class="row g-2">
         @foreach($monitoringData as $item)
         <div class="col-6 col-md-4 col-lg-3">
-            <div class="monitoring-card card-{{ $item['status'] }} text-center p-3 d-flex flex-column align-items-center justify-content-center h-100" 
-                 data-bs-toggle="modal" data-bs-target="#detailModal"
-                 wire:click="$dispatch('show-detail', { rombelId: '{{ $item['rombel']->id }}' })"
-                 style="cursor: pointer; text-align: center;">
+            <div class="monitoring-card card-{{ $item['status'] }} text-center p-3 d-flex flex-column align-items-center justify-content-center h-100 shadow-sm" style="border-radius: 12px;">
                 
-                {{-- Nama Kelas (Rata Tengah) --}}
+                {{-- Nama Kelas --}}
                 <div class="fw-bold fs-6 mb-1 text-center w-100 text-dark">{{ $item['rombel']->nama_kelas }}</div>
 
                 @if($item['jadwal'] && !$item['jadwal']->isKegiatanKhusus())
@@ -95,26 +92,36 @@
                     @endif
                 @endif
 
-                {{-- Status Badge (Rata Tengah) --}}
+                {{-- Status Badge --}}
                 <div class="mt-2 text-center w-100">
                     <span class="status-badge status-{{ $item['status'] }} mx-auto">
                         {{ $item['label'] }}
                     </span>
                 </div>
 
-                @if($item['status'] === 'hijau' && $item['agenda']?->foto_bukti_path)
-                    <div class="mt-2 text-center w-100">
-                        <span class="badge bg-success bg-opacity-10 text-success small mx-auto">
-                            <i class="bi bi-camera-fill me-1"></i> Lihat Foto
-                        </span>
-                    </div>
+                {{-- 2 Tombol Lihat Foto (Foto Murid & Foto Guru) --}}
+                @if($item['agenda'])
+                <div class="mt-2 d-flex flex-wrap gap-1 justify-content-center w-100">
+                    @if($item['agenda']->foto_bukti_path)
+                        <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 text-nowrap shadow-sm" style="font-size: 0.68rem; border-radius: 6px;"
+                                @click="openPhoto('{{ Storage::url($item['agenda']->foto_bukti_path) }}', 'Foto Murid (Ketua Kelas) - {{ $item['rombel']->nama_kelas }}')">
+                            <i class="bi bi-camera-fill me-1"></i>Foto Murid
+                        </button>
+                    @endif
+
+                    @if($item['agenda']->foto_guru_path)
+                        <button type="button" class="btn btn-outline-success btn-sm py-1 px-2 text-nowrap shadow-sm" style="font-size: 0.68rem; border-radius: 6px;"
+                                @click="openPhoto('{{ Storage::url($item['agenda']->foto_guru_path) }}', 'Foto Guru & Suasana Kelas - {{ $item['rombel']->nama_kelas }}')">
+                            <i class="bi bi-person-bounding-box me-1"></i>Foto Guru
+                        </button>
+                    @endif
+                </div>
                 @endif
 
                 @if($item['status'] === 'merah')
                     <div class="mt-2 text-center w-100">
                         @if(auth()->user()->canOverride())
-                        <a href="{{ route('admin.koreksi') }}" class="btn btn-outline-danger btn-sm mx-auto" style="min-height: 32px; font-size: 0.7rem;"
-                           wire:navigate onclick="event.stopPropagation()">
+                        <a href="{{ route('admin.koreksi') }}" class="btn btn-outline-danger btn-sm mx-auto" style="min-height: 32px; font-size: 0.7rem;" wire:navigate>
                             <i class="bi bi-pencil me-1"></i> Koreksi
                         </a>
                         @endif
@@ -123,6 +130,29 @@
             </div>
         </div>
         @endforeach
+    </div>
+
+    {{-- Photo Viewer Modal --}}
+    <div x-show="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.8); z-index: 1060;" x-cloak>
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header bg-dark text-white border-bottom border-secondary">
+                    <h6 class="modal-title fw-bold" x-text="modalTitle">Pratinjau Foto Watermark</h6>
+                    <button type="button" class="btn-close btn-close-white" @click="showModal = false"></button>
+                </div>
+                <div class="modal-body text-center p-3 bg-dark">
+                    <img :src="modalPhotoUrl" class="img-fluid rounded-3 shadow" style="max-height: 480px; object-fit: contain;">
+                </div>
+                <div class="modal-footer bg-dark border-top border-secondary justify-content-between">
+                    <a :href="modalPhotoUrl" download class="btn btn-success btn-sm px-3 fw-bold" style="border-radius: 8px;">
+                        <i class="bi bi-download me-1"></i>Unduh Foto Watermark
+                    </a>
+                    <button type="button" class="btn btn-outline-light btn-sm px-3" @click="showModal = false" style="border-radius: 8px;">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- Quick Links --}}
