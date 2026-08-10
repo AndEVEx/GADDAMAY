@@ -1,4 +1,4 @@
-<div wire:poll.30s x-data="{ showModal: false, modalPhotoUrl: '', modalTitle: '', openPhoto(url, title) { this.modalPhotoUrl = url; this.modalTitle = title; this.showModal = true; } }">
+<div wire:poll.30s>
     {{-- Page Header --}}
     <div class="page-header shadow-sm mb-3">
         <div class="d-flex justify-content-between align-items-center">
@@ -104,14 +104,14 @@
                 <div class="mt-2 d-flex flex-wrap gap-1 justify-content-center w-100">
                     @if($item['agenda']->foto_bukti_path)
                         <button type="button" class="btn btn-outline-primary btn-sm py-1 px-2 text-nowrap shadow-sm" style="font-size: 0.68rem; border-radius: 6px;"
-                                @click="openPhoto('{{ Storage::url($item['agenda']->foto_bukti_path) }}', 'Foto Murid (Ketua Kelas) - {{ $item['rombel']->nama_kelas }}')">
+                                onclick="window.openPhotoModal('{{ Storage::url($item['agenda']->foto_bukti_path) }}', 'Foto Murid (Ketua Kelas) - {{ $item['rombel']->nama_kelas }}')">
                             <i class="bi bi-camera-fill me-1"></i>Foto Murid
                         </button>
                     @endif
 
                     @if($item['agenda']->foto_guru_path)
                         <button type="button" class="btn btn-outline-success btn-sm py-1 px-2 text-nowrap shadow-sm" style="font-size: 0.68rem; border-radius: 6px;"
-                                @click="openPhoto('{{ Storage::url($item['agenda']->foto_guru_path) }}', 'Foto Guru & Suasana Kelas - {{ $item['rombel']->nama_kelas }}')">
+                                onclick="window.openPhotoModal('{{ Storage::url($item['agenda']->foto_guru_path) }}', 'Foto Guru & Suasana Kelas - {{ $item['rombel']->nama_kelas }}')">
                             <i class="bi bi-person-bounding-box me-1"></i>Foto Guru
                         </button>
                     @endif
@@ -130,29 +130,6 @@
             </div>
         </div>
         @endforeach
-    </div>
-
-    {{-- Photo Viewer Modal --}}
-    <div x-show="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.8); z-index: 1060;" x-cloak>
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                <div class="modal-header bg-dark text-white border-bottom border-secondary">
-                    <h6 class="modal-title fw-bold" x-text="modalTitle">Pratinjau Foto Watermark</h6>
-                    <button type="button" class="btn-close btn-close-white" @click="showModal = false"></button>
-                </div>
-                <div class="modal-body text-center p-3 bg-dark">
-                    <img :src="modalPhotoUrl" class="img-fluid rounded-3 shadow" style="max-height: 480px; object-fit: contain;">
-                </div>
-                <div class="modal-footer bg-dark border-top border-secondary justify-content-between">
-                    <a :href="modalPhotoUrl" download class="btn btn-success btn-sm px-3 fw-bold" style="border-radius: 8px;">
-                        <i class="bi bi-download me-1"></i>Unduh Foto Watermark
-                    </a>
-                    <button type="button" class="btn btn-outline-light btn-sm px-3" @click="showModal = false" style="border-radius: 8px;">
-                        Tutup
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     {{-- Quick Links --}}

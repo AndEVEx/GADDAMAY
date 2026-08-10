@@ -266,20 +266,97 @@ window.WatermarkCamera = {
 };
 
 // ============================================================
-// Fullscreen Toggle Helper
+// Robust Global Standalone Lightbox Photo Modal Helper
 // ============================================================
-window.toggleFullscreen = function() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen();
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
+window.openPhotoModal = function(photoUrl, title = 'Pratinjau Foto Watermark') {
+    const existingModal = document.getElementById('global-photo-modal-overlay');
+    if (existingModal) {
+        existingModal.remove();
     }
+
+    if (!photoUrl) {
+        if (window.showToast) {
+            window.showToast('Foto belum tersedia / belum diunggah.', 'warning');
+        } else {
+            alert('Foto belum tersedia / belum diunggah.');
+        }
+        return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'global-photo-modal-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    `;
+
+    overlay.innerHTML = `
+        <div style="background: #1e293b; border-radius: 16px; width: 100%; max-width: 720px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation()">
+            <div style="padding: 14px 18px; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+                <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-image text-info"></i>
+                    <span>${title}</span>
+                </div>
+                <button type="button" id="btn-close-photo-modal" style="background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 4px;">&times;</button>
+            </div>
+            <div style="padding: 16px; text-align: center; background: #0f172a; min-height: 240px; display: flex; align-items: center; justify-content: center;">
+                <div id="photo-loading-spinner" style="color: #38bdf8;">
+                    <div class="spinner-border spinner-border-sm me-2"></div>
+                    <span style="font-size: 0.85rem;">Memuat foto...</span>
+                </div>
+                <img id="photo-modal-img" src="${photoUrl}" style="max-height: 68vh; max-width: 100%; border-radius: 10px; object-fit: contain; display: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);" alt="Foto Bukti">
+            </div>
+            <div style="padding: 12px 18px; background: #1e293b; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #334155;">
+                <a href="${photoUrl}" download style="background: #0284c7; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-download"></i> Unduh Foto Watermark
+                </a>
+                <button type="button" id="btn-close-photo-modal-bottom" style="background: #334155; color: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const img = document.getElementById('photo-modal-img');
+    const spinner = document.getElementById('photo-loading-spinner');
+
+    img.onload = function() {
+        if (spinner) spinner.style.display = 'none';
+        if (img) img.style.display = 'inline-block';
+    };
+
+    img.onerror = function() {
+        if (spinner) {
+            spinner.innerHTML = '<div style="color: #ef4444; padding: 20px;"><i class="bi bi-exclamation-triangle-fill fs-3 d-block mb-1"></i>Foto tidak dapat dimuat atau belum tersedia di server.</div>';
+        }
+    };
+
+    const closeModal = () => {
+        overlay.remove();
+        document.removeEventListener('keydown', handleEsc);
+    };
+
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') closeModal();
+    };
+
+    const btnClose1 = document.getElementById('btn-close-photo-modal');
+    const btnClose2 = document.getElementById('btn-close-photo-modal-bottom');
+
+    if (btnClose1) btnClose1.onclick = closeModal;
+    if (btnClose2) btnClose2.onclick = closeModal;
+    overlay.onclick = closeModal;
+    document.addEventListener('keydown', handleEsc);
 };

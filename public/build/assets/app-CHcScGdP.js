@@ -11,4 +11,42 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                 Siap Mengajar! 💪
             </button>
         </div>
-    `,r.addEventListener(`click`,e=>{e.target===r&&r.remove()}),document.body.appendChild(r)}window.WatermarkCamera={async processAndWatermark(e,t={}){return new Promise((n,r)=>{try{let r=document.createElement(`canvas`),i=r.getContext(`2d`),a=e.videoWidth||e.naturalWidth||e.width,o=e.videoHeight||e.naturalHeight||e.height;if(!a||!o)throw Error(`Sumber gambar tidak valid atau belum siap.`);let s=Math.min(1,1e3/a);r.width=a*s,r.height=o*s;let c=r.width,l=r.height;i.drawImage(e,0,0,c,l);let u=Math.max(120,l*.22),d=i.createLinearGradient(0,l-u-40,0,l);d.addColorStop(0,`rgba(0, 0, 0, 0)`),d.addColorStop(.3,`rgba(15, 23, 42, 0.75)`),d.addColorStop(1,`rgba(15, 23, 42, 0.95)`),i.fillStyle=d,i.fillRect(0,l-u-40,c,u+40),i.fillStyle=`#0284c7`,i.fillRect(24,l-u+10,5,u-30),i.textBaseline=`top`,i.shadowColor=`rgba(0, 0, 0, 0.8)`,i.shadowBlur=4;let f=l-u+10;i.font=`bold 18px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#38bdf8`;let p=`AGEN DAMAY | ${t.namaSekolah||`SMKN 2 INDRAMAYU`}`;i.fillText(p.toUpperCase(),43,f),f+=26,i.font=`600 22px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#ffffff`;let m=`${t.namaKelas||`Kelas`} • ${t.namaMapel||`Mata Pelajaran`}`;i.fillText(m,43,f),f+=28;let h=new Date,g={day:`2-digit`,month:`short`,year:`numeric`},_={hour:`2-digit`,minute:`2-digit`,second:`2-digit`,hour12:!1},v=h.toLocaleDateString(`id-ID`,g),y=h.toLocaleTimeString(`id-ID`,_);i.font=`400 15px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#cbd5e1`;let b=`Pengajar: ${t.namaGuru||`Guru`} | ${v} - ${y} WIB`;i.fillText(b,43,f),f+=24;let x=t.tagline||`Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari`;i.font=`italic 500 13px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#f1f5f9`,i.fillText(`"${x}"`,43,f),n(r.toDataURL(`image/jpeg`,.7))}catch(e){r(e)}})}},window.toggleFullscreen=function(){!document.fullscreenElement&&!document.webkitFullscreenElement?document.documentElement.requestFullscreen?document.documentElement.requestFullscreen():document.documentElement.webkitRequestFullscreen&&document.documentElement.webkitRequestFullscreen():document.exitFullscreen?document.exitFullscreen():document.webkitExitFullscreen&&document.webkitExitFullscreen()};
+    `,r.addEventListener(`click`,e=>{e.target===r&&r.remove()}),document.body.appendChild(r)}window.WatermarkCamera={async processAndWatermark(e,t={}){return new Promise((n,r)=>{try{let r=document.createElement(`canvas`),i=r.getContext(`2d`),a=e.videoWidth||e.naturalWidth||e.width,o=e.videoHeight||e.naturalHeight||e.height;if(!a||!o)throw Error(`Sumber gambar tidak valid atau belum siap.`);let s=Math.min(1,1e3/a);r.width=a*s,r.height=o*s;let c=r.width,l=r.height;i.drawImage(e,0,0,c,l);let u=Math.max(120,l*.22),d=i.createLinearGradient(0,l-u-40,0,l);d.addColorStop(0,`rgba(0, 0, 0, 0)`),d.addColorStop(.3,`rgba(15, 23, 42, 0.75)`),d.addColorStop(1,`rgba(15, 23, 42, 0.95)`),i.fillStyle=d,i.fillRect(0,l-u-40,c,u+40),i.fillStyle=`#0284c7`,i.fillRect(24,l-u+10,5,u-30),i.textBaseline=`top`,i.shadowColor=`rgba(0, 0, 0, 0.8)`,i.shadowBlur=4;let f=l-u+10;i.font=`bold 18px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#38bdf8`;let p=`AGEN DAMAY | ${t.namaSekolah||`SMKN 2 INDRAMAYU`}`;i.fillText(p.toUpperCase(),43,f),f+=26,i.font=`600 22px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#ffffff`;let m=`${t.namaKelas||`Kelas`} • ${t.namaMapel||`Mata Pelajaran`}`;i.fillText(m,43,f),f+=28;let h=new Date,g={day:`2-digit`,month:`short`,year:`numeric`},_={hour:`2-digit`,minute:`2-digit`,second:`2-digit`,hour12:!1},v=h.toLocaleDateString(`id-ID`,g),y=h.toLocaleTimeString(`id-ID`,_);i.font=`400 15px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#cbd5e1`;let b=`Pengajar: ${t.namaGuru||`Guru`} | ${v} - ${y} WIB`;i.fillText(b,43,f),f+=24;let x=t.tagline||`Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari`;i.font=`italic 500 13px "Inter", "Segoe UI", sans-serif`,i.fillStyle=`#f1f5f9`,i.fillText(`"${x}"`,43,f),n(r.toDataURL(`image/jpeg`,.7))}catch(e){r(e)}})}},window.openPhotoModal=function(e,t=`Pratinjau Foto Watermark`){let n=document.getElementById(`global-photo-modal-overlay`);if(n&&n.remove(),!e){window.showToast?window.showToast(`Foto belum tersedia / belum diunggah.`,`warning`):alert(`Foto belum tersedia / belum diunggah.`);return}let r=document.createElement(`div`);r.id=`global-photo-modal-overlay`,r.style.cssText=`
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    `,r.innerHTML=`
+        <div style="background: #1e293b; border-radius: 16px; width: 100%; max-width: 720px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1);" onclick="event.stopPropagation()">
+            <div style="padding: 14px 18px; background: #0f172a; color: #fff; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155;">
+                <div style="font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-image text-info"></i>
+                    <span>${t}</span>
+                </div>
+                <button type="button" id="btn-close-photo-modal" style="background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 4px;">&times;</button>
+            </div>
+            <div style="padding: 16px; text-align: center; background: #0f172a; min-height: 240px; display: flex; align-items: center; justify-content: center;">
+                <div id="photo-loading-spinner" style="color: #38bdf8;">
+                    <div class="spinner-border spinner-border-sm me-2"></div>
+                    <span style="font-size: 0.85rem;">Memuat foto...</span>
+                </div>
+                <img id="photo-modal-img" src="${e}" style="max-height: 68vh; max-width: 100%; border-radius: 10px; object-fit: contain; display: none; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);" alt="Foto Bukti">
+            </div>
+            <div style="padding: 12px 18px; background: #1e293b; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #334155;">
+                <a href="${e}" download style="background: #0284c7; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-download"></i> Unduh Foto Watermark
+                </a>
+                <button type="button" id="btn-close-photo-modal-bottom" style="background: #334155; color: #f1f5f9; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    `,document.body.appendChild(r);let i=document.getElementById(`photo-modal-img`),a=document.getElementById(`photo-loading-spinner`);i.onload=function(){a&&(a.style.display=`none`),i&&(i.style.display=`inline-block`)},i.onerror=function(){a&&(a.innerHTML=`<div style="color: #ef4444; padding: 20px;"><i class="bi bi-exclamation-triangle-fill fs-3 d-block mb-1"></i>Foto tidak dapat dimuat atau belum tersedia di server.</div>`)};let o=()=>{r.remove(),document.removeEventListener(`keydown`,s)},s=e=>{e.key===`Escape`&&o()},c=document.getElementById(`btn-close-photo-modal`),l=document.getElementById(`btn-close-photo-modal-bottom`);c&&(c.onclick=o),l&&(l.onclick=o),r.onclick=o,document.addEventListener(`keydown`,s)};
