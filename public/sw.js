@@ -1,14 +1,15 @@
-const CACHE_NAME = 'agenda-guru-v1';
+const CACHE_NAME = 'agendamay-pwa-v2';
 const OFFLINE_URL = '/offline.html';
-
-const PRECACHE_URLS = [
-    '/',
-    '/offline.html',
-];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+        caches.open(CACHE_NAME).then(async (cache) => {
+            try {
+                await cache.add(new Request(OFFLINE_URL, { cache: 'reload' }));
+            } catch (e) {
+                console.warn('Precache offline URL warning:', e);
+            }
+        })
     );
     self.skipWaiting();
 });
@@ -25,7 +26,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request).catch(() => caches.match(OFFLINE_URL))
+            fetch(event.request).catch(() => {
+                return caches.match(OFFLINE_URL);
+            })
         );
     }
 });
