@@ -24,8 +24,8 @@ class NotifyTeachersCommand extends Command
             return self::SUCCESS;
         }
 
-        // Find period that starts in ~5 minutes
-        $targetTime = $now->copy()->addMinutes(5)->format('H:i');
+        // Find period that starts in ~15 minutes
+        $targetTime = $now->copy()->addMinutes(15)->format('H:i');
         $jam = JamPelajaran::where('waktu_mulai', '<=', $targetTime . ':59')
             ->where('waktu_mulai', '>=', $targetTime . ':00')
             ->first();

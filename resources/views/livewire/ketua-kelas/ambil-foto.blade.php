@@ -116,12 +116,20 @@ function pwaCameraComponent() {
         processing: false,
         previewBase64: '',
 
+        init() {
+            this.startCamera();
+            window.addEventListener('beforeunload', () => this.stopCamera());
+            document.addEventListener('livewire:navigating', () => this.stopCamera());
+        },
+
+        destroy() {
+            this.stopCamera();
+        },
+
         async startCamera() {
             this.cameraLoading = true;
             try {
-                if (this.stream) {
-                    this.stopCamera();
-                }
+                this.stopCamera();
                 this.stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: this.facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }
                 });
@@ -145,8 +153,14 @@ function pwaCameraComponent() {
 
         stopCamera() {
             if (this.stream) {
-                this.stream.getTracks().forEach(track => track.stop());
+                this.stream.getTracks().forEach(track => {
+                    track.stop();
+                    try { this.stream.removeTrack(track); } catch (e) {}
+                });
                 this.stream = null;
+            }
+            if (this.$refs && this.$refs.video) {
+                this.$refs.video.srcObject = null;
             }
         },
 
@@ -165,6 +179,9 @@ function pwaCameraComponent() {
 
                 const base64Image = await window.WatermarkCamera.processAndWatermark(this.$refs.video, metadata);
                 this.previewBase64 = base64Image;
+
+                // Stop camera immediately to turn off LED indicator
+                this.stopCamera();
 
                 // Submit to Livewire
                 @this.simpanFotoBase64(base64Image);

@@ -26,11 +26,12 @@ class KelasAkanDimulaiNotification extends Notification
         $kelas = $this->jadwal->rombel?->nama_kelas ?? '';
 
         return [
-            'title' => "⏰ Bersiap Mengajar!",
-            'message' => "{$notifiable->name}, bersiap mengajar {$mapel} di {$kelas}! {$this->motivasi}",
+            'title' => "⏰ Pengingat Mengajar (-15 Menit)",
+            'message' => "{$notifiable->name}, 15 menit lagi Anda mengajar {$mapel} di kelas {$kelas}! \"{$this->motivasi}\"",
             'jadwal_id' => $this->jadwal->id,
             'mapel' => $mapel,
             'kelas' => $kelas,
+            'motivasi' => $this->motivasi,
         ];
     }
 }
