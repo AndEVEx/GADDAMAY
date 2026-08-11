@@ -462,3 +462,33 @@ window.toggleFullscreen = function() {
 window.triggerSidebarFullscreen = function() {
     window.toggleFullscreen();
 };
+
+// ============================================================
+// Browser Notification Permission Request Helper
+// ============================================================
+window.requestBrowserNotificationPermission = function() {
+    if (!('Notification' in window)) {
+        alert('Browser atau perangkat Anda tidak mendukung Web Notification API.');
+        return;
+    }
+
+    if (Notification.permission === 'granted') {
+        if (window.showToast) window.showToast('Alarm pengingat mengajar di browser sudah aktif!', 'success');
+        return;
+    }
+
+    if (Notification.permission === 'denied') {
+        alert("⚠️ Izin Notifikasi saat ini diblokir di setelan browser Anda.\n\nCara Mengaktifkan:\n1. Klik ikon Gembok 🔒 / Setelan Situs di sebelah kiri alamat URL browser.\n2. Ubah Izin 'Notifikasi' menjadi 'Izinkan' (Allow).\n3. Refresh / Muat ulang halaman ini.");
+        return;
+    }
+
+    Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+            if (window.showToast) window.showToast('Alarm pengingat mengajar di browser berhasil diaktifkan!', 'success');
+        } else if (permission === 'denied') {
+            alert("⚠️ Izin notifikasi ditolak. Anda dapat mengaktifkannya kapan saja melalui ikon Gembok 🔒 di sebelah kiri URL browser.");
+        }
+    }).catch(err => {
+        console.warn('Notification permission error:', err);
+    });
+};
