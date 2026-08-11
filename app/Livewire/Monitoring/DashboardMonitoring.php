@@ -18,6 +18,8 @@ class DashboardMonitoring extends Component
     public int $hariIni;
     public string $tanggal;
     public int $maxJam = 12;
+    public ?int $currentJam = null;
+    public ?int $selectedJam = null;
 
     public function mount()
     {
