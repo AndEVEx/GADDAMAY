@@ -50,10 +50,12 @@
                                         <div class="fw-bold">
                                             @if($jp->jam_ke === 0)
                                                 Jam ke-0 (Apel Pagi / Upacara)
-                                            @elseif($jp->jam_ke === 4)
-                                                Jam ke-4 <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem;">Istirahat 1: 09:45-10:00</span>
-                                            @elseif($jp->jam_ke === 7)
-                                                Jam ke-7 <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem;">Ishoma: 12:15-12:45</span>
+                                            @elseif($jp->jam_ke === 5)
+                                                Jam ke-5 <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem;">Istirahat 1 (09:45-10:00)</span>
+                                            @elseif($jp->jam_ke === 9)
+                                                Jam ke-9 <span class="badge bg-warning text-dark ms-1" style="font-size: 0.65rem;">Ishoma (12:15-12:45)</span>
+                                            @elseif($jp->jam_ke === 12)
+                                                Jam ke-12 <span class="badge bg-info text-white ms-1" style="font-size: 0.65rem;">Selesai KBM</span>
                                             @else
                                                 Jam ke-{{ $jp->jam_ke }}
                                             @endif
