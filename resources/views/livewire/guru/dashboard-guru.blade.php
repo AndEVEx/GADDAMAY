@@ -61,9 +61,6 @@
                                         <i class="bi bi-door-open text-primary flex-shrink-0"></i>
                                         <span class="fw-semibold text-truncate">{{ $jadwal->rombel?->nama_kelas ?? '-' }}</span>
                                     </div>
-                                    @if(!empty($jadwal->is_split_by_break))
-                                        <span class="badge bg-info bg-opacity-15 text-info text-nowrap" style="font-size: 0.65rem;">Terpotong Istirahat</span>
-                                    @endif
                                 </div>
                             @endif
 
