@@ -16,15 +16,28 @@
             
             <div class="dropdown">
                 <button class="btn btn-light text-primary fw-extrabold dropdown-toggle shadow-sm px-3 py-2 d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 44px; border-radius: 12px; font-weight: 800; font-size: 0.95rem;">
-                    <span>Jam ke-{{ $selectedJam ?? '?' }} {{ $currentJam === $selectedJam ? '(LIVE Saat Ini)' : '' }}</span>
+                    <span>
+                        @if(($selectedJam ?? null) === 0)
+                            Jam ke-0 (Apel / Upacara)
+                        @else
+                            Jam ke-{{ $selectedJam ?? '?' }}
+                        @endif
+                        {{ $currentJam === $selectedJam ? '(LIVE Saat Ini)' : '' }}
+                    </span>
                 </button>
-                <ul class="dropdown-menu shadow-lg py-1" style="border-radius: 12px; max-height: 340px; overflow-y: auto; min-width: 270px;">
+                <ul class="dropdown-menu shadow-lg py-1" style="border-radius: 12px; max-height: 340px; overflow-y: auto; min-width: 290px;">
                     @if(!empty($jamPelajaranList) && $jamPelajaranList->isNotEmpty())
                         @foreach($jamPelajaranList as $jp)
                             <li>
                                 <button class="dropdown-item py-2 fw-semibold d-flex justify-content-between align-items-center {{ $selectedJam === $jp->jam_ke ? 'active bg-primary text-white' : '' }}" wire:click="setJam({{ $jp->jam_ke }})">
                                     <div>
-                                        <div class="fw-bold">Jam ke-{{ $jp->jam_ke }}</div>
+                                        <div class="fw-bold">
+                                            @if($jp->jam_ke === 0)
+                                                Jam ke-0 (Apel / Upacara / Pra-KBM)
+                                            @else
+                                                Jam ke-{{ $jp->jam_ke }}
+                                            @endif
+                                        </div>
                                         <div class="small {{ $selectedJam === $jp->jam_ke ? 'text-white-50' : 'text-muted' }}" style="font-size: 0.72rem;">
                                             pkl {{ substr($jp->waktu_mulai, 0, 5) }} - {{ substr($jp->waktu_selesai, 0, 5) }} WIB
                                         </div>
