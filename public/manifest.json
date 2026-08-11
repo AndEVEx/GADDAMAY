@@ -2,9 +2,9 @@
     "name": "AgenDAmay - SMKN 2 Indramayu",
     "short_name": "AgenDAmay",
     "description": "AgenDAmay - Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari",
-    "start_url": "/",
-    "display": "fullscreen",
-    "display_override": ["fullscreen", "standalone", "minimal-ui"],
+    "start_url": "/?pwa=1",
+    "display": "standalone",
+    "display_override": ["standalone", "minimal-ui"],
     "orientation": "portrait",
     "background_color": "#1a56db",
     "theme_color": "#1a56db",
@@ -23,7 +23,7 @@
         },
         {
             "src": "/icons/logo-sekolah.png",
-            "sizes": "any",
+            "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"
         }

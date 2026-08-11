@@ -167,7 +167,7 @@
                             <i class="bi bi-download text-primary me-2 fs-6"></i>
                             <span class="small">Install Aplikasi (PWA)</span>
                         </button>
-                        <button type="button" onclick="window.triggerSidebarFullscreen()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
+                        <button type="button" onclick="window.toggleFullscreen()" data-bs-dismiss="offcanvas" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
                             <i class="bi bi-arrows-fullscreen text-info me-2 fs-6"></i>
                             <span class="small">Layar Penuh (Fullscreen)</span>
                         </button>
@@ -223,5 +223,18 @@
     @endauth
 
     @livewireScripts
+
+    {{-- Register PWA Service Worker --}}
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                console.log('PWA ServiceWorker registered with scope:', reg.scope);
+            }).catch(function(err) {
+                console.warn('PWA ServiceWorker registration failed:', err);
+            });
+        });
+    }
+    </script>
 </body>
 </html>

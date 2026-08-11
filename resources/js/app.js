@@ -427,24 +427,38 @@ window.installPWA = function() {
 };
 
 // ============================================================
-// Sidebar Fullscreen Trigger Helper
+// Fullscreen Toggle Helper (Synchronous User Gesture Execution)
 // ============================================================
-window.triggerSidebarFullscreen = function() {
-    const sidebarEl = document.getElementById('appSidebar');
-    if (sidebarEl && window.bootstrap && window.bootstrap.Offcanvas) {
-        try {
-            const bsOffcanvas = window.bootstrap.Offcanvas.getInstance(sidebarEl);
-            if (bsOffcanvas) {
-                bsOffcanvas.hide();
-            }
-        } catch (e) {
-            // ignore if offcanvas instance not found
-        }
-    }
+window.toggleFullscreen = function() {
+    try {
+        const doc = document;
+        const docEl = document.documentElement;
 
-    setTimeout(() => {
-        if (window.toggleFullscreen) {
-            window.toggleFullscreen();
+        const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+        const exitFS = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
+
+        const isFS = doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+
+        if (!isFS) {
+            if (requestFS) {
+                const res = requestFS.call(docEl);
+                if (res && res.catch) {
+                    res.catch(err => console.warn("Fullscreen warning:", err));
+                }
+            }
+        } else {
+            if (exitFS) {
+                const res = exitFS.call(doc);
+                if (res && res.catch) {
+                    res.catch(err => console.warn("Exit Fullscreen warning:", err));
+                }
+            }
         }
-    }, 150);
+    } catch (e) {
+        console.error("Fullscreen toggle exception:", e);
+    }
+};
+
+window.triggerSidebarFullscreen = function() {
+    window.toggleFullscreen();
 };
