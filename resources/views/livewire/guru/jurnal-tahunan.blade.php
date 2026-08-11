@@ -10,11 +10,8 @@
             <label class="form-label fw-bold text-dark small mb-1">
                 <i class="bi bi-calendar-month text-primary me-1"></i>Pilih Bulan Jurnal Mengajar:
             </label>
-            <div class="d-flex align-items-center gap-2">
+            <div>
                 <input type="month" wire:model.live="bulan" class="form-control fw-semibold" style="min-height: 44px; border-radius: 10px;">
-                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 text-nowrap fw-bold" style="font-size: 0.85rem; border-radius: 8px;">
-                    {{ $namaBulan }}
-                </span>
             </div>
         </div>
     </div>

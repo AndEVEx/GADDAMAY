@@ -393,3 +393,58 @@ window.openPhotoModal = function(photoUrl, title = 'Pratinjau Foto Watermark') {
     overlay.onclick = closeModal;
     document.addEventListener('keydown', handleEsc);
 };
+
+// ============================================================
+// PWA Install Prompt Helper
+// ============================================================
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+
+    const installBtns = document.querySelectorAll('.pwa-install-btn');
+    installBtns.forEach(btn => btn.style.display = 'flex');
+});
+
+window.installPWA = function() {
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                if (window.showToast) window.showToast('Terima kasih! Aplikasi AgenDAmay telah terinstall.', 'success');
+            }
+            deferredInstallPrompt = null;
+        });
+    } else {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            alert("📱 Cara Install di iPhone/iPad (Safari):\n1. Tap tombol 'Bagikan' (Share icon) di bagian bawah browser Safari.\n2. Pilih 'Tambahkan ke Layar Utama' (Add to Home Screen).\n3. Tap 'Tambah' (Add) di sudut kanan atas.");
+        } else {
+            alert("📲 Cara Install Aplikasi AgenDAmay:\n1. Buka menu browser (titik 3 di kanan atas Chrome/Edge).\n2. Pilih 'Install aplikasi AgenDAmay' atau 'Tambahkan ke Layar Utama' (Add to Home Screen).");
+        }
+    }
+};
+
+// ============================================================
+// Sidebar Fullscreen Trigger Helper
+// ============================================================
+window.triggerSidebarFullscreen = function() {
+    const sidebarEl = document.getElementById('appSidebar');
+    if (sidebarEl && window.bootstrap && window.bootstrap.Offcanvas) {
+        try {
+            const bsOffcanvas = window.bootstrap.Offcanvas.getInstance(sidebarEl);
+            if (bsOffcanvas) {
+                bsOffcanvas.hide();
+            }
+        } catch (e) {
+            // ignore if offcanvas instance not found
+        }
+    }
+
+    setTimeout(() => {
+        if (window.toggleFullscreen) {
+            window.toggleFullscreen();
+        }
+    }, 150);
+};

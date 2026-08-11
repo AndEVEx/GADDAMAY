@@ -163,7 +163,11 @@
                     </div>
 
                     <div class="list-group list-group-flush">
-                        <button type="button" onclick="window.toggleFullscreen()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
+                        <button type="button" onclick="window.installPWA()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2 text-primary fw-semibold pwa-install-btn">
+                            <i class="bi bi-download text-primary me-2 fs-6"></i>
+                            <span class="small">Install Aplikasi (PWA)</span>
+                        </button>
+                        <button type="button" onclick="window.triggerSidebarFullscreen()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
                             <i class="bi bi-arrows-fullscreen text-info me-2 fs-6"></i>
                             <span class="small">Layar Penuh (Fullscreen)</span>
                         </button>
