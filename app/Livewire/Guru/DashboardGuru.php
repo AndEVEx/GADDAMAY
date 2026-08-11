@@ -154,17 +154,26 @@ class DashboardGuru extends Component
             $agenda = $agendas->first(fn($a) => in_array($a->jadwal_pelajaran_id, $block['all_ids']));
 
             // Determine exact start time from JamPelajaran table
-            $jamObj = $jamMap->get($block['jam_ke_mulai']);
-            $waktuMulaiStr = $jamObj?->waktu_mulai ?? '07:00';
+            $jamObj = $jamMap->get((int) $block['jam_ke_mulai']);
+            $waktuMulaiRaw = $jamObj?->waktu_mulai ?? '07:00';
 
-            // Allow starting 15 minutes before scheduled start time
-            $allowedStartWindow = Carbon::createFromFormat('H:i', substr($waktuMulaiStr, 0, 5), 'Asia/Jakarta')
-                ->subMinutes(15)
-                ->format('H:i');
+            $timeArrived = true;
+            $displayStartStr = '07:00';
 
-            $timeArrived = ($timeNow >= $allowedStartWindow) || $user->canOverride();
+            try {
+                // Carbon::parse safely parses "7:00", "07:00", "11:30", "13:00:00"
+                $mulaiCarbon = Carbon::parse($waktuMulaiRaw, 'Asia/Jakarta');
+                $allowedStartWindow = $mulaiCarbon->copy()->subMinutes(30)->format('H:i');
+                
+                // Active if current time is on or after the 30-min window before start time
+                $timeArrived = ($timeNow >= $allowedStartWindow) || $user->canOverride();
+                $displayStartStr = $mulaiCarbon->format('H:i');
+            } catch (\Exception $e) {
+                $timeArrived = true;
+                $displayStartStr = substr($waktuMulaiRaw, 0, 5);
+            }
 
-            $block['waktu_mulai_str'] = substr($waktuMulaiStr, 0, 5);
+            $block['waktu_mulai_str'] = $displayStartStr;
             $block['time_arrived'] = $timeArrived;
             $block['agenda'] = $agenda;
             $block['status_label'] = $this->getStatusLabel($agenda);
