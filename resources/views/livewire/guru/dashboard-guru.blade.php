@@ -1,4 +1,4 @@
-<div>
+<div wire:poll.60s>
     {{-- Clean Welcome Header Card (No Blue Background) --}}
     <div class="card mb-3 border-0 bg-light shadow-sm" style="border-radius: 12px;">
         <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">

@@ -14,11 +14,18 @@
     <div class="collapse px-2 py-2 bg-light rounded my-1 border shadow-sm" id="notificationListCollapse" onclick="event.stopPropagation();" style="max-height: 280px; overflow-y: auto;">
         <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
             <span class="fw-bold text-dark" style="font-size: 0.75rem;"><i class="bi bi-clock-history me-1 text-primary"></i>Pengingat Mengajar</span>
-            @if($unreadCount > 0)
-                <button class="btn btn-link btn-sm text-primary p-0 text-decoration-none" wire:click="markAllRead" style="font-size: 0.7rem;">
-                    Tandai dibaca
-                </button>
-            @endif
+            <div class="d-flex align-items-center gap-2">
+                @if($unreadCount > 0)
+                    <button class="btn btn-link btn-sm text-primary p-0 text-decoration-none" wire:click="markAllRead" style="font-size: 0.7rem;">
+                        Tandai dibaca
+                    </button>
+                @endif
+                @if($notifications->isNotEmpty())
+                    <button class="btn btn-link btn-sm text-danger p-0 text-decoration-none" wire:click="deleteAllNotifications" wire:confirm="Hapus semua riwayat notifikasi?" style="font-size: 0.7rem;">
+                        <i class="bi bi-trash me-1"></i>Bersihkan
+                    </button>
+                @endif
+            </div>
         </div>
 
         {{-- Browser Notification Permission Button --}}

@@ -35,6 +35,13 @@ class NotificationBell extends Component
         }
     }
 
+    public function deleteAllNotifications()
+    {
+        Auth::user()->notifications()->delete();
+        $this->unreadCount = 0;
+        $this->dispatch('show-toast', message: 'Semua riwayat notifikasi berhasil dibersihkan.', type: 'info');
+    }
+
     public function render()
     {
         $notifications = Auth::user()->notifications()->latest()->take(10)->get();
