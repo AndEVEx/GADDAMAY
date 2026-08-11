@@ -179,30 +179,6 @@ class DashboardGuru extends Component
             $block['status_label'] = $this->getStatusLabel($agenda);
             $block['can_start'] = $this->canStart($block, $agenda, $timeArrived);
 
-            // Generate teaching reminder in-app notification if not notified today
-            if (empty($block['is_kegiatan_khusus']) && !empty($block['mataPelajaran'])) {
-                $jadwalObj = new \App\Models\JadwalPelajaran([
-                    'id' => $block['id'],
-                    'rombel_id' => $block['rombel']?->id,
-                    'mapel_id' => $block['mataPelajaran']?->id,
-                ]);
-                $jadwalObj->setRelation('rombel', $block['rombel']);
-                $jadwalObj->setRelation('mataPelajaran', $block['mataPelajaran']);
-
-                $alreadyNotified = $user->notifications()
-                    ->where('data->jadwal_id', $block['id'])
-                    ->whereDate('created_at', Carbon::today())
-                    ->exists();
-
-                if (!$alreadyNotified) {
-                    $jamStr = "Jam " . $block['jam_ke_mulai'] . ($block['jam_ke_mulai'] !== $block['jam_ke_selesai'] ? " s/d " . $block['jam_ke_selesai'] : "");
-                    $user->notify(new \App\Notifications\KelasAkanDimulaiNotification(
-                        $jadwalObj,
-                        "Pengingat mengajar hari ini ({$jamStr}). Mari hadir tepat waktu!"
-                    ));
-                }
-            }
-
             return (object) $block;
         });
     }

@@ -49,11 +49,14 @@ class NotifyTeachersCommand extends Command
                 $guru = $jg->guru;
                 if (!$guru) continue;
 
-                // Check if already notified today for this jadwal
-                $alreadyNotified = $guru->notifications()
-                    ->where('data->jadwal_id', $jadwal->id)
+                // Check if already notified today for this jadwal using robust string matching
+                $todayNotifications = $guru->notifications()
                     ->whereDate('created_at', $now->toDateString())
-                    ->exists();
+                    ->get();
+
+                $alreadyNotified = $todayNotifications->contains(function ($n) use ($jadwal) {
+                    return isset($n->data['jadwal_id']) && (string)$n->data['jadwal_id'] === (string)$jadwal->id;
+                });
 
                 if ($alreadyNotified) continue;
 
