@@ -198,65 +198,98 @@ window.WatermarkCamera = {
                 ctx.drawImage(imageSource, 0, 0, w, h);
 
                 // 2. Banner Gradient Gelap
-                const bannerHeight = Math.max(120, h * 0.22);
+                const bannerHeight = Math.max(135, h * 0.24);
                 const gradient = ctx.createLinearGradient(0, h - bannerHeight - 40, 0, h);
                 gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                gradient.addColorStop(0.3, 'rgba(15, 23, 42, 0.75)');
-                gradient.addColorStop(1, 'rgba(15, 23, 42, 0.95)');
+                gradient.addColorStop(0.3, 'rgba(15, 23, 42, 0.85)');
+                gradient.addColorStop(1, 'rgba(15, 23, 42, 0.98)');
 
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, h - bannerHeight - 40, w, bannerHeight + 40);
 
-                // 3. Aksen Garis Kiri
-                const paddingLeft = 24;
-                const strokeWidth = 5;
-                ctx.fillStyle = '#0284c7';
-                ctx.fillRect(paddingLeft, h - bannerHeight + 10, strokeWidth, bannerHeight - 30);
-
-                // 4. Metadata Text
+                // 3. Metadata & Branding with School Logo
                 ctx.textBaseline = 'top';
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-                ctx.shadowBlur = 4;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+                ctx.shadowBlur = 6;
 
-                const textX = paddingLeft + strokeWidth + 14;
-                let currentY = h - bannerHeight + 10;
+                const paddingLeft = 20;
 
-                // A. Header Badge
-                ctx.font = 'bold 18px "Inter", "Segoe UI", sans-serif';
-                ctx.fillStyle = '#38bdf8';
-                const headerText = `AGEN DAMAY | ${metadata.namaSekolah || 'SMKN 2 INDRAMAYU'}`;
-                ctx.fillText(headerText.toUpperCase(), textX, currentY);
-                currentY += 26;
+                const logoImg = new Image();
+                logoImg.src = '/icons/logo-sekolah.png';
 
-                // B. Kelas & Mapel
-                ctx.font = '600 22px "Inter", "Segoe UI", sans-serif';
-                ctx.fillStyle = '#ffffff';
-                const mainInfo = `${metadata.namaKelas || 'Kelas'} • ${metadata.namaMapel || 'Mata Pelajaran'}`;
-                ctx.fillText(mainInfo, textX, currentY);
-                currentY += 28;
+                const renderWatermarkText = () => {
+                    const logoSize = Math.max(56, bannerHeight * 0.45);
+                    const logoX = paddingLeft;
+                    const logoY = h - bannerHeight + 10;
 
-                // C. Guru & Waktu
-                const now = new Date();
-                const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' };
-                const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-                const dateStr = now.toLocaleDateString('id-ID', optionsDate);
-                const timeStr = now.toLocaleTimeString('id-ID', optionsTime);
+                    // Draw White Badge Box for School Logo
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    if (ctx.roundRect) {
+                        ctx.roundRect(logoX, logoY, logoSize, logoSize, 12);
+                    } else {
+                        ctx.rect(logoX, logoY, logoSize, logoSize);
+                    }
+                    ctx.fill();
 
-                ctx.font = '400 15px "Inter", "Segoe UI", sans-serif';
-                ctx.fillStyle = '#cbd5e1';
-                const detailText = `Pengajar: ${metadata.namaGuru || 'Guru'} | ${dateStr} - ${timeStr} WIB`;
-                ctx.fillText(detailText, textX, currentY);
-                currentY += 24;
+                    // Draw Logo Image inside White Box
+                    try {
+                        ctx.drawImage(logoImg, logoX + 4, logoY + 4, logoSize - 8, logoSize - 8);
+                    } catch (e) {
+                        // ignore if image not loaded yet
+                    }
 
-                // D. Tagline
-                const tagline = metadata.tagline || 'Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari';
-                ctx.font = 'italic 500 13px "Inter", "Segoe UI", sans-serif';
-                ctx.fillStyle = '#f1f5f9';
-                ctx.fillText(`"${tagline}"`, textX, currentY);
+                    const textX = logoX + logoSize + 14;
+                    let currentY = logoY - 2;
 
-                // 5. Compress to Base64 JPEG
-                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.70);
-                resolve(compressedBase64);
+                    // A. LARGE AGEN DAMAY Branding + SMKN 2 INDRAMAYU
+                    ctx.font = '800 26px "Inter", "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.fillText('AGEN DAMAY', textX, currentY);
+
+                    ctx.font = '700 15px "Inter", "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#fde047'; // Bright Yellow
+                    ctx.fillText('• SMKN 2 INDRAMAYU', textX + 175, currentY + 8);
+                    currentY += 32;
+
+                    // B. Kelas & Mapel
+                    ctx.font = '700 20px "Inter", "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#ffffff';
+                    const mainInfo = `${metadata.namaKelas || 'Kelas'} • ${metadata.namaMapel || 'Mata Pelajaran'}`;
+                    ctx.fillText(mainInfo, textX, currentY);
+                    currentY += 26;
+
+                    // C. Guru & Waktu
+                    const now = new Date();
+                    const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' };
+                    const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+                    const dateStr = now.toLocaleDateString('id-ID', optionsDate);
+                    const timeStr = now.toLocaleTimeString('id-ID', optionsTime);
+
+                    ctx.font = '500 14px "Inter", "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#cbd5e1';
+                    const detailText = `Pengajar: ${metadata.namaGuru || 'Guru'} | ${dateStr} - ${timeStr} WIB`;
+                    ctx.fillText(detailText, textX, currentY);
+                    currentY += 22;
+
+                    // D. Tagline
+                    const tagline = metadata.tagline || 'Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari';
+                    ctx.font = 'italic 600 13px "Inter", "Segoe UI", sans-serif';
+                    ctx.fillStyle = '#fde047'; // Bright Yellow
+                    ctx.fillText(`"${tagline}"`, textX, currentY);
+
+                    // Compress to Base64 JPEG
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    resolve(compressedBase64);
+                };
+
+                logoImg.onload = renderWatermarkText;
+                logoImg.onerror = renderWatermarkText;
+                
+                // Fallback timeout in case image load stalls
+                setTimeout(() => {
+                    renderWatermarkText();
+                }, 400);
 
             } catch (error) {
                 reject(error);

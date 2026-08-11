@@ -45,7 +45,7 @@
                     </div>
                     <div class="d-flex flex-column text-start">
                         <span class="fw-extrabold text-white" style="font-size: 1.1rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
-                        <span class="text-white-50 d-none d-sm-inline" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
+                        <span class="text-white-50" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
             </div>
@@ -61,7 +61,7 @@
                 </div>
                 <div>
                     <h6 class="mb-0 fw-extrabold text-white" style="letter-spacing: 0.3px;">AgenDAmay</h6>
-                    <small class="text-white-50" style="font-size: 0.7rem;">SMKN 2 Indramayu</small>
+                    <small class="fw-bold" style="color: #ffeb3b; text-shadow: 0 1px 2px rgba(0,0,0,0.5); font-size: 0.78rem;">SMKN 2 Indramayu</small>
                 </div>
             </div>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -163,7 +163,7 @@
                     </div>
 
                     <div class="list-group list-group-flush">
-                        <button type="button" onclick="toggleFullscreen()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
+                        <button type="button" onclick="window.toggleFullscreen()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
                             <i class="bi bi-arrows-fullscreen text-info me-2 fs-6"></i>
                             <span class="small">Layar Penuh (Fullscreen)</span>
                         </button>
