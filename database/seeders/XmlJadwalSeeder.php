@@ -42,7 +42,16 @@ class XmlJadwalSeeder extends Seeder
         $this->cachedGuruPassword = Hash::make('password123');
         $this->cachedKetuaPassword = Hash::make('ketua123');
 
-        $xmlPath = config('app.xml_jadwal_path', storage_path('app/temp_jadwal.xml'));
+        $xmlPath = config('app.xml_jadwal_path');
+        if (!$xmlPath || !file_exists($xmlPath)) {
+            if (file_exists(storage_path('app/temp_jadwal.xml'))) {
+                $xmlPath = storage_path('app/temp_jadwal.xml');
+            } elseif (file_exists('C:\\Users\\User\\Downloads\\2.xml')) {
+                $xmlPath = 'C:\\Users\\User\\Downloads\\2.xml';
+            } else {
+                $xmlPath = storage_path('app/temp_jadwal.xml');
+            }
+        }
 
         if (!file_exists($xmlPath)) {
             $message = "XML file not found: {$xmlPath}";
