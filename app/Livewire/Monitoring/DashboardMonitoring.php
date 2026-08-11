@@ -17,8 +17,7 @@ class DashboardMonitoring extends Component
 {
     public int $hariIni;
     public string $tanggal;
-    public ?int $currentJam = null;
-    public ?int $selectedJam = null;
+    public int $maxJam = 12;
 
     public function mount()
     {
@@ -26,13 +25,40 @@ class DashboardMonitoring extends Component
         $this->hariIni = $now->dayOfWeekIso;
         $this->tanggal = $now->format('Y-m-d');
 
-        // Detect current period
+        // Dynamically get maximum jam_ke from database (defaults to 12)
+        $this->maxJam = JamPelajaran::max('jam_ke') ?? 12;
+
+        $this->detectLiveJam();
+    }
+
+    public function detectLiveJam()
+    {
+        $now = Carbon::now('Asia/Jakarta');
         $timeNow = $now->format('H:i:s');
+
         $jam = JamPelajaran::where('waktu_mulai', '<=', $timeNow)
             ->where('waktu_selesai', '>=', $timeNow)
             ->first();
+
         $this->currentJam = $jam?->jam_ke;
-        $this->selectedJam = $this->currentJam;
+        if (is_null($this->selectedJam)) {
+            $this->selectedJam = $this->currentJam ?? 1;
+        }
+    }
+
+    public function resetToLive()
+    {
+        $now = Carbon::now('Asia/Jakarta');
+        $timeNow = $now->format('H:i:s');
+
+        $jam = JamPelajaran::where('waktu_mulai', '<=', $timeNow)
+            ->where('waktu_selesai', '>=', $timeNow)
+            ->first();
+
+        $this->currentJam = $jam?->jam_ke;
+        $this->selectedJam = $this->currentJam ?? 1;
+
+        $this->dispatch('show-toast', message: "Monitoring dikembalikan ke Jam Live saat ini (Jam ke-{$this->selectedJam})", type: 'info');
     }
 
     public function setJam(?int $jam)

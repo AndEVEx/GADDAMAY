@@ -16,24 +16,27 @@
             
             <div class="dropdown">
                 <button class="btn btn-light text-primary fw-extrabold dropdown-toggle shadow-sm px-3 py-2 d-inline-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-height: 44px; border-radius: 12px; font-weight: 800; font-size: 0.95rem;">
-                    <span>Jam ke-{{ $selectedJam ?? '?' }}</span>
+                    <span>Jam ke-{{ $selectedJam ?? '?' }} {{ $currentJam === $selectedJam ? '(LIVE Saat Ini)' : '' }}</span>
                 </button>
-                <ul class="dropdown-menu shadow-lg py-1" style="border-radius: 12px; max-height: 280px; overflow-y: auto;">
-                    @for($i = 1; $i <= 10; $i++)
+                <ul class="dropdown-menu shadow-lg py-1" style="border-radius: 12px; max-height: 320px; overflow-y: auto;">
+                    @for($i = 0; $i <= $maxJam; $i++)
                         <li>
-                            <button class="dropdown-item py-2 fw-semibold {{ $selectedJam == $i ? 'active bg-primary text-white' : '' }}" wire:click="setJam({{ $i }})">
-                                Jam ke-{{ $i }}
+                            <button class="dropdown-item py-2 fw-semibold d-flex justify-content-between align-items-center {{ $selectedJam === $i ? 'active bg-primary text-white' : '' }}" wire:click="setJam({{ $i }})">
+                                <span>Jam ke-{{ $i }}</span>
+                                @if($currentJam === $i)
+                                    <span class="badge bg-success text-white ms-2" style="font-size: 0.65rem;">LIVE</span>
+                                @endif
                             </button>
                         </li>
                     @endfor
                 </ul>
             </div>
 
-            {{-- Live Badge Indicator --}}
-            <span class="badge bg-success text-white px-3 py-2 ms-2 d-inline-flex align-items-center gap-2 shadow-sm" style="border-radius: 12px; font-size: 0.9rem !important;">
+            {{-- Interactive Live Badge Button --}}
+            <button type="button" wire:click="resetToLive" class="btn btn-success text-white px-3 py-2 ms-2 d-inline-flex align-items-center gap-2 shadow-sm border-0" style="border-radius: 12px; font-size: 0.9rem !important; cursor: pointer;" title="Klik untuk kembali ke Jam Live saat ini">
                 <i class="bi bi-broadcast fs-5 animate-pulse text-white"></i>
-                <span class="fw-extrabold" style="letter-spacing: 0.5px;">LIVE</span>
-            </span>
+                <span class="fw-extrabold" style="letter-spacing: 0.5px;">LIVE (Kembali ke Jam Sekarang)</span>
+            </button>
         </div>
     </div>
 
