@@ -120,7 +120,7 @@
                             <i class="bi bi-person me-1"></i>{{ $item['agenda']->guru?->name }}
                         </div>
                         <div class="small text-primary fw-bold text-center w-100 mt-1" style="font-size: 0.72rem;">
-                            <i class="bi bi-clock-history me-1"></i>Masuk: {{ $item['agenda']->waktu_mulai?->format('H:i') ?? $item['agenda']->created_at?->format('H:i') }} WIB
+                            <i class="bi bi-clock-history me-1"></i>Masuk: {{ $item['agenda']->waktu_mulai?->setTimezone('Asia/Jakarta')->format('H:i') ?? $item['agenda']->created_at?->setTimezone('Asia/Jakarta')->format('H:i') }} WIB
                         </div>
                     @else
                         <div class="small text-muted text-center w-100" style="font-size: 0.75rem;">

@@ -45,7 +45,7 @@ class FotoGuru extends Component
             $this->agenda->update([
                 'foto_guru_path' => $filename,
                 'status' => 'berjalan',
-                'waktu_mulai' => $this->agenda->waktu_mulai ?? now(),
+                'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
             ]);
 
             $this->dispatch('show-toast', message: 'Foto Guru & Suasana Kelas tersimpan! Lanjut ke Stopwatch.', type: 'success');
@@ -66,7 +66,7 @@ class FotoGuru extends Component
         $this->agenda->update([
             'foto_guru_path' => $path,
             'status' => 'berjalan',
-            'waktu_mulai' => $this->agenda->waktu_mulai ?? now(),
+            'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
         ]);
 
         $this->dispatch('show-toast', message: 'Foto Guru tersimpan! Lanjut ke Stopwatch.', type: 'success');

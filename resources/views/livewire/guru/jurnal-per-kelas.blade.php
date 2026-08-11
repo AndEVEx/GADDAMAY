@@ -67,7 +67,7 @@
              'mapel' => $agenda->jadwalPelajaran?->mataPelajaran?->nama_mapel,
              'materi' => $agenda->materi_diajarkan,
              'refleksi' => $agenda->refleksi,
-             'waktu_masuk' => ($agenda->waktu_mulai?->format('H:i') ?? $agenda->created_at?->format('H:i')) . ' WIB',
+             'waktu_masuk' => ($agenda->waktu_mulai?->setTimezone('Asia/Jakarta')->format('H:i') ?? $agenda->created_at?->setTimezone('Asia/Jakarta')->format('H:i')) . ' WIB',
              'guru' => $agenda->guru?->name ?? '-',
              'status' => ucfirst($agenda->status),
              'tps' => $agenda->tujuanPembelajaran->map(fn($t) => ['kode' => $t->kode_tp, 'deskripsi' => $t->deskripsi_tp]),
@@ -86,7 +86,7 @@
                             Minggu ke-{{ $agenda->week_of_month }}
                         </span>
                         <span class="badge bg-info bg-opacity-15 text-info fw-bold px-2 py-1" style="font-size: 0.7rem; border-radius: 6px;">
-                            <i class="bi bi-clock-history me-1"></i>Masuk pkl {{ $agenda->waktu_mulai?->format('H:i') ?? $agenda->created_at?->format('H:i') }} WIB
+                            <i class="bi bi-clock-history me-1"></i>Masuk pkl {{ $agenda->waktu_mulai?->setTimezone('Asia/Jakarta')->format('H:i') ?? $agenda->created_at?->setTimezone('Asia/Jakarta')->format('H:i') }} WIB
                         </span>
                     </div>
                     <div class="fw-bold fs-6 text-dark">{{ $agenda->tanggal?->translatedFormat('l, d F Y') }}</div>

@@ -44,6 +44,7 @@ class MulaiKelas extends Component
             ],
             [
                 'token_handshake' => str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT),
+                'waktu_mulai' => Carbon::now('Asia/Jakarta'),
                 'status' => 'menunggu_token',
                 'status_kehadiran_guru' => 'hadir',
             ]
