@@ -76,10 +76,27 @@ class XmlJadwalSeeder extends Seeder
 
     private function seedPeriods($xml): void
     {
+        // Standard SMKN 2 Indramayu 12-Period Schedule Slots (Including Jam 0 Apel & Breaks)
+        $standardPeriods = [
+            0  => ['mulai' => '07:00', 'selesai' => '07:30'], // Jam 0: Apel / Upacara / Pra-KBM
+            1  => ['mulai' => '07:30', 'selesai' => '08:15'], // Jam 1
+            2  => ['mulai' => '08:15', 'selesai' => '09:00'], // Jam 2
+            3  => ['mulai' => '09:00', 'selesai' => '09:45'], // Jam 3
+            4  => ['mulai' => '09:45', 'selesai' => '10:30'], // Jam 4
+            5  => ['mulai' => '10:30', 'selesai' => '11:15'], // Jam 5
+            6  => ['mulai' => '11:15', 'selesai' => '12:00'], // Jam 6
+            7  => ['mulai' => '12:00', 'selesai' => '12:45'], // Jam 7 (Ishoma / Sholat / Lunch)
+            8  => ['mulai' => '12:45', 'selesai' => '13:30'], // Jam 8
+            9  => ['mulai' => '13:30', 'selesai' => '14:15'], // Jam 9
+            10 => ['mulai' => '14:15', 'selesai' => '15:00'], // Jam 10 (14:46 PM is HERE!)
+            11 => ['mulai' => '15:00', 'selesai' => '15:45'], // Jam 11
+            12 => ['mulai' => '15:45', 'selesai' => '16:30'], // Jam 12
+        ];
+
         foreach ($xml->periods->period as $period) {
             $jamKe = (int) $period['period'];
-            $mulai = (string) $period['starttime'];
-            $selesai = (string) $period['endtime'];
+            $mulai = $standardPeriods[$jamKe]['mulai'] ?? (string) $period['starttime'];
+            $selesai = $standardPeriods[$jamKe]['selesai'] ?? (string) $period['endtime'];
 
             JamPelajaran::updateOrCreate(
                 ['jam_ke' => $jamKe],
