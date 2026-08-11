@@ -36,30 +36,37 @@ class DashboardMonitoring extends Component
     public function detectLiveJam()
     {
         $now = Carbon::now('Asia/Jakarta');
-        $timeNow = $now->format('H:i:s');
+        $timeNow = $now->format('H:i');
 
+        // 1. Check exact match inside period
         $jam = JamPelajaran::where('waktu_mulai', '<=', $timeNow)
             ->where('waktu_selesai', '>=', $timeNow)
             ->first();
 
-        $this->currentJam = $jam?->jam_ke;
+        // 2. If in break/gap, find upcoming period
+        if (!$jam) {
+            $jam = JamPelajaran::where('waktu_mulai', '>', $timeNow)
+                ->orderBy('waktu_mulai', 'asc')
+                ->first();
+        }
+
+        // 3. Fallback to latest past period
+        if (!$jam) {
+            $jam = JamPelajaran::where('waktu_selesai', '<', $timeNow)
+                ->orderBy('waktu_selesai', 'desc')
+                ->first();
+        }
+
+        $this->currentJam = $jam?->jam_ke ?? 1;
         if (is_null($this->selectedJam)) {
-            $this->selectedJam = $this->currentJam ?? 1;
+            $this->selectedJam = $this->currentJam;
         }
     }
 
     public function resetToLive()
     {
-        $now = Carbon::now('Asia/Jakarta');
-        $timeNow = $now->format('H:i:s');
-
-        $jam = JamPelajaran::where('waktu_mulai', '<=', $timeNow)
-            ->where('waktu_selesai', '>=', $timeNow)
-            ->first();
-
-        $this->currentJam = $jam?->jam_ke;
-        $this->selectedJam = $this->currentJam ?? 1;
-
+        $this->detectLiveJam();
+        $this->selectedJam = $this->currentJam;
         $this->dispatch('show-toast', message: "Monitoring dikembalikan ke Jam Live saat ini (Jam ke-{$this->selectedJam})", type: 'info');
     }
 
@@ -189,10 +196,12 @@ class DashboardMonitoring extends Component
     {
         $data = $this->monitoringData;
         $summary = $data->countBy('status');
+        $jamPelajaranList = JamPelajaran::orderBy('jam_ke')->get();
 
         return view('livewire.monitoring.dashboard-monitoring', [
             'monitoringData' => $data,
             'summary' => $summary,
+            'jamPelajaranList' => $jamPelajaranList,
         ]);
     }
 }
