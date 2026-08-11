@@ -67,6 +67,8 @@
              'mapel' => $agenda->jadwalPelajaran?->mataPelajaran?->nama_mapel,
              'materi' => $agenda->materi_diajarkan,
              'refleksi' => $agenda->refleksi,
+             'waktu_masuk' => ($agenda->waktu_mulai?->format('H:i') ?? $agenda->created_at?->format('H:i')) . ' WIB',
+             'guru' => $agenda->guru?->name ?? '-',
              'status' => ucfirst($agenda->status),
              'tps' => $agenda->tujuanPembelajaran->map(fn($t) => ['kode' => $t->kode_tp, 'deskripsi' => $t->deskripsi_tp]),
              'foto_murid' => $agenda->foto_bukti_path ? Storage::url($agenda->foto_bukti_path) : null,
@@ -82,6 +84,9 @@
                         </span>
                         <span class="badge bg-secondary bg-opacity-15 text-dark px-2 py-1" style="font-size: 0.7rem; border-radius: 6px;">
                             Minggu ke-{{ $agenda->week_of_month }}
+                        </span>
+                        <span class="badge bg-info bg-opacity-15 text-info fw-bold px-2 py-1" style="font-size: 0.7rem; border-radius: 6px;">
+                            <i class="bi bi-clock-history me-1"></i>Masuk pkl {{ $agenda->waktu_mulai?->format('H:i') ?? $agenda->created_at?->format('H:i') }} WIB
                         </span>
                     </div>
                     <div class="fw-bold fs-6 text-dark">{{ $agenda->tanggal?->translatedFormat('l, d F Y') }}</div>
@@ -154,9 +159,12 @@
                     
                     <div class="modal-body p-3 text-dark">
                         <div>
-                            {{-- Status Badge --}}
-                            <div class="mb-3">
+                            {{-- Status & Jam Masuk Badge --}}
+                            <div class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
                                 <span class="badge bg-success px-3 py-2 fw-bold" x-text="'Status: ' + modalAgenda.status"></span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 fw-bold" style="font-size: 0.82rem;">
+                                    <i class="bi bi-clock-history me-1"></i>Waktu Guru Masuk: <span x-text="modalAgenda.waktu_masuk"></span>
+                                </span>
                             </div>
 
                             {{-- Materi --}}

@@ -177,7 +177,7 @@ class DashboardGuru extends Component
             $block['time_arrived'] = $timeArrived;
             $block['agenda'] = $agenda;
             $block['status_label'] = $this->getStatusLabel($agenda);
-            $block['can_start'] = $this->canStart($block, $agenda, $timeArrived);
+            $block['can_start'] = $this->canStart($block, $agenda);
 
             return (object) $block;
         });
@@ -199,10 +199,9 @@ class DashboardGuru extends Component
         };
     }
 
-    private function canStart(array $block, ?AgendaHarian $agenda, bool $timeArrived): bool
+    private function canStart(array $block, ?AgendaHarian $agenda): bool
     {
         if ($block['is_kegiatan_khusus']) return false;
-        if (!$timeArrived) return false;
         if (!$agenda) return true;
         if ($agenda->status === 'dibatalkan') return true;
 
