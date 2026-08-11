@@ -197,11 +197,13 @@ class DashboardMonitoring extends Component
         $data = $this->monitoringData;
         $summary = $data->countBy('status');
         $jamPelajaranList = JamPelajaran::orderBy('jam_ke')->get();
+        $currentJamObj = $jamPelajaranList->firstWhere('jam_ke', $this->currentJam);
 
         return view('livewire.monitoring.dashboard-monitoring', [
             'monitoringData' => $data,
             'summary' => $summary,
             'jamPelajaranList' => $jamPelajaranList,
+            'currentJamObj' => $currentJamObj,
         ]);
     }
 }

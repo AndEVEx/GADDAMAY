@@ -85,21 +85,21 @@ class XmlJadwalSeeder extends Seeder
 
     private function seedPeriods($xml): void
     {
-        // Standard SMKN 2 Indramayu 12-Period Schedule Slots (Including Jam 0 Apel & Breaks)
+        // Standard SMKN 2 Indramayu 12-Period Schedule Slots (45-min periods from 07:00 AM to 16:15 PM)
         $standardPeriods = [
-            0  => ['mulai' => '07:00', 'selesai' => '07:30'], // Jam 0: Apel / Upacara / Pra-KBM
-            1  => ['mulai' => '07:30', 'selesai' => '08:15'], // Jam 1
-            2  => ['mulai' => '08:15', 'selesai' => '09:00'], // Jam 2
-            3  => ['mulai' => '09:00', 'selesai' => '09:45'], // Jam 3
-            4  => ['mulai' => '09:45', 'selesai' => '10:30'], // Jam 4
-            5  => ['mulai' => '10:30', 'selesai' => '11:15'], // Jam 5
-            6  => ['mulai' => '11:15', 'selesai' => '12:00'], // Jam 6
-            7  => ['mulai' => '12:00', 'selesai' => '12:45'], // Jam 7 (Ishoma / Sholat / Lunch)
-            8  => ['mulai' => '12:45', 'selesai' => '13:30'], // Jam 8
-            9  => ['mulai' => '13:30', 'selesai' => '14:15'], // Jam 9
-            10 => ['mulai' => '14:15', 'selesai' => '15:00'], // Jam 10 (14:46 PM is HERE!)
-            11 => ['mulai' => '15:00', 'selesai' => '15:45'], // Jam 11
-            12 => ['mulai' => '15:45', 'selesai' => '16:30'], // Jam 12
+            0  => ['mulai' => '07:00', 'selesai' => '07:15'], // Jam 0: Apel / Upacara / Pra-KBM
+            1  => ['mulai' => '07:15', 'selesai' => '08:00'], // Jam 1
+            2  => ['mulai' => '08:00', 'selesai' => '08:45'], // Jam 2
+            3  => ['mulai' => '08:45', 'selesai' => '09:30'], // Jam 3
+            4  => ['mulai' => '09:30', 'selesai' => '10:15'], // Jam 4
+            5  => ['mulai' => '10:15', 'selesai' => '11:00'], // Jam 5 (Istirahat 1)
+            6  => ['mulai' => '11:00', 'selesai' => '11:45'], // Jam 6
+            7  => ['mulai' => '11:45', 'selesai' => '12:30'], // Jam 7 (Ishoma / Lunch / Sholat)
+            8  => ['mulai' => '12:30', 'selesai' => '13:15'], // Jam 8
+            9  => ['mulai' => '13:15', 'selesai' => '14:00'], // Jam 9
+            10 => ['mulai' => '14:00', 'selesai' => '14:45'], // Jam 10
+            11 => ['mulai' => '14:45', 'selesai' => '15:30'], // Jam 11 (15:09 PM is HERE!)
+            12 => ['mulai' => '15:30', 'selesai' => '16:15'], // Jam 12 (Jam Terakhir)
         ];
 
         foreach ($xml->periods->period as $period) {
