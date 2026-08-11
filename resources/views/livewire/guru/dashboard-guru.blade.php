@@ -94,6 +94,10 @@
                     <a href="{{ route('guru.mulai', $jadwal->primary_id ?? $jadwal->id) }}" class="btn btn-primary btn-sm w-100 py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
                         <i class="bi bi-play-fill me-1 fs-6"></i> Mulai Kelas
                     </a>
+                @elseif(empty($jadwal->agenda) && empty($jadwal->is_kegiatan_khusus))
+                    <button disabled class="btn btn-light text-muted btn-sm w-100 py-2 fw-medium border" style="border-radius: 8px; cursor: not-allowed;" title="Waktu mengajar belum tiba">
+                        <i class="bi bi-lock-fill me-1 text-secondary"></i> Mulai Kelas (Belum Jamnya &bull; pkl {{ $jadwal->waktu_mulai_str ?? '07:00' }})
+                    </button>
                 @elseif(!empty($jadwal->agenda))
                     @if($jadwal->agenda->status === 'menunggu_token')
                         <a href="{{ route('guru.mulai', $jadwal->primary_id ?? $jadwal->id) }}" class="btn btn-warning btn-sm w-100 text-white py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>

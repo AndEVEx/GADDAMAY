@@ -144,13 +144,31 @@ class DashboardGuru extends Component
             })
             ->get();
 
+        // Batch load JamPelajaran mapping
+        $jamMap = \App\Models\JamPelajaran::all()->keyBy('jam_ke');
+        $now = Carbon::now('Asia/Jakarta');
+        $timeNow = $now->format('H:i');
+
         // Attach agenda & status label for each block and generate teaching notifications
-        return $allMerged->map(function ($block) use ($agendas, $user) {
+        return $allMerged->map(function ($block) use ($agendas, $user, $jamMap, $timeNow) {
             $agenda = $agendas->first(fn($a) => in_array($a->jadwal_pelajaran_id, $block['all_ids']));
 
+            // Determine exact start time from JamPelajaran table
+            $jamObj = $jamMap->get($block['jam_ke_mulai']);
+            $waktuMulaiStr = $jamObj?->waktu_mulai ?? '07:00';
+
+            // Allow starting 15 minutes before scheduled start time
+            $allowedStartWindow = Carbon::createFromFormat('H:i', substr($waktuMulaiStr, 0, 5), 'Asia/Jakarta')
+                ->subMinutes(15)
+                ->format('H:i');
+
+            $timeArrived = ($timeNow >= $allowedStartWindow) || $user->canOverride();
+
+            $block['waktu_mulai_str'] = substr($waktuMulaiStr, 0, 5);
+            $block['time_arrived'] = $timeArrived;
             $block['agenda'] = $agenda;
             $block['status_label'] = $this->getStatusLabel($agenda);
-            $block['can_start'] = $this->canStart($block, $agenda);
+            $block['can_start'] = $this->canStart($block, $agenda, $timeArrived);
 
             // Generate teaching reminder in-app notification if not notified today
             if (empty($block['is_kegiatan_khusus']) && !empty($block['mataPelajaran'])) {
@@ -196,9 +214,10 @@ class DashboardGuru extends Component
         };
     }
 
-    private function canStart(array $block, ?AgendaHarian $agenda): bool
+    private function canStart(array $block, ?AgendaHarian $agenda, bool $timeArrived): bool
     {
         if ($block['is_kegiatan_khusus']) return false;
+        if (!$timeArrived) return false;
         if (!$agenda) return true;
         if ($agenda->status === 'dibatalkan') return true;
 
