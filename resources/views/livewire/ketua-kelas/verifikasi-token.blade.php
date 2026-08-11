@@ -1,7 +1,16 @@
 <div>
-    <div class="page-header">
-        <h1><i class="bi bi-qr-code-scan me-2"></i>Verifikasi Token</h1>
-        <p class="subtitle mb-0">Masukkan kode OTP dari guru pengajar</p>
+    <div class="page-header mb-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+                <h1><i class="bi bi-qr-code-scan me-2"></i>Verifikasi Token</h1>
+                <p class="subtitle mb-0">Masukkan kode OTP dari guru pengajar</p>
+            </div>
+            @if($studentRombel)
+            <div class="badge bg-primary px-3 py-2 fw-bold" style="font-size: 0.85rem; border-radius: 8px;">
+                <i class="bi bi-door-open me-1"></i>Kelas {{ $studentRombel->nama_kelas }}
+            </div>
+            @endif
+        </div>
     </div>
 
     @if($agenda && in_array($agenda->status, ['token_terverifikasi', 'berjalan']))

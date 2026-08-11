@@ -276,12 +276,13 @@ class XmlJadwalSeeder extends Seeder
         $count = 0;
         foreach ($rombels as $rombel) {
             $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rombel->nama_kelas));
-            User::firstOrCreate(
+            User::updateOrCreate(
                 ['email' => "ketua.{$slug}@smkn2indramayu.sch.id"],
                 [
                     'name' => "Ketua Kelas {$rombel->nama_kelas}",
                     'password' => $this->cachedKetuaPassword,
                     'role' => 'ketua_kelas',
+                    'rombel_id' => $rombel->id,
                 ]
             );
             $count++;

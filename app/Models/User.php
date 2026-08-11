@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'rombel_id',
     ];
 
     /**
@@ -96,6 +97,11 @@ class User extends Authenticatable
     public function tujuanPembelajaran(): HasMany
     {
         return $this->hasMany(TujuanPembelajaran::class, 'ketua_mgmp_id');
+    }
+
+    public function rombel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Rombel::class, 'rombel_id');
     }
 
     // =========================================================================
