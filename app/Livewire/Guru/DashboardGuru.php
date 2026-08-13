@@ -149,16 +149,36 @@ class DashboardGuru extends Component
         $now = Carbon::now('Asia/Jakarta');
         $timeNow = $now->format('H:i');
 
+        // Official SMKN 2 Indramayu Schedule Timetable (Jam 0 to Jam 12)
+        $officialPeriods = [
+            0  => ['mulai' => '06:25', 'selesai' => '06:45'], // Jam 0: Apel Pagi / Upacara
+            1  => ['mulai' => '06:45', 'selesai' => '07:30'], // Jam 1
+            2  => ['mulai' => '07:30', 'selesai' => '08:15'], // Jam 2
+            3  => ['mulai' => '08:15', 'selesai' => '09:00'], // Jam 3
+            4  => ['mulai' => '09:00', 'selesai' => '09:45'], // Jam 4
+            5  => ['mulai' => '09:45', 'selesai' => '10:00'], // Jam 5: Istirahat 1
+            6  => ['mulai' => '10:00', 'selesai' => '10:45'], // Jam 6
+            7  => ['mulai' => '10:45', 'selesai' => '11:30'], // Jam 7
+            8  => ['mulai' => '11:30', 'selesai' => '12:15'], // Jam 8
+            9  => ['mulai' => '12:15', 'selesai' => '12:45'], // Jam 9: Istirahat 2 / Ishoma
+            10 => ['mulai' => '12:45', 'selesai' => '13:30'], // Jam 10
+            11 => ['mulai' => '13:30', 'selesai' => '14:15'], // Jam 11
+            12 => ['mulai' => '14:15', 'selesai' => '15:00'], // Jam 12
+        ];
+
         // Attach agenda & status label for each block and generate teaching notifications
-        return $allMerged->map(function ($block) use ($agendas, $user, $jamMap, $timeNow) {
+        return $allMerged->map(function ($block) use ($agendas, $user, $jamMap, $timeNow, $officialPeriods) {
             $agenda = $agendas->first(fn($a) => in_array($a->jadwal_pelajaran_id, $block['all_ids']));
 
-            // Determine exact start and end times from JamPelajaran table
-            $jamStartObj = $jamMap->get((int) $block['jam_ke_mulai']);
-            $jamEndObj = $jamMap->get((int) $block['jam_ke_selesai']);
+            $startJamKey = (int) $block['jam_ke_mulai'];
+            $endJamKey = (int) $block['jam_ke_selesai'];
 
-            $waktuMulaiRaw = $jamStartObj?->waktu_mulai ?? '06:45';
-            $waktuSelesaiRaw = $jamEndObj?->waktu_selesai ?? '15:00';
+            // Priority 1: Official SMKN 2 Indramayu period timetable mapping
+            // Priority 2: Database JamPelajaran record fallback
+            $waktuMulaiRaw = $officialPeriods[$startJamKey]['mulai'] 
+                ?? ($jamMap->get($startJamKey)?->waktu_mulai ?? '06:45');
+            $waktuSelesaiRaw = $officialPeriods[$endJamKey]['selesai'] 
+                ?? ($jamMap->get($endJamKey)?->waktu_selesai ?? '15:00');
 
             $timeArrived = false;
             $isLate = false;

@@ -38,26 +38,44 @@ class DashboardMonitoring extends Component
         $now = Carbon::now('Asia/Jakarta');
         $timeNow = $now->format('H:i');
 
-        // 1. Check exact match inside period
-        $jam = JamPelajaran::where('waktu_mulai', '<=', $timeNow)
-            ->where('waktu_selesai', '>=', $timeNow)
-            ->first();
+        $officialPeriods = [
+            0  => ['mulai' => '06:25', 'selesai' => '06:45'], // Jam 0: Apel Pagi / Upacara
+            1  => ['mulai' => '06:45', 'selesai' => '07:30'], // Jam 1
+            2  => ['mulai' => '07:30', 'selesai' => '08:15'], // Jam 2
+            3  => ['mulai' => '08:15', 'selesai' => '09:00'], // Jam 3
+            4  => ['mulai' => '09:00', 'selesai' => '09:45'], // Jam 4
+            5  => ['mulai' => '09:45', 'selesai' => '10:00'], // Jam 5: Istirahat 1
+            6  => ['mulai' => '10:00', 'selesai' => '10:45'], // Jam 6
+            7  => ['mulai' => '10:45', 'selesai' => '11:30'], // Jam 7
+            8  => ['mulai' => '11:30', 'selesai' => '12:15'], // Jam 8
+            9  => ['mulai' => '12:15', 'selesai' => '12:45'], // Jam 9: Istirahat 2 / Ishoma
+            10 => ['mulai' => '12:45', 'selesai' => '13:30'], // Jam 10
+            11 => ['mulai' => '13:30', 'selesai' => '14:15'], // Jam 11
+            12 => ['mulai' => '14:15', 'selesai' => '15:00'], // Jam 12
+        ];
 
-        // 2. If in break/gap, find upcoming period
-        if (!$jam) {
-            $jam = JamPelajaran::where('waktu_mulai', '>', $timeNow)
-                ->orderBy('waktu_mulai', 'asc')
-                ->first();
+        $foundJam = null;
+        foreach ($officialPeriods as $jamKe => $slot) {
+            if ($timeNow >= $slot['mulai'] && $timeNow <= $slot['selesai']) {
+                $foundJam = $jamKe;
+                break;
+            }
         }
 
-        // 3. Fallback to latest past period
-        if (!$jam) {
-            $jam = JamPelajaran::where('waktu_selesai', '<', $timeNow)
-                ->orderBy('waktu_selesai', 'desc')
-                ->first();
+        if ($foundJam === null) {
+            foreach ($officialPeriods as $jamKe => $slot) {
+                if ($slot['mulai'] > $timeNow) {
+                    $foundJam = $jamKe;
+                    break;
+                }
+            }
         }
 
-        $this->currentJam = $jam?->jam_ke ?? 1;
+        if ($foundJam === null) {
+            $foundJam = 12;
+        }
+
+        $this->currentJam = $foundJam;
         if (is_null($this->selectedJam)) {
             $this->selectedJam = $this->currentJam;
         }
