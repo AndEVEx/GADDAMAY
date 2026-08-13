@@ -40,5 +40,21 @@
             "type": "image/png",
             "purpose": "any"
         }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/desktop.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Tampilan Desktop AgenDAmay"
+        },
+        {
+            "src": "/screenshots/mobile.png",
+            "sizes": "720x1280",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Tampilan Mobile AgenDAmay"
+        }
     ]
 }
