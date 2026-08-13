@@ -45,8 +45,18 @@ class JurnalPerKelas extends Component
 
         // Assign sequence number (Pertemuan Ke-1, Pertemuan Ke-2, ...) for the month
         $pertemuanCounter = 1;
+        $seenDayMapel = [];
+
         foreach ($allAgendasMonth as $agenda) {
-            $agenda->pertemuan_ke = $pertemuanCounter++;
+            $dateStr = $agenda->tanggal?->format('Y-m-d') ?? $agenda->created_at?->format('Y-m-d');
+            $mapelId = $agenda->jadwalPelajaran?->mapel_id ?? 0;
+            $key = $dateStr . '_' . $mapelId;
+
+            if (!isset($seenDayMapel[$key])) {
+                $seenDayMapel[$key] = $pertemuanCounter++;
+            }
+
+            $agenda->pertemuan_ke = $seenDayMapel[$key];
             $agenda->week_of_month = Carbon::parse($agenda->tanggal)->weekOfMonth;
         }
 

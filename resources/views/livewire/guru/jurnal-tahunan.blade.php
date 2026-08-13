@@ -27,7 +27,7 @@
             <div>
                 <div class="fw-bold text-dark fs-6 mb-1">{{ $rombel->nama_kelas }}</div>
                 <div class="small text-muted d-flex align-items-center gap-2">
-                    <span><i class="bi bi-clock me-1 text-primary"></i>{{ $rombel->total_jadwal_count }} sesi/minggu</span>
+                    <span><i class="bi bi-clock me-1 text-primary"></i>{{ $rombel->merged_sesi_minggu }} sesi/minggu</span>
                     <span>&bull;</span>
                     <span class="text-primary fw-semibold">{{ $namaBulan }}</span>
                 </div>
