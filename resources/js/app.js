@@ -179,7 +179,7 @@ window.WatermarkCamera = {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
 
-                const maxWidth = 1000;
+                const maxWidth = 1200;
                 let srcWidth = imageSource.videoWidth || imageSource.naturalWidth || imageSource.width;
                 let srcHeight = imageSource.videoHeight || imageSource.naturalHeight || imageSource.height;
 
@@ -194,102 +194,120 @@ window.WatermarkCamera = {
                 const w = canvas.width;
                 const h = canvas.height;
 
-                // 1. Draw photo to canvas
+                // 1. Draw photo onto canvas
                 ctx.drawImage(imageSource, 0, 0, w, h);
 
-                // 2. Banner Gradient Gelap
-                const bannerHeight = Math.max(135, h * 0.24);
-                const gradient = ctx.createLinearGradient(0, h - bannerHeight - 40, 0, h);
+                // 2. Compact Banner Dark Gradient at bottom (shortened height)
+                const bannerHeight = Math.max(110, h * 0.16);
+                const gradient = ctx.createLinearGradient(0, h - bannerHeight - 15, 0, h);
                 gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                gradient.addColorStop(0.3, 'rgba(15, 23, 42, 0.85)');
+                gradient.addColorStop(0.3, 'rgba(15, 23, 42, 0.88)');
                 gradient.addColorStop(1, 'rgba(15, 23, 42, 0.98)');
 
                 ctx.fillStyle = gradient;
-                ctx.fillRect(0, h - bannerHeight - 40, w, bannerHeight + 40);
+                ctx.fillRect(0, h - bannerHeight - 15, w, bannerHeight + 15);
 
-                // 3. Metadata & Branding with School Logo
                 ctx.textBaseline = 'top';
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
                 ctx.shadowBlur = 6;
 
-                const paddingLeft = 20;
+                const paddingLeft = 18;
 
+                // 3. Load School Logo Image
                 const logoImg = new Image();
-                logoImg.src = '/icons/logo-sekolah.png';
+                logoImg.crossOrigin = 'anonymous';
 
+                let rendered = false;
                 const renderWatermarkText = () => {
-                    const logoSize = Math.max(56, bannerHeight * 0.45);
-                    const logoX = paddingLeft;
-                    const logoY = h - bannerHeight + 10;
+                    if (rendered) return;
+                    rendered = true;
 
-                    // Draw White Badge Box for School Logo
+                    const logoSize = Math.max(56, bannerHeight * 0.54);
+                    const logoX = paddingLeft;
+                    const logoY = h - bannerHeight + 6;
+
+                    // Draw White Rounded Box for School Logo
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
                     if (ctx.roundRect) {
-                        ctx.roundRect(logoX, logoY, logoSize, logoSize, 12);
+                        ctx.roundRect(logoX, logoY, logoSize, logoSize, 10);
                     } else {
                         ctx.rect(logoX, logoY, logoSize, logoSize);
                     }
                     ctx.fill();
 
                     // Draw Logo Image inside White Box
-                    try {
-                        ctx.drawImage(logoImg, logoX + 4, logoY + 4, logoSize - 8, logoSize - 8);
-                    } catch (e) {
-                        // ignore if image not loaded yet
+                    if (logoImg.complete && logoImg.naturalWidth > 0) {
+                        try {
+                            ctx.drawImage(logoImg, logoX + 3, logoY + 3, logoSize - 6, logoSize - 6);
+                        } catch (e) {}
                     }
 
                     const textX = logoX + logoSize + 14;
                     let currentY = logoY - 2;
 
-                    // A. LARGE AGEN DAMAY Branding + SMKN 2 INDRAMAYU
-                    ctx.font = '800 26px "Inter", "Segoe UI", sans-serif';
+                    // A. Header Branding: AGEN DAMAY  •  SMKN 2 INDRAMAYU (Same size, 2 spaces apart, distinct colors)
+                    const headerFontSize = Math.max(20, Math.round(w * 0.024));
+                    ctx.font = `800 ${headerFontSize}px "Inter", "Segoe UI", sans-serif`;
+
+                    // AGEN DAMAY (Cyan)
                     ctx.fillStyle = '#38bdf8';
                     ctx.fillText('AGEN DAMAY', textX, currentY);
 
-                    ctx.font = '700 15px "Inter", "Segoe UI", sans-serif';
-                    ctx.fillStyle = '#fde047'; // Bright Yellow
-                    ctx.fillText('• SMKN 2 INDRAMAYU', textX + 175, currentY + 8);
-                    currentY += 32;
+                    // Measure AGEN DAMAY width + 2 spaces for exact alignment
+                    const agenDamayWidth = ctx.measureText('AGEN DAMAY  ').width;
 
-                    // B. Kelas & Mapel
-                    ctx.font = '700 20px "Inter", "Segoe UI", sans-serif';
+                    // SMKN 2 INDRAMAYU (Bright Yellow, Same Font Size)
+                    ctx.fillStyle = '#fde047';
+                    ctx.fillText('•  SMKN 2 INDRAMAYU', textX + agenDamayWidth, currentY);
+
+                    currentY += headerFontSize + 5;
+
+                    // B. Kelas & Mapel (Larger white text)
+                    const titleFontSize = Math.max(18, Math.round(w * 0.021));
+                    ctx.font = `800 ${titleFontSize}px "Inter", "Segoe UI", sans-serif`;
                     ctx.fillStyle = '#ffffff';
                     const mainInfo = `${metadata.namaKelas || 'Kelas'} • ${metadata.namaMapel || 'Mata Pelajaran'}`;
                     ctx.fillText(mainInfo, textX, currentY);
-                    currentY += 26;
 
-                    // C. Guru & Waktu
+                    currentY += titleFontSize + 5;
+
+                    // C. Pengajar & Waktu (Larger slate text)
                     const now = new Date();
                     const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' };
                     const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
                     const dateStr = now.toLocaleDateString('id-ID', optionsDate);
                     const timeStr = now.toLocaleTimeString('id-ID', optionsTime);
 
-                    ctx.font = '500 14px "Inter", "Segoe UI", sans-serif';
-                    ctx.fillStyle = '#cbd5e1';
+                    const detailFontSize = Math.max(14, Math.round(w * 0.015));
+                    ctx.font = `600 ${detailFontSize}px "Inter", "Segoe UI", sans-serif`;
+                    ctx.fillStyle = '#e2e8f0';
                     const detailText = `Pengajar: ${metadata.namaGuru || 'Guru'} | ${dateStr} - ${timeStr} WIB`;
                     ctx.fillText(detailText, textX, currentY);
-                    currentY += 22;
 
-                    // D. Tagline
+                    currentY += detailFontSize + 4;
+
+                    // D. Tagline (Larger italic yellow text)
                     const tagline = metadata.tagline || 'Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari';
-                    ctx.font = 'italic 600 13px "Inter", "Segoe UI", sans-serif';
-                    ctx.fillStyle = '#fde047'; // Bright Yellow
+                    const taglineFontSize = Math.max(13, Math.round(w * 0.014));
+                    ctx.font = `italic 600 ${taglineFontSize}px "Inter", "Segoe UI", sans-serif`;
+                    ctx.fillStyle = '#fde047';
                     ctx.fillText(`"${tagline}"`, textX, currentY);
 
                     // Compress to Base64 JPEG
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
                     resolve(compressedBase64);
                 };
 
+                // Attach onload & onerror BEFORE setting src so logo loads reliably
                 logoImg.onload = renderWatermarkText;
                 logoImg.onerror = renderWatermarkText;
-                
-                // Fallback timeout in case image load stalls
+                logoImg.src = '/icons/logo-sekolah.png';
+
+                // Safety timeout fallback
                 setTimeout(() => {
                     renderWatermarkText();
-                }, 400);
+                }, 300);
 
             } catch (error) {
                 reject(error);
