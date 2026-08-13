@@ -57,13 +57,16 @@
     {{-- Refleksi Pembelajaran --}}
     <div class="card mt-3 mb-4 animate-fade-in-up">
         <div class="card-header bg-info bg-opacity-10">
-            <h6 class="mb-0"><i class="bi bi-journal-text me-2"></i>Refleksi Pembelajaran</h6>
+            <h6 class="mb-0 fw-bold"><i class="bi bi-journal-text me-2 text-info"></i>Refleksi Pembelajaran Guru <span class="text-danger">*</span></h6>
         </div>
         <div class="card-body">
-            <textarea wire:model="refleksi" class="form-control" rows="4" 
-                      placeholder="Tuliskan refleksi pembelajaran hari ini..."
+            <textarea wire:model="refleksi" class="form-control @error('refleksi') is-invalid @enderror" rows="4" 
+                      placeholder="Tuliskan refleksi pembelajaran hari ini (proses KBM, respon siswa, kendala, dan rencana tindak lanjut)..."
                       style="min-height: 120px;"></textarea>
-            <div class="form-text">Refleksi tentang proses pembelajaran, kendala, dan rencana tindak lanjut.</div>
+            @error('refleksi')
+                <div class="invalid-feedback fw-semibold"><i class="bi bi-exclamation-circle me-1"></i>{{ $message }}</div>
+            @enderror
+            <div class="form-text mt-2">Refleksi pembelajaran ini akan terekam secara otomatis di detail aktifitas Jurnal Guru.</div>
         </div>
     </div>
 

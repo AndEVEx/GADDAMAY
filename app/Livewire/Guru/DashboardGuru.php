@@ -153,31 +153,55 @@ class DashboardGuru extends Component
         return $allMerged->map(function ($block) use ($agendas, $user, $jamMap, $timeNow) {
             $agenda = $agendas->first(fn($a) => in_array($a->jadwal_pelajaran_id, $block['all_ids']));
 
-            // Determine exact start time from JamPelajaran table
-            $jamObj = $jamMap->get((int) $block['jam_ke_mulai']);
-            $waktuMulaiRaw = $jamObj?->waktu_mulai ?? '07:00';
+            // Determine exact start and end times from JamPelajaran table
+            $jamStartObj = $jamMap->get((int) $block['jam_ke_mulai']);
+            $jamEndObj = $jamMap->get((int) $block['jam_ke_selesai']);
 
-            $timeArrived = true;
-            $displayStartStr = '07:00';
+            $waktuMulaiRaw = $jamStartObj?->waktu_mulai ?? '06:45';
+            $waktuSelesaiRaw = $jamEndObj?->waktu_selesai ?? '15:00';
+
+            $timeArrived = false;
+            $isLate = false;
+            $displayStartStr = '06:45';
 
             try {
-                // Carbon::parse safely parses "7:00", "07:00", "11:30", "13:00:00"
                 $mulaiCarbon = Carbon::parse($waktuMulaiRaw, 'Asia/Jakarta');
-                $allowedStartWindow = $mulaiCarbon->copy()->subMinutes(30)->format('H:i');
-                
-                // Active if current time is on or after the 30-min window before start time
-                $timeArrived = ($timeNow >= $allowedStartWindow) || $user->canOverride();
                 $displayStartStr = $mulaiCarbon->format('H:i');
+
+                $startTimeStr = $mulaiCarbon->format('H:i');
+                $lateLimitStr = $mulaiCarbon->copy()->addMinutes(30)->format('H:i');
+
+                if ($timeNow >= $startTimeStr) {
+                    $timeArrived = true;
+                }
+
+                // Task 1: If current time > start_time + 30 min and no agenda started yet
+                if ($timeNow > $lateLimitStr && !$agenda && !$user->canOverride()) {
+                    $isLate = true;
+                }
             } catch (\Exception $e) {
                 $timeArrived = true;
                 $displayStartStr = substr($waktuMulaiRaw, 0, 5);
             }
 
+            // Task 2: Auto-close completed class if scheduled period has ended
+            if ($agenda && in_array($agenda->status, ['menunggu_token', 'token_terverifikasi', 'berjalan'])) {
+                $selesaiStr = substr($waktuSelesaiRaw, 0, 5);
+                if ($timeNow >= $selesaiStr) {
+                    $agenda->update([
+                        'status' => 'selesai',
+                        'waktu_selesai' => Carbon::now('Asia/Jakarta'),
+                    ]);
+                    $agenda->refresh();
+                }
+            }
+
             $block['waktu_mulai_str'] = $displayStartStr;
             $block['time_arrived'] = $timeArrived;
+            $block['is_late'] = $isLate;
             $block['agenda'] = $agenda;
             $block['status_label'] = $this->getStatusLabel($agenda);
-            $block['can_start'] = $this->canStart($block, $agenda);
+            $block['can_start'] = $this->canStart($block, $agenda, $timeArrived, $isLate);
 
             return (object) $block;
         });
@@ -199,9 +223,11 @@ class DashboardGuru extends Component
         };
     }
 
-    private function canStart(array $block, ?AgendaHarian $agenda): bool
+    private function canStart(array $block, ?AgendaHarian $agenda, bool $timeArrived, bool $isLate): bool
     {
         if ($block['is_kegiatan_khusus']) return false;
+        if ($isLate && !$agenda) return false;
+        if (!$timeArrived && !$agenda) return false;
         if (!$agenda) return true;
         if ($agenda->status === 'dibatalkan') return true;
 

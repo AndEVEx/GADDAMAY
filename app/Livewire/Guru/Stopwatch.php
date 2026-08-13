@@ -30,13 +30,12 @@ class Stopwatch extends Component
     {
         try {
             $this->agenda->update([
-                'waktu_selesai' => Carbon::now('Asia/Jakarta'),
                 'prompter_custom' => $this->prompter,
-                'status' => 'selesai',
+                'waktu_selesai' => $this->agenda->waktu_selesai ?? Carbon::now('Asia/Jakarta'),
             ]);
 
-            $this->dispatch('show-toast', message: 'Pembelajaran berhasil diakhiri!', type: 'success');
-            return redirect()->route('guru.dashboard');
+            $this->dispatch('show-toast', message: 'Lanjut ke pengisian Refleksi Pembelajaran & KKTP!', type: 'info');
+            return redirect()->route('guru.kktp', $this->agenda->id);
         } catch (\Exception $e) {
             $this->dispatch('show-toast', message: 'Gagal mengakhiri: ' . $e->getMessage(), type: 'danger');
         }

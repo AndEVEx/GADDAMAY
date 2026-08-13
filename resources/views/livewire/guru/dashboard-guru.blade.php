@@ -91,9 +91,13 @@
                     <a href="{{ route('guru.mulai', $jadwal->primary_id ?? $jadwal->id) }}" class="btn btn-primary btn-sm w-100 py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
                         <i class="bi bi-play-fill me-1 fs-6"></i> Mulai Kelas
                     </a>
+                @elseif(!empty($jadwal->is_late) && empty($jadwal->agenda) && empty($jadwal->is_kegiatan_khusus))
+                    <button disabled class="btn btn-danger text-white btn-sm w-100 py-2 fw-semibold border-0" style="border-radius: 8px; cursor: not-allowed;" title="Batas waktu mulai kelas 30 menit terlewat">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Anda Telat
+                    </button>
                 @elseif(empty($jadwal->agenda) && empty($jadwal->is_kegiatan_khusus))
                     <button disabled class="btn btn-light text-muted btn-sm w-100 py-2 fw-medium border" style="border-radius: 8px; cursor: not-allowed;" title="Waktu mengajar belum tiba">
-                        <i class="bi bi-lock-fill me-1 text-secondary"></i> Mulai Kelas (Belum Jamnya &bull; pkl {{ $jadwal->waktu_mulai_str ?? '07:00' }})
+                        <i class="bi bi-lock-fill me-1 text-secondary"></i> Mulai Kelas (Belum Jamnya &bull; pkl {{ $jadwal->waktu_mulai_str ?? '06:45' }})
                     </button>
                 @elseif(!empty($jadwal->agenda))
                     @if($jadwal->agenda->status === 'menunggu_token')
@@ -105,7 +109,7 @@
                             <i class="bi bi-pencil-square me-1"></i> Isi Materi
                         </a>
                     @elseif($jadwal->agenda->status === 'berjalan')
-                        <div class="d-flex gap-2">
+                        <div class="d-flex flex-wrap gap-2">
                             <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
                                 <i class="bi bi-pencil-square me-1"></i> Isi Materi / Edit
                             </a>
@@ -114,9 +118,12 @@
                             </a>
                         </div>
                     @elseif($jadwal->agenda->status === 'selesai')
-                        <div class="d-flex gap-2">
+                        <div class="d-flex flex-wrap gap-2">
                             <a href="{{ route('guru.detail-agenda', $jadwal->agenda->id) }}" class="btn btn-outline-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
-                                <i class="bi bi-eye me-1"></i> Lihat Detail Agenda (Selesai)
+                                <i class="bi bi-eye me-1"></i> Detail Agenda
+                            </a>
+                            <a href="{{ route('guru.kehadiran', $jadwal->agenda->id) }}" class="btn btn-outline-secondary btn-sm py-2 fw-semibold" style="border-radius: 8px;" wire:navigate title="Presensi Siswa">
+                                <i class="bi bi-person-check me-1"></i> Presensi
                             </a>
                         </div>
                     @endif

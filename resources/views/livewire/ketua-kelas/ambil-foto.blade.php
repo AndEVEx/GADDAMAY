@@ -48,37 +48,19 @@
                         </template>
                     </button>
 
-                    <div class="d-flex gap-2 mt-1">
-                        <button type="button" @click="switchCamera()" class="btn btn-outline-secondary flex-fill" style="min-height: 44px; border-radius: 10px;">
-                            <i class="bi bi-arrow-repeat me-1"></i>Ganti Kamera
-                        </button>
-                        <button type="button" @click="mode = 'file'; stopCamera();" class="btn btn-outline-secondary flex-fill" style="min-height: 44px; border-radius: 10px;">
-                            <i class="bi bi-folder2-open me-1"></i>Pilih dari Galeri
-                        </button>
-                    </div>
+                    <button type="button" @click="switchCamera()" class="btn btn-outline-secondary w-100 mt-1" style="min-height: 44px; border-radius: 10px;">
+                        <i class="bi bi-arrow-repeat me-1"></i>Ganti Kamera (Depan / Belakang)
+                    </button>
                 </div>
             </div>
 
-            {{-- Mode File Upload Fallback --}}
-            <div x-show="mode === 'file'" style="display: none;">
-                <div class="border border-2 border-dashed rounded-3 p-4 mb-3" style="border-color: #dee2e6;">
-                    <i class="bi bi-image fs-1 text-muted mb-2 d-block"></i>
-                    <label class="form-label fw-bold">Pilih Foto dari Perangkat</label>
-                    <input type="file" wire:model="foto" accept="image/*" class="form-control mb-2" id="foto-file-input">
-                    @error('foto') <div class="text-danger small">{{ $message }}</div> @enderror
-                </div>
-
-                @if($foto)
-                <div class="mb-3">
-                    <img src="{{ $foto->temporaryUrl() }}" class="img-fluid rounded-3 shadow-sm" style="max-height: 300px;" id="preview-file-img">
-                </div>
-                <button type="button" @click="watermarkFileImage()" class="btn btn-primary btn-lg w-100 fw-bold" style="border-radius: 12px;">
-                    <i class="bi bi-cloud-upload me-2"></i>Simpan Foto Bukti
-                </button>
-                @endif
-
-                <button type="button" @click="mode = 'camera'; startCamera();" class="btn btn-outline-primary w-100 mt-2" style="min-height: 44px; border-radius: 10px;">
-                    <i class="bi bi-camera me-1"></i>Kembali ke Kamera Live
+            {{-- Camera Error Notice if blocked --}}
+            <div x-show="mode === 'error'" style="display: none;" class="alert alert-warning text-center py-4">
+                <i class="bi bi-camera-video-off fs-1 text-warning d-block mb-2"></i>
+                <h6 class="fw-bold text-dark">Kamera Live Diperlukan</h6>
+                <p class="small text-muted mb-3">Foto bukti hanya dapat diambil langsung dari kamera live. Mohon izinkan akses kamera pada browser Anda.</p>
+                <button type="button" @click="mode = 'camera'; startCamera();" class="btn btn-primary btn-sm px-3" style="border-radius: 8px;">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Coba Buka Kamera Lagi
                 </button>
             </div>
 

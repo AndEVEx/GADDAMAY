@@ -48,8 +48,8 @@ class FotoGuru extends Component
                 'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
             ]);
 
-            $this->dispatch('show-toast', message: 'Foto Guru & Suasana Kelas tersimpan! Lanjut ke Stopwatch.', type: 'success');
-            return redirect()->route('guru.stopwatch', $this->agenda->id);
+            $this->dispatch('show-toast', message: 'Foto Guru & Suasana Kelas tersimpan! Lanjut ke Presensi Siswa.', type: 'success');
+            return redirect()->route('guru.kehadiran', $this->agenda->id);
         } catch (\Exception $e) {
             $this->dispatch('show-toast', message: 'Gagal menyimpan foto: ' . $e->getMessage(), type: 'danger');
         }
@@ -69,8 +69,8 @@ class FotoGuru extends Component
             'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
         ]);
 
-        $this->dispatch('show-toast', message: 'Foto Guru tersimpan! Lanjut ke Stopwatch.', type: 'success');
-        return redirect()->route('guru.stopwatch', $this->agenda->id);
+        $this->dispatch('show-toast', message: 'Foto Guru tersimpan! Lanjut ke Presensi Siswa.', type: 'success');
+        return redirect()->route('guru.kehadiran', $this->agenda->id);
     }
 
     public function render()

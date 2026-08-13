@@ -104,24 +104,21 @@
     </div>
 
     {{-- Refleksi & Prompter Card --}}
-    @if($agenda->refleksi || $agenda->prompter_custom)
     <div class="card mb-3 animate-fade-in-up border shadow-sm" style="border-radius: 12px;">
         <div class="card-header bg-light fw-bold text-dark">
-            <i class="bi bi-journal-text me-2 text-primary"></i>Refleksi & Catatan Prompter
+            <i class="bi bi-journal-text me-2 text-primary"></i>Refleksi Pembelajaran Guru & Catatan
         </div>
         <div class="card-body">
-            @if($agenda->refleksi)
             <div class="mb-3">
-                <div class="fw-bold text-muted small mb-1">Refleksi Guru:</div>
-                <div class="p-3 bg-info bg-opacity-10 text-dark rounded-3 border border-info border-opacity-25">
-                    {{ $agenda->refleksi }}
+                <div class="fw-bold text-muted small mb-1"><i class="bi bi-journal-check text-info me-1"></i>Refleksi Guru (Proses KBM, Kendala, & Rencana):</div>
+                <div class="p-3 bg-info bg-opacity-10 text-dark rounded-3 border border-info border-opacity-25 fw-medium">
+                    {{ $agenda->refleksi ?: 'Belum ada catatan refleksi pembelajaran.' }}
                 </div>
             </div>
-            @endif
 
             @if($agenda->prompter_custom)
             <div>
-                <div class="fw-bold text-muted small mb-1">Catatan Prompter:</div>
+                <div class="fw-bold text-muted small mb-1"><i class="bi bi-chat-left-text me-1 text-secondary"></i>Catatan Prompter:</div>
                 <div class="p-3 bg-light text-dark rounded-3 border">
                     {{ $agenda->prompter_custom }}
                 </div>
@@ -129,7 +126,6 @@
             @endif
         </div>
     </div>
-    @endif
 
     {{-- 2 Foto Bukti Section (Foto Murid & Foto Guru) --}}
     <div class="card mb-4 animate-fade-in-up border shadow-sm" style="border-radius: 12px;">

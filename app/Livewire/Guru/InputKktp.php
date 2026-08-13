@@ -50,6 +50,13 @@ class InputKktp extends Component
 
     public function simpanDanSelesai()
     {
+        $this->validate([
+            'refleksi' => 'required|min:5',
+        ], [
+            'refleksi.required' => 'Refleksi pembelajaran wajib diisi sebelum menyelesaikan kelas!',
+            'refleksi.min' => 'Refleksi pembelajaran minimal 5 karakter.',
+        ]);
+
         // Save all KKTP records
         foreach ($this->kktpData as $siswaId => $tps) {
             foreach ($tps as $tpId => $status) {
@@ -63,10 +70,11 @@ class InputKktp extends Component
         // Set agenda as complete
         $this->agenda->update([
             'status' => 'selesai',
+            'waktu_selesai' => $this->agenda->waktu_selesai ?? \Carbon\Carbon::now('Asia/Jakarta'),
             'refleksi' => $this->refleksi,
         ]);
 
-        $this->dispatch('show-toast', message: 'Pembelajaran selesai! KKTP tersimpan.', type: 'success');
+        $this->dispatch('show-toast', message: 'Pembelajaran selesai! Refleksi & KKTP tersimpan.', type: 'success');
         return redirect()->route('guru.dashboard');
     }
 
