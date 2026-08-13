@@ -174,145 +174,134 @@ function showMotivasiPopup(isi, tipe) {
 // ============================================================
 window.WatermarkCamera = {
     async processAndWatermark(imageSource, metadata = {}) {
-        return new Promise((resolve, reject) => {
-            try {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
 
-                const maxWidth = 1200;
-                let srcWidth = imageSource.videoWidth || imageSource.naturalWidth || imageSource.width;
-                let srcHeight = imageSource.videoHeight || imageSource.naturalHeight || imageSource.height;
+            const maxWidth = 1200;
+            let srcWidth = imageSource.videoWidth || imageSource.naturalWidth || imageSource.width;
+            let srcHeight = imageSource.videoHeight || imageSource.naturalHeight || imageSource.height;
 
-                if (!srcWidth || !srcHeight) {
-                    throw new Error("Sumber gambar tidak valid atau belum siap.");
-                }
-
-                const scaleFactor = Math.min(1, maxWidth / srcWidth);
-                canvas.width = srcWidth * scaleFactor;
-                canvas.height = srcHeight * scaleFactor;
-
-                const w = canvas.width;
-                const h = canvas.height;
-
-                // 1. Draw photo onto canvas
-                ctx.drawImage(imageSource, 0, 0, w, h);
-
-                // 2. Compact Banner Dark Gradient at bottom (shortened height)
-                const bannerHeight = Math.max(110, h * 0.16);
-                const gradient = ctx.createLinearGradient(0, h - bannerHeight - 15, 0, h);
-                gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                gradient.addColorStop(0.3, 'rgba(15, 23, 42, 0.88)');
-                gradient.addColorStop(1, 'rgba(15, 23, 42, 0.98)');
-
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, h - bannerHeight - 15, w, bannerHeight + 15);
-
-                ctx.textBaseline = 'top';
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-                ctx.shadowBlur = 6;
-
-                const paddingLeft = 18;
-
-                // 3. Load School Logo Image
-                const logoImg = new Image();
-                logoImg.crossOrigin = 'anonymous';
-
-                let rendered = false;
-                const renderWatermarkText = () => {
-                    if (rendered) return;
-                    rendered = true;
-
-                    const logoSize = Math.max(56, bannerHeight * 0.54);
-                    const logoX = paddingLeft;
-                    const logoY = h - bannerHeight + 6;
-
-                    // Draw White Rounded Box for School Logo
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    if (ctx.roundRect) {
-                        ctx.roundRect(logoX, logoY, logoSize, logoSize, 10);
-                    } else {
-                        ctx.rect(logoX, logoY, logoSize, logoSize);
-                    }
-                    ctx.fill();
-
-                    // Draw Logo Image inside White Box
-                    if (logoImg.complete && logoImg.naturalWidth > 0) {
-                        try {
-                            ctx.drawImage(logoImg, logoX + 3, logoY + 3, logoSize - 6, logoSize - 6);
-                        } catch (e) {}
-                    }
-
-                    const textX = logoX + logoSize + 14;
-                    let currentY = logoY - 2;
-
-                    // A. Header Branding: AGEN DAMAY  •  SMKN 2 INDRAMAYU (Same size, 2 spaces apart, distinct colors)
-                    const headerFontSize = Math.max(20, Math.round(w * 0.024));
-                    ctx.font = `800 ${headerFontSize}px "Inter", "Segoe UI", sans-serif`;
-
-                    // AGEN DAMAY (Cyan)
-                    ctx.fillStyle = '#38bdf8';
-                    ctx.fillText('AGEN DAMAY', textX, currentY);
-
-                    // Measure AGEN DAMAY width + 2 spaces for exact alignment
-                    const agenDamayWidth = ctx.measureText('AGEN DAMAY  ').width;
-
-                    // SMKN 2 INDRAMAYU (Bright Yellow, Same Font Size)
-                    ctx.fillStyle = '#fde047';
-                    ctx.fillText('•  SMKN 2 INDRAMAYU', textX + agenDamayWidth, currentY);
-
-                    currentY += headerFontSize + 5;
-
-                    // B. Kelas & Mapel (Larger white text)
-                    const titleFontSize = Math.max(18, Math.round(w * 0.021));
-                    ctx.font = `800 ${titleFontSize}px "Inter", "Segoe UI", sans-serif`;
-                    ctx.fillStyle = '#ffffff';
-                    const mainInfo = `${metadata.namaKelas || 'Kelas'} • ${metadata.namaMapel || 'Mata Pelajaran'}`;
-                    ctx.fillText(mainInfo, textX, currentY);
-
-                    currentY += titleFontSize + 5;
-
-                    // C. Pengajar & Waktu (Larger slate text)
-                    const now = new Date();
-                    const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' };
-                    const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
-                    const dateStr = now.toLocaleDateString('id-ID', optionsDate);
-                    const timeStr = now.toLocaleTimeString('id-ID', optionsTime);
-
-                    const detailFontSize = Math.max(14, Math.round(w * 0.015));
-                    ctx.font = `600 ${detailFontSize}px "Inter", "Segoe UI", sans-serif`;
-                    ctx.fillStyle = '#e2e8f0';
-                    const detailText = `Pengajar: ${metadata.namaGuru || 'Guru'} | ${dateStr} - ${timeStr} WIB`;
-                    ctx.fillText(detailText, textX, currentY);
-
-                    currentY += detailFontSize + 4;
-
-                    // D. Tagline (Larger italic yellow text)
-                    const tagline = metadata.tagline || 'Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari';
-                    const taglineFontSize = Math.max(13, Math.round(w * 0.014));
-                    ctx.font = `italic 600 ${taglineFontSize}px "Inter", "Segoe UI", sans-serif`;
-                    ctx.fillStyle = '#fde047';
-                    ctx.fillText(`"${tagline}"`, textX, currentY);
-
-                    // Compress to Base64 JPEG
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-                    resolve(compressedBase64);
-                };
-
-                // Attach onload & onerror BEFORE setting src so logo loads reliably
-                logoImg.onload = renderWatermarkText;
-                logoImg.onerror = renderWatermarkText;
-                logoImg.src = '/icons/logo-sekolah.png';
-
-                // Safety timeout fallback
-                setTimeout(() => {
-                    renderWatermarkText();
-                }, 300);
-
-            } catch (error) {
-                reject(error);
+            if (!srcWidth || !srcHeight) {
+                throw new Error("Sumber gambar tidak valid atau belum siap.");
             }
-        });
+
+            const scaleFactor = Math.min(1, maxWidth / srcWidth);
+            canvas.width = srcWidth * scaleFactor;
+            canvas.height = srcHeight * scaleFactor;
+
+            const w = canvas.width;
+            const h = canvas.height;
+
+            // 1. Draw photo onto canvas
+            ctx.drawImage(imageSource, 0, 0, w, h);
+
+            // 2. Compact Banner Dark Gradient at bottom (portrait vs landscape height)
+            const isPortrait = h > w;
+            const bannerHeight = isPortrait ? Math.max(85, Math.min(110, h * 0.11)) : Math.max(105, Math.min(130, h * 0.15));
+            const gradient = ctx.createLinearGradient(0, h - bannerHeight - 12, 0, h);
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(0.35, 'rgba(15, 23, 42, 0.88)');
+            gradient.addColorStop(1, 'rgba(15, 23, 42, 0.98)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, h - bannerHeight - 12, w, bannerHeight + 12);
+
+            ctx.textBaseline = 'top';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 6;
+
+            const paddingLeft = 18;
+
+            // 3. Load School Logo Image with Async Promise Wait
+            const logoImg = new Image();
+            logoImg.crossOrigin = 'anonymous';
+
+            await new Promise((resolveLogo) => {
+                logoImg.onload = () => resolveLogo(true);
+                logoImg.onerror = () => resolveLogo(false);
+                logoImg.src = '/icons/logo-sekolah.png';
+                if (logoImg.complete && logoImg.naturalWidth > 0) resolveLogo(true);
+                setTimeout(() => resolveLogo(false), 1200);
+            });
+
+            const logoSize = Math.max(54, bannerHeight * 0.55);
+            const logoX = paddingLeft;
+            const logoY = h - bannerHeight + (isPortrait ? 4 : 6);
+
+            // Draw White Rounded Box for School Logo
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(logoX, logoY, logoSize, logoSize, 10);
+            } else {
+                ctx.rect(logoX, logoY, logoSize, logoSize);
+            }
+            ctx.fill();
+
+            // Draw Logo Image inside White Box
+            if (logoImg.complete && logoImg.naturalWidth > 0) {
+                try {
+                    ctx.drawImage(logoImg, logoX + 3, logoY + 3, logoSize - 6, logoSize - 6);
+                } catch (e) {}
+            }
+
+            const textX = logoX + logoSize + 14;
+            let currentY = logoY - 2;
+
+            // A. Header Branding: AGEN DAMAY  •  SMKN 2 INDRAMAYU (Same size, 2 spaces apart, distinct colors)
+            const headerFontSize = Math.max(19, Math.round(w * 0.023));
+            ctx.font = `800 ${headerFontSize}px "Inter", "Segoe UI", sans-serif`;
+
+            // AGEN DAMAY (Cyan)
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText('AGEN DAMAY', textX, currentY);
+
+            // Measure AGEN DAMAY width + 2 spaces for exact alignment
+            const agenDamayWidth = ctx.measureText('AGEN DAMAY  ').width;
+
+            // SMKN 2 INDRAMAYU (Bright Yellow, Same Font Size)
+            ctx.fillStyle = '#fde047';
+            ctx.fillText('•  SMKN 2 INDRAMAYU', textX + agenDamayWidth, currentY);
+
+            currentY += headerFontSize + 4;
+
+            // B. Kelas & Mapel (Larger white text)
+            const titleFontSize = Math.max(17, Math.round(w * 0.020));
+            ctx.font = `800 ${titleFontSize}px "Inter", "Segoe UI", sans-serif`;
+            ctx.fillStyle = '#ffffff';
+            const mainInfo = `${metadata.namaKelas || 'Kelas'} • ${metadata.namaMapel || 'Mata Pelajaran'}`;
+            ctx.fillText(mainInfo, textX, currentY);
+
+            currentY += titleFontSize + 4;
+
+            // C. Pengajar & Waktu (Larger slate text)
+            const now = new Date();
+            const optionsDate = { day: '2-digit', month: 'short', year: 'numeric' };
+            const optionsTime = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const dateStr = now.toLocaleDateString('id-ID', optionsDate);
+            const timeStr = now.toLocaleTimeString('id-ID', optionsTime);
+
+            const detailFontSize = Math.max(13, Math.round(w * 0.014));
+            ctx.font = `600 ${detailFontSize}px "Inter", "Segoe UI", sans-serif`;
+            ctx.fillStyle = '#e2e8f0';
+            const detailText = `Pengajar: ${metadata.namaGuru || 'Guru'} | ${dateStr} - ${timeStr} WIB`;
+            ctx.fillText(detailText, textX, currentY);
+
+            currentY += detailFontSize + 3;
+
+            // D. Tagline (Larger italic yellow text)
+            const tagline = metadata.tagline || 'Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari';
+            const taglineFontSize = Math.max(12, Math.round(w * 0.013));
+            ctx.font = `italic 600 ${taglineFontSize}px "Inter", "Segoe UI", sans-serif`;
+            ctx.fillStyle = '#fde047';
+            ctx.fillText(`"${tagline}"`, textX, currentY);
+
+            // Compress to Base64 JPEG
+            return canvas.toDataURL('image/jpeg', 0.85);
+        } catch (error) {
+            throw error;
+        }
     }
 };
 

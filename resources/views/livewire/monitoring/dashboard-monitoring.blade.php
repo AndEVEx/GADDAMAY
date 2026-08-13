@@ -1,28 +1,19 @@
 <div wire:poll.30s>
     {{-- Page Header --}}
     <div class="page-header shadow-sm mb-3">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-                <h1 class="text-white fw-bold mb-1"><i class="bi bi-graph-up me-2"></i>Monitoring KBM</h1>
-                <p class="subtitle mb-0 text-white-50 small">
-                    {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}
-                </p>
-            </div>
-            {{-- Realtime Time & Current Live Jam Info --}}
-            <div class="bg-white bg-opacity-20 rounded-3 px-3 py-2 text-white border border-white border-opacity-25 shadow-sm text-end">
-                <div class="small text-white-50 fw-semibold" style="font-size: 0.72rem;">
-                    <i class="bi bi-clock-history me-1"></i>Jam Server Real-time:
-                </div>
-                <div class="fw-bold text-warning fs-5" style="letter-spacing: 0.5px; line-height: 1.2;">
-                    {{ \Carbon\Carbon::now('Asia/Jakarta')->format('H:i:s') }} WIB
-                </div>
-                <div class="small fw-bold text-white mt-1" style="font-size: 0.75rem;">
-                    <span class="badge bg-success text-white me-1 animate-pulse" style="font-size: 0.65rem;">LIVE</span> 
-                    Jam ke-{{ $currentJam ?? '?' }}
-                    @if(!empty($currentJamObj))
-                        <span class="text-white-50">({{ substr($currentJamObj->waktu_mulai, 0, 5) }} - {{ substr($currentJamObj->waktu_selesai, 0, 5) }} WIB)</span>
+        <div>
+            <h1 class="text-white fw-bold mb-1"><i class="bi bi-graph-up me-2"></i>Monitoring KBM</h1>
+            <div class="subtitle mb-0 text-white small fw-medium">
+                {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}
+                &bull; {{ \Carbon\Carbon::now('Asia/Jakarta')->format('H:i:s') }} WIB
+                &bull; Jam ke-{{ $currentJam ?? '?' }}
+                @if(!empty($currentJamObj))
+                    ({{ substr($currentJamObj->waktu_mulai, 0, 5) }} - {{ substr($currentJamObj->waktu_selesai, 0, 5) }} WIB
+                    @if(!empty($currentJamObj->label))
+                        &bull; {{ $currentJamObj->label }}
                     @endif
-                </div>
+                    )
+                @endif
             </div>
         </div>
         
