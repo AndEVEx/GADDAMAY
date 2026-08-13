@@ -102,17 +102,13 @@ class XmlJadwalSeeder extends Seeder
             12 => ['mulai' => '14:15', 'selesai' => '15:00'], // Jam 12 (KBM 10 / Jam Terakhir KBM)
         ];
 
-        foreach ($xml->periods->period as $period) {
-            $jamKe = (int) $period['period'];
-            $mulai = $standardPeriods[$jamKe]['mulai'] ?? (string) $period['starttime'];
-            $selesai = $standardPeriods[$jamKe]['selesai'] ?? (string) $period['endtime'];
-
+        foreach ($standardPeriods as $jamKe => $slot) {
             JamPelajaran::updateOrCreate(
                 ['jam_ke' => $jamKe],
-                ['waktu_mulai' => $mulai, 'waktu_selesai' => $selesai]
+                ['waktu_mulai' => $slot['mulai'], 'waktu_selesai' => $slot['selesai']]
             );
         }
-        $this->command?->info('Periods seeded: ' . count($xml->periods->period));
+        $this->command?->info('Periods seeded: ' . count($standardPeriods));
     }
 
     private function seedTeachers($xml): void

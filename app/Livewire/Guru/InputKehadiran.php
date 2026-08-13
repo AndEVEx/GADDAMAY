@@ -40,6 +40,14 @@ class InputKehadiran extends Component
         $this->kehadiran[$siswaId] = $status;
     }
 
+    public function setAllStatus(string $status)
+    {
+        foreach ($this->kehadiran as $siswaId => $current) {
+            $this->kehadiran[$siswaId] = $status;
+        }
+        $this->dispatch('show-toast', message: "Seluruh siswa diset ke status " . strtoupper($status), type: 'info');
+    }
+
     public function simpan()
     {
         foreach ($this->kehadiran as $siswaId => $status) {

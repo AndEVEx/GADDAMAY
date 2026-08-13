@@ -214,7 +214,33 @@ class DashboardMonitoring extends Component
     {
         $data = $this->monitoringData;
         $summary = $data->countBy('status');
-        $jamPelajaranList = JamPelajaran::orderBy('jam_ke')->get();
+
+        $officialPeriods = [
+            0  => ['mulai' => '06:25', 'selesai' => '06:45', 'label' => 'Apel Pagi / Upacara', 'is_break' => false],
+            1  => ['mulai' => '06:45', 'selesai' => '07:30', 'label' => 'KBM 1', 'is_break' => false],
+            2  => ['mulai' => '07:30', 'selesai' => '08:15', 'label' => 'KBM 2', 'is_break' => false],
+            3  => ['mulai' => '08:15', 'selesai' => '09:00', 'label' => 'KBM 3', 'is_break' => false],
+            4  => ['mulai' => '09:00', 'selesai' => '09:45', 'label' => 'KBM 4', 'is_break' => false],
+            5  => ['mulai' => '09:45', 'selesai' => '10:00', 'label' => 'Istirahat 1', 'is_break' => true],
+            6  => ['mulai' => '10:00', 'selesai' => '10:45', 'label' => 'KBM 5', 'is_break' => false],
+            7  => ['mulai' => '10:45', 'selesai' => '11:30', 'label' => 'KBM 6', 'is_break' => false],
+            8  => ['mulai' => '11:30', 'selesai' => '12:15', 'label' => 'KBM 7', 'is_break' => false],
+            9  => ['mulai' => '12:15', 'selesai' => '12:45', 'label' => 'Istirahat 2 / Ishoma', 'is_break' => true],
+            10 => ['mulai' => '12:45', 'selesai' => '13:30', 'label' => 'KBM 8', 'is_break' => false],
+            11 => ['mulai' => '13:30', 'selesai' => '14:15', 'label' => 'KBM 9', 'is_break' => false],
+            12 => ['mulai' => '14:15', 'selesai' => '15:00', 'label' => 'KBM 10', 'is_break' => false],
+        ];
+
+        $jamPelajaranList = collect($officialPeriods)->map(function ($slot, $jamKe) {
+            return (object) [
+                'jam_ke' => $jamKe,
+                'waktu_mulai' => $slot['mulai'],
+                'waktu_selesai' => $slot['selesai'],
+                'label' => $slot['label'],
+                'is_break' => $slot['is_break'],
+            ];
+        });
+
         $currentJamObj = $jamPelajaranList->firstWhere('jam_ke', $this->currentJam);
 
         return view('livewire.monitoring.dashboard-monitoring', [
