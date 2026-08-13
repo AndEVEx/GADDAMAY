@@ -51,7 +51,7 @@ class JurnalTahunan extends Component
         ]);
     }
 
-    private function calculateMergedSesiMinggu(int $userId, int $rombelId): int
+    private function calculateMergedSesiMinggu(int|string $userId, int|string $rombelId): int
     {
         $jadwals = JadwalPelajaran::where('rombel_id', $rombelId)
             ->whereHas('jadwalGuru', fn($q) => $q->where('guru_id', $userId))
