@@ -9,9 +9,18 @@
     <title>{{ $title ?? 'AgenDAmay' }} — AgenDAmay SMKN 2 Indramayu</title>
 
     {{-- PWA Assets --}}
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" href="{{ \App\Helpers\LogoHelper::getBase64() }}">
-    <link rel="apple-touch-icon" href="{{ \App\Helpers\LogoHelper::getBase64() }}">
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AgenDAmay">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="AgenDAmay">
+    <meta name="msapplication-TileColor" content="#1a56db">
+    <meta name="msapplication-TileImage" content="/icons/icon-192.png">
 
     {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">

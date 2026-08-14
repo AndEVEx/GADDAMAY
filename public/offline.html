@@ -3,23 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offline — Agenda Guru</title>
+    <meta name="theme-color" content="#1a56db">
+    <title>Offline — AgenDAmay</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
-        .container { text-align: center; max-width: 400px; }
-        .icon { font-size: 4rem; margin-bottom: 1rem; }
-        h1 { color: #1a56db; font-size: 1.5rem; margin-bottom: 0.5rem; }
-        p { color: #6b7280; line-height: 1.6; }
-        .btn { display: inline-block; margin-top: 1.5rem; padding: 0.75rem 2rem; background: #1a56db; color: white; border: none; border-radius: 0.75rem; font-weight: 600; cursor: pointer; text-decoration: none; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a56db 0%, #0d47a1 50%, #1e3a5f 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            color: #ffffff;
+        }
+        .container {
+            text-align: center;
+            max-width: 400px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+        p {
+            color: rgba(255,255,255,0.75);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+        .btn {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.85rem 2.5rem;
+            background: #ffffff;
+            color: #1a56db;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.3); }
+        .btn:active { transform: translateY(0); }
+        .brand {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">📡</div>
-        <h1>Tidak Ada Koneksi</h1>
-        <p>Perangkat Anda sedang offline. Silakan periksa koneksi internet dan coba lagi.</p>
-        <a href="/" class="btn">Coba Lagi</a>
+        <span class="icon">&#x1F4F6;</span>
+        <h1>Tidak Ada Koneksi Internet</h1>
+        <p>Perangkat Anda sedang offline. Pastikan koneksi internet aktif untuk mengakses AgenDAmay.</p>
+        <p>Periksa WiFi atau paket data Anda, lalu coba lagi.</p>
+        <a href="/" class="btn" onclick="window.location.reload(); return false;">Coba Lagi</a>
+        <div class="brand">AgenDAmay &bull; SMKN 2 Indramayu</div>
     </div>
 </body>
 </html>
