@@ -218,11 +218,24 @@ window.WatermarkCamera = {
             logoImg.crossOrigin = 'anonymous';
 
             await new Promise((resolveLogo) => {
-                logoImg.onload = () => resolveLogo(true);
-                logoImg.onerror = () => resolveLogo(false);
-                logoImg.src = '/icons/logo-sekolah.png';
-                if (logoImg.complete && logoImg.naturalWidth > 0) resolveLogo(true);
-                setTimeout(() => resolveLogo(false), 1200);
+                let resolved = false;
+                const onDone = () => {
+                    if (!resolved) {
+                        resolved = true;
+                        resolveLogo(true);
+                    }
+                };
+                logoImg.onload = onDone;
+                logoImg.onerror = () => {
+                    if (!logoImg.src.includes('/icons/')) {
+                        logoImg.src = '/icons/logo-sekolah.png';
+                    } else {
+                        onDone();
+                    }
+                };
+                logoImg.src = '/pwa-icons/logosekolah.png';
+                if (logoImg.complete && logoImg.naturalWidth > 0) onDone();
+                setTimeout(onDone, 1500);
             });
 
             const logoSize = Math.max(54, bannerHeight * 0.55);

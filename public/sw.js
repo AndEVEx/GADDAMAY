@@ -1,6 +1,6 @@
 // AgenDAmay Service Worker - PWA Standalone Support
-// Version: 2.0.0
-const CACHE_NAME = 'agendamay-pwa-v3';
+// Version: 2.1.0
+const CACHE_NAME = 'agendamay-pwa-v4';
 const OFFLINE_URL = '/offline.html';
 
 // Pre-cache essential shell assets
@@ -9,6 +9,13 @@ const PRECACHE_ASSETS = [
     '/icons/icon-192.png',
     '/icons/icon-512.png',
     '/icons/logo-sekolah.png',
+    '/pwa-icons/icon-192.png',
+    '/pwa-icons/icon-512.png',
+    '/pwa-icons/logo-sekolah.png',
+    '/screenshots/1280-1.png',
+    '/screenshots/1280-2.png',
+    '/screenshots/screenshoot-720-1.png',
+    '/screenshots/screenshoot-720-2.png',
     '/manifest.json',
 ];
 
@@ -69,6 +76,7 @@ self.addEventListener('fetch', (event) => {
     // Static assets: cache-first (icons, fonts, compiled CSS/JS)
     const isStaticAsset =
         request.url.includes('/icons/') ||
+        request.url.includes('/pwa-icons/') ||
         request.url.includes('/screenshots/') ||
         request.url.includes('/build/assets/') ||
         request.url.includes('.woff2') ||
