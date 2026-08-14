@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Mechanisms\HandleRequests\EndpointResolver;
 use App\Http\Controllers\LivewireCustomFileUploadController;
 use App\Http\Controllers\DirectImportController;
+use App\Http\Controllers\Api\GuruScheduleController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Guru\DashboardGuru;
 use App\Livewire\Guru\MulaiKelas;
@@ -58,6 +59,11 @@ Route::post('/logout', function () {
 })->name('logout')->middleware('auth');
 
 Route::get('/ganti-password', GantiPassword::class)->middleware('auth')->name('ganti-password');
+
+// API: Guru schedule for push notification
+Route::get('/api/guru/jadwal-hari-ini', [GuruScheduleController::class, 'todaySchedule'])
+    ->middleware(['auth'])
+    ->name('api.guru.jadwal');
 
 Route::get('/', function () {
     if (!auth()->check()) return redirect()->route('login');

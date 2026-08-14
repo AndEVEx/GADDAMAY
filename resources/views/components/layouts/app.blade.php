@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1a56db">
     <meta name="description" content="AgenDAmay - Agenda Digital SMKN 2 Indramayu">
-    
+    @auth
+    <meta name="user-role" content="{{ auth()->user()->role }}">
+    @endauth
     <title>{{ $title ?? 'AgenDAmay' }} — AgenDAmay SMKN 2 Indramayu</title>
 
     {{-- PWA Assets --}}
@@ -233,8 +235,11 @@
 
     @livewireScripts
 
-    {{-- Register PWA Service Worker --}}
+    {{-- Register PWA Service Worker + Teaching Schedule Notification System --}}
     <script>
+    // ============================================================
+    // 1. PWA Service Worker Registration
+    // ============================================================
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').then(function(reg) {
@@ -244,6 +249,239 @@
             });
         });
     }
+
+    // ============================================================
+    // 2. Teaching Schedule Push Notification System (Guru Only)
+    // ============================================================
+    (function() {
+        'use strict';
+
+        const NOTIF_STORAGE_KEY = 'agendamay_notified_schedule';
+        const NOTIF_CHECK_INTERVAL = 30000; // Check every 30 seconds
+        const NOTIF_MINUTES_BEFORE = 15;    // Notify 15 minutes before class
+
+        let notifIntervalId = null;
+        let cachedSchedule = null;
+        let lastFetchDate = null;
+
+        // Request Notification permission on first interaction
+        function requestNotifPermission() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'default') {
+                Notification.requestPermission().then(function(perm) {
+                    console.log('Notification permission:', perm);
+                });
+            }
+        }
+
+        // Get today's date string for localStorage key scoping
+        function todayStr() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        // Check if a specific notification has already been sent today
+        function alreadyNotified(key) {
+            try {
+                const data = JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '{}');
+                return data[todayStr()] && data[todayStr()][key] === true;
+            } catch (e) { return false; }
+        }
+
+        // Mark a notification as sent for today
+        function markNotified(key) {
+            try {
+                const data = JSON.parse(localStorage.getItem(NOTIF_STORAGE_KEY) || '{}');
+                const today = todayStr();
+
+                // Clean up old dates (only keep today)
+                const cleaned = {};
+                cleaned[today] = data[today] || {};
+                cleaned[today][key] = true;
+
+                localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(cleaned));
+            } catch (e) { }
+        }
+
+        // Play notification sound using Web Audio API
+        function playNotifSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+
+                // Play a pleasant two-tone chime
+                function playTone(freq, startTime, duration) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + startTime);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime + startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + startTime + duration);
+                    osc.start(ctx.currentTime + startTime);
+                    osc.stop(ctx.currentTime + startTime + duration);
+                }
+
+                // 3-tone ascending chime: C5 → E5 → G5
+                playTone(523, 0, 0.25);
+                playTone(659, 0.2, 0.25);
+                playTone(784, 0.4, 0.4);
+            } catch (e) {
+                console.warn('Audio notification failed:', e);
+            }
+        }
+
+        // Show browser notification
+        function showTeachingNotification(block) {
+            const title = '📚 15 Menit Lagi Mengajar!';
+            const body = block.mapel + ' — ' + block.kelas + '\nPukul ' + block.waktu_mulai + ' WIB';
+
+            // Play sound first (works even if Notification is denied)
+            playNotifSound();
+
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    const notif = new Notification(title, {
+                        body: body,
+                        icon: '/icons/icon-192.png',
+                        badge: '/icons/icon-192.png',
+                        tag: 'teaching-' + block.waktu_mulai,
+                        renotify: false,
+                        requireInteraction: true,
+                        vibrate: [200, 100, 200, 100, 200],
+                    });
+
+                    notif.onclick = function() {
+                        window.focus();
+                        notif.close();
+                    };
+
+                    // Auto-close after 30 seconds
+                    setTimeout(function() { notif.close(); }, 30000);
+                } catch (e) {
+                    console.warn('Notification display failed:', e);
+                }
+            }
+
+            // Also show in-app toast as fallback
+            if (window.Livewire) {
+                window.Livewire.dispatch('show-toast', {
+                    message: '📚 15 menit lagi: ' + block.mapel + ' — ' + block.kelas + ' (pkl ' + block.waktu_mulai + ')',
+                    type: 'warning'
+                });
+            }
+        }
+
+        // Fetch schedule from API (once per day, cached)
+        async function fetchSchedule() {
+            const today = todayStr();
+            if (cachedSchedule && lastFetchDate === today) {
+                return cachedSchedule;
+            }
+
+            try {
+                const resp = await fetch('/api/guru/jadwal-hari-ini', {
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (!resp.ok) {
+                    cachedSchedule = null;
+                    return null;
+                }
+
+                const data = await resp.json();
+                cachedSchedule = data;
+                lastFetchDate = today;
+                return data;
+            } catch (e) {
+                return cachedSchedule; // Return stale cache on network error
+            }
+        }
+
+        // Parse "HH:MM" string to minutes since midnight
+        function timeToMinutes(timeStr) {
+            const parts = timeStr.split(':');
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+
+        // Main check: compare current time against schedule
+        async function checkScheduleNotifications() {
+            const data = await fetchSchedule();
+            if (!data || !data.jadwal || data.jadwal.length === 0) return;
+
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+            data.jadwal.forEach(function(block) {
+                const startMinutes = timeToMinutes(block.waktu_mulai);
+                const diff = startMinutes - nowMinutes;
+
+                // Notify if class starts in 13-17 minute window (centered around 15 min)
+                if (diff >= (NOTIF_MINUTES_BEFORE - 2) && diff <= (NOTIF_MINUTES_BEFORE + 2)) {
+                    const notifKey = block.waktu_mulai + '_' + block.kelas + '_' + block.mapel;
+
+                    if (!alreadyNotified(notifKey)) {
+                        markNotified(notifKey);
+                        showTeachingNotification(block);
+                    }
+                }
+            });
+        }
+
+        // Only run for guru/ketua_mgmp roles
+        function isGuruPage() {
+            // Check if URL contains /guru/ or if the body has guru-related content
+            return document.querySelector('meta[name="user-role"]')?.content === 'guru'
+                || document.querySelector('meta[name="user-role"]')?.content === 'ketua_mgmp'
+                || window.location.pathname.startsWith('/guru');
+        }
+
+        // Initialize notification system
+        function initNotifSystem() {
+            // Request permission early
+            requestNotifPermission();
+
+            // Clear any previous interval (prevents duplicates on Livewire navigate)
+            if (notifIntervalId) {
+                clearInterval(notifIntervalId);
+                notifIntervalId = null;
+            }
+
+            // Run first check after 2 seconds (let page settle)
+            setTimeout(function() {
+                checkScheduleNotifications();
+            }, 2000);
+
+            // Then check every 30 seconds
+            notifIntervalId = setInterval(checkScheduleNotifications, NOTIF_CHECK_INTERVAL);
+        }
+
+        // Start on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initNotifSystem);
+        } else {
+            initNotifSystem();
+        }
+
+        // Re-init on Livewire navigation (SPA-style page changes)
+        document.addEventListener('livewire:navigated', function() {
+            // Do NOT re-initialize a new interval - just ensure the existing one is running
+            if (!notifIntervalId) {
+                initNotifSystem();
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (notifIntervalId) {
+                clearInterval(notifIntervalId);
+                notifIntervalId = null;
+            }
+        });
+    })();
     </script>
 </body>
 </html>
