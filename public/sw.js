@@ -1,22 +1,18 @@
-// AgenDAmay Service Worker - PWA Standalone Support
-// Version: 2.1.0
-const CACHE_NAME = 'agendamay-pwa-v4';
+// AgenDAmay Service Worker - PWA Standalone & Push Notification Support
+// Version: 2.3.0
+const CACHE_NAME = 'agendamay-pwa-v6';
 const OFFLINE_URL = '/offline.html';
 
 // Pre-cache essential shell assets
 const PRECACHE_ASSETS = [
     OFFLINE_URL,
-    '/icons/icon-192.png',
-    '/icons/icon-512.png',
-    '/icons/logo-sekolah.png',
     '/pwa-icons/icon-192.png',
     '/pwa-icons/icon-512.png',
-    '/pwa-icons/logo-sekolah.png',
     '/screenshots/1280-1.png',
     '/screenshots/1280-2.png',
     '/screenshots/screenshoot-720-1.png',
     '/screenshots/screenshoot-720-2.png',
-    '/manifest.json',
+    '/manifest.json'
 ];
 
 // Install: pre-cache offline shell
@@ -73,9 +69,8 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Static assets: cache-first (icons, fonts, compiled CSS/JS)
+    // Static assets: cache-first
     const isStaticAsset =
-        request.url.includes('/icons/') ||
         request.url.includes('/pwa-icons/') ||
         request.url.includes('/screenshots/') ||
         request.url.includes('/build/assets/') ||
@@ -99,4 +94,60 @@ self.addEventListener('fetch', (event) => {
         );
         return;
     }
+});
+
+// =================================================================
+// WEB PUSH NOTIFICATION LISTENERS (WAJIB UNTUK NOTIFIKASI ANDROID)
+// =================================================================
+
+// 1. Menangkap sinyal Push dari Server / FCM
+self.addEventListener('push', function(event) {
+    if (!(self.Notification && self.Notification.permission === 'granted')) {
+        return;
+    }
+
+    let data = {};
+    if (event.data) {
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data = { body: event.data.text() };
+        }
+    }
+
+    const title = data.title || 'AgenDAmay SMKN 2 Indramayu';
+    const options = {
+        body: data.body || 'Ada pemberitahuan KBM baru.',
+        icon: data.icon || '/pwa-icons/icon-192.png',
+        badge: '/pwa-icons/icon-192.png',
+        vibrate: [200, 100, 200],
+        data: {
+            url: data.action_url || '/guru/dashboard'
+        }
+    };
+
+    event.waitUntil(
+        self.registration.showNotification(title, options)
+    );
+});
+
+// 2. Ketika Notifikasi di HP diklik oleh Guru
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+
+    const targetUrl = event.notification?.data?.url || '/guru/dashboard';
+
+    event.waitUntil(
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+            for (let i = 0; i < clientList.length; i++) {
+                let client = clientList[i];
+                if (client.url.includes(targetUrl) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }
+        })
+    );
 });
