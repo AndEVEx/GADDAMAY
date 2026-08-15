@@ -1,14 +1,18 @@
-// AgenDAmay Service Worker - PWA Standalone & Push Notification
-// Version: 2.2.0
-const CACHE_NAME = 'agendamay-pwa-v5'; // Versi dinaikkan ke v5 agar browser HP memperbarui SW
+// AgenDAmay Service Worker - PWA Standalone & Push Notification Support
+// Version: 2.3.0
+const CACHE_NAME = 'agendamay-pwa-v6';
 const OFFLINE_URL = '/offline.html';
 
-// Pre-cache essential shell assets (Hanya mendaftarkan file yang PASTI ada)
+// Pre-cache essential shell assets
 const PRECACHE_ASSETS = [
     OFFLINE_URL,
+    '/pwa-icons/icon-192.png',
+    '/pwa-icons/icon-512.png',
+    '/screenshots/1280-1.png',
+    '/screenshots/1280-2.png',
+    '/screenshots/screenshoot-720-1.png',
+    '/screenshots/screenshoot-720-2.png',
     '/manifest.json'
-    // Ikon & Screenshot sengaja dikeluarkan dari precache agar tidak memicu error 404.
-    // Static asset tersebut akan di-cache secara otomatis saat diakses via event 'fetch' di bawah.
 ];
 
 // Install: pre-cache offline shell
@@ -67,7 +71,6 @@ self.addEventListener('fetch', (event) => {
 
     // Static assets: cache-first
     const isStaticAsset =
-        request.url.includes('/icons/') ||
         request.url.includes('/pwa-icons/') ||
         request.url.includes('/screenshots/') ||
         request.url.includes('/build/assets/') ||
@@ -97,7 +100,7 @@ self.addEventListener('fetch', (event) => {
 // WEB PUSH NOTIFICATION LISTENERS (WAJIB UNTUK NOTIFIKASI ANDROID)
 // =================================================================
 
-// 1. Menangkap sinyal Push dari Laravel Server / Google FCM
+// 1. Menangkap sinyal Push dari Server / FCM
 self.addEventListener('push', function(event) {
     if (!(self.Notification && self.Notification.permission === 'granted')) {
         return;
@@ -112,7 +115,7 @@ self.addEventListener('push', function(event) {
         }
     }
 
-    const title = data.title || 'AgenDamay SMKN 2 Indramayu';
+    const title = data.title || 'AgenDAmay SMKN 2 Indramayu';
     const options = {
         body: data.body || 'Ada pemberitahuan KBM baru.',
         icon: data.icon || '/pwa-icons/icon-192.png',
@@ -148,9 +151,3 @@ self.addEventListener('notificationclick', function(event) {
         })
     );
 });
-```eof
-
-### Ringkasan Perubahan:
-1. **Pembersihan `PRECACHE_ASSETS`**: Daftar jalur gambar yang 404 dikeluarkan. Peringatan `Precache skipped` di konsol akan hilang total.
-2. **Versi Cache Dinaikkan**: Mengubah nama cache ke `'agendamay-pwa-v5'` memaksa browser HP memperbarui Service Worker baru.
-3. **Integrasi Web Push**: Menambahkan event listener `'push'` dan `'notificationclick'` di bagian paling bawah agar notifikasi pengingat mengajar bisa mendarat di HP guru.
