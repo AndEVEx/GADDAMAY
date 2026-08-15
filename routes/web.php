@@ -35,6 +35,10 @@ use App\Livewire\Monitoring\DashboardMonitoring;
 use App\Livewire\Monitoring\ProgressTp;
 use App\Livewire\Guru\FotoGuru;
 use App\Livewire\Guru\DetailAgenda;
+use App\Livewire\Guru\KktpHub;
+use App\Livewire\Guru\SettingKktp;
+use App\Livewire\Guru\NilaiKktpIndex;
+use App\Livewire\Guru\NilaiKktpDetail;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -92,6 +96,12 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
     Route::get('/jurnal', JurnalTahunan::class)->name('guru.jurnal');
     Route::get('/jurnal/{rombel}', JurnalPerKelas::class)->name('guru.jurnal-kelas');
     Route::get('/detail/{agenda}', DetailAgenda::class)->name('guru.detail-agenda')->withTrashed();
+
+    // KKTP Menu (Setting & Nilai)
+    Route::get('/menu-kktp', KktpHub::class)->name('guru.kktp-hub');
+    Route::get('/menu-kktp/setting', SettingKktp::class)->name('guru.kktp-setting');
+    Route::get('/menu-kktp/nilai', NilaiKktpIndex::class)->name('guru.kktp-nilai');
+    Route::get('/menu-kktp/nilai/{rombel}/{mapel}', NilaiKktpDetail::class)->name('guru.kktp-nilai-detail');
 
     // These require time restriction
     Route::middleware('time-restriction')->group(function () {

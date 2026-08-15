@@ -5,6 +5,10 @@
             <i class="bi bi-house-fill"></i>
             <span>Beranda</span>
         </a>
+        <a href="{{ route('guru.kktp-hub') }}" class="nav-item {{ request()->routeIs('guru.kktp*') ? 'active' : '' }}" wire:navigate>
+            <i class="bi bi-list-check"></i>
+            <span>KKTP</span>
+        </a>
         <a href="{{ route('guru.jurnal') }}" class="nav-item {{ request()->routeIs('guru.jurnal*') ? 'active' : '' }}" wire:navigate>
             <i class="bi bi-journal-text"></i>
             <span>Jurnal</span>

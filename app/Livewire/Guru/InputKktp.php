@@ -23,7 +23,7 @@ class InputKktp extends Component
         $this->agenda = $agenda->load(['jadwalPelajaran.rombel', 'jadwalPelajaran.mataPelajaran', 'tujuanPembelajaran', 'kehadiranMurid.siswa', 'kktpSiswa']);
         $this->refleksi = $this->agenda->refleksi ?? '';
 
-        // Initialize kktpData for students who are HADIR
+        // Initialize kktpData for students who are HADIR — default: tercapai
         $siswaHadir = $this->agenda->kehadiranMurid
             ->where('status', 'hadir')
             ->filter(fn($k) => !empty($k->siswa))
@@ -32,12 +32,12 @@ class InputKktp extends Component
 
         foreach ($siswaHadir as $siswa) {
             foreach ($tps as $tp) {
-                // Check existing record
+                // Check existing record, default to 'tercapai'
                 $existing = $this->agenda->kktpSiswa
                     ->where('siswa_id', $siswa->id)
                     ->where('tp_id', $tp->id)
                     ->first();
-                $this->kktpData[$siswa->id][$tp->id] = $existing ? $existing->status : 'belum_tercapai';
+                $this->kktpData[$siswa->id][$tp->id] = $existing ? $existing->status : 'tercapai';
             }
         }
     }
@@ -57,12 +57,28 @@ class InputKktp extends Component
             'refleksi.min' => 'Refleksi pembelajaran minimal 5 karakter.',
         ]);
 
-        // Save all KKTP records
+        // Save KKTP records for HADIR students
         foreach ($this->kktpData as $siswaId => $tps) {
             foreach ($tps as $tpId => $status) {
                 KktpSiswa::updateOrCreate(
                     ['agenda_harian_id' => $this->agenda->id, 'siswa_id' => $siswaId, 'tp_id' => $tpId],
                     ['status' => $status]
+                );
+            }
+        }
+
+        // Auto-mark absent students (S/I/A) as 'belum_tercapai'
+        $siswaAbsent = $this->agenda->kehadiranMurid
+            ->where('status', '!=', 'hadir')
+            ->filter(fn($k) => !empty($k->siswa))
+            ->pluck('siswa');
+        $tpsAll = $this->agenda->tujuanPembelajaran;
+
+        foreach ($siswaAbsent as $siswa) {
+            foreach ($tpsAll as $tp) {
+                KktpSiswa::updateOrCreate(
+                    ['agenda_harian_id' => $this->agenda->id, 'siswa_id' => $siswa->id, 'tp_id' => $tp->id],
+                    ['status' => 'belum_tercapai']
                 );
             }
         }
