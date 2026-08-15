@@ -10,19 +10,19 @@
     @endauth
     <title>{{ $title ?? 'AgenDAmay' }} — AgenDAmay SMKN 2 Indramayu</title>
 
-    {{-- PWA Assets --}}
+    {{-- PWA Assets (Diperbarui ke /pwa-icons/) --}}
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-icons/icon-512.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/pwa-icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="/pwa-icons/icon-512.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="AgenDAmay">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="AgenDAmay">
     <meta name="msapplication-TileColor" content="#1a56db">
-    <meta name="msapplication-TileImage" content="/icons/icon-192.png">
+    <meta name="msapplication-TileImage" content="/pwa-icons/icon-192.png">
 
     {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -238,12 +238,64 @@
     {{-- Register PWA Service Worker + Teaching Schedule Notification System --}}
     <script>
     // ============================================================
-    // 1. PWA Service Worker Registration
+    // 1. PWA Service Worker Registration & Installation Handler
     // ============================================================
+    let deferredPrompt = null;
+
+    // Tangkap event instalasi PWA dari browser Chrome/Android
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('PWA Install Prompt berhasil ditangkap.');
+    });
+
+    // Fungsi trigger saat tombol "Install Aplikasi (PWA)" di Sidebar diklik
+    window.installPWA = function() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User menerima instalasi PWA');
+                } else {
+                    console.log('User menolak instalasi PWA');
+                }
+                deferredPrompt = null;
+            });
+        } else {
+            alert('Aplikasi sudah terinstall di HP/Komputer Anda atau browser ini belum mendukung instalasi PWA otomatis.');
+        }
+    };
+
+    // Fungsi Fullscreen
+    window.toggleFullscreen = function() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.warn('Gagal mode layar penuh:', err);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').then(function(reg) {
                 console.log('PWA ServiceWorker registered with scope:', reg.scope);
+
+                // Auto-reload saat Service Worker versi baru terdeteksi
+                reg.onupdatefound = function() {
+                    const installingWorker = reg.installing;
+                    if (installingWorker) {
+                        installingWorker.onstatechange = function() {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('Versi baru AgenDamay diunduh. Memuat ulang...');
+                                window.location.reload();
+                            }
+                        };
+                    }
+                };
             }).catch(function(err) {
                 console.warn('PWA ServiceWorker registration failed:', err);
             });
@@ -310,7 +362,6 @@
                 if (!AudioContext) return;
                 const ctx = new AudioContext();
 
-                // Play a pleasant two-tone chime
                 function playTone(freq, startTime, duration) {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -333,7 +384,7 @@
             }
         }
 
-        // Show browser notification
+        // Show browser notification (Icon path fixed to /pwa-icons/)
         function showTeachingNotification(block) {
             const title = '📚 15 Menit Lagi Mengajar!';
             const body = block.mapel + ' — ' + block.kelas + '\nPukul ' + block.waktu_mulai + ' WIB';
@@ -345,8 +396,8 @@
                 try {
                     const notif = new Notification(title, {
                         body: body,
-                        icon: '/icons/icon-192.png',
-                        badge: '/icons/icon-192.png',
+                        icon: '/pwa-icons/icon-192.png',
+                        badge: '/pwa-icons/icon-192.png',
                         tag: 'teaching-' + block.waktu_mulai,
                         renotify: false,
                         requireInteraction: true,
@@ -374,7 +425,7 @@
             }
         }
 
-        // Fetch schedule from API (once per day, cached)
+        // Fetch schedule from API
         async function fetchSchedule() {
             const today = todayStr();
             if (cachedSchedule && lastFetchDate === today) {
@@ -397,17 +448,15 @@
                 lastFetchDate = today;
                 return data;
             } catch (e) {
-                return cachedSchedule; // Return stale cache on network error
+                return cachedSchedule;
             }
         }
 
-        // Parse "HH:MM" string to minutes since midnight
         function timeToMinutes(timeStr) {
             const parts = timeStr.split(':');
             return parseInt(parts[0]) * 60 + parseInt(parts[1]);
         }
 
-        // Main check: compare current time against schedule
         async function checkScheduleNotifications() {
             const data = await fetchSchedule();
             if (!data || !data.jadwal || data.jadwal.length === 0) return;
@@ -419,7 +468,6 @@
                 const startMinutes = timeToMinutes(block.waktu_mulai);
                 const diff = startMinutes - nowMinutes;
 
-                // Notify if class starts in 13-17 minute window (centered around 15 min)
                 if (diff >= (NOTIF_MINUTES_BEFORE - 2) && diff <= (NOTIF_MINUTES_BEFORE + 2)) {
                     const notifKey = block.waktu_mulai + '_' + block.kelas + '_' + block.mapel;
 
@@ -431,50 +479,33 @@
             });
         }
 
-        // Only run for guru/ketua_mgmp roles
-        function isGuruPage() {
-            // Check if URL contains /guru/ or if the body has guru-related content
-            return document.querySelector('meta[name="user-role"]')?.content === 'guru'
-                || document.querySelector('meta[name="user-role"]')?.content === 'ketua_mgmp'
-                || window.location.pathname.startsWith('/guru');
-        }
-
-        // Initialize notification system
         function initNotifSystem() {
-            // Request permission early
             requestNotifPermission();
 
-            // Clear any previous interval (prevents duplicates on Livewire navigate)
             if (notifIntervalId) {
                 clearInterval(notifIntervalId);
                 notifIntervalId = null;
             }
 
-            // Run first check after 2 seconds (let page settle)
             setTimeout(function() {
                 checkScheduleNotifications();
             }, 2000);
 
-            // Then check every 30 seconds
             notifIntervalId = setInterval(checkScheduleNotifications, NOTIF_CHECK_INTERVAL);
         }
 
-        // Start on page load
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initNotifSystem);
         } else {
             initNotifSystem();
         }
 
-        // Re-init on Livewire navigation (SPA-style page changes)
         document.addEventListener('livewire:navigated', function() {
-            // Do NOT re-initialize a new interval - just ensure the existing one is running
             if (!notifIntervalId) {
                 initNotifSystem();
             }
         });
 
-        // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
             if (notifIntervalId) {
                 clearInterval(notifIntervalId);
