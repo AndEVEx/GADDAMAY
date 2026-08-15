@@ -1,6 +1,6 @@
 // AgenDAmay Service Worker - PWA Standalone & Push Notification Support
 // Version: 2.3.0
-const CACHE_NAME = 'agendamay-pwa-v6';
+const CACHE_NAME = 'agendamay-pwa-v7';
 const OFFLINE_URL = '/offline.html';
 
 // Pre-cache essential shell assets

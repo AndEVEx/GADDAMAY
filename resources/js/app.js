@@ -227,8 +227,8 @@ window.WatermarkCamera = {
                 };
                 logoImg.onload = onDone;
                 logoImg.onerror = () => {
-                    if (!logoImg.src.includes('/icons/')) {
-                        logoImg.src = '/icons/logo-sekolah.png';
+                    if (!logoImg.src.includes('/pwa-icons/')) {
+                        logoImg.src = '/pwa-icons/logo-sekolah.png';
                     } else {
                         onDone();
                     }

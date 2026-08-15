@@ -11,8 +11,6 @@
     <title>{{ $title ?? 'AgenDAmay' }} — AgenDAmay SMKN 2 Indramayu</title>
 
     {{-- PWA Assets (Diperbarui ke /pwa-icons/) --}}
-    <!-- SESUDAHNYA (Hapus atribut crossorigin="use-credentials") -->
-    <link rel="manifest" href="/manifest.json">
     {{-- PWA Assets (Bersih dari crossorigin) --}}
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png">
