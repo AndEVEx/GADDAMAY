@@ -11,7 +11,10 @@
     <title>{{ $title ?? 'AgenDAmay' }} — AgenDAmay SMKN 2 Indramayu</title>
 
     {{-- PWA Assets (Diperbarui ke /pwa-icons/) --}}
-    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <!-- SESUDAHNYA (Hapus atribut crossorigin="use-credentials") -->
+    <link rel="manifest" href="/manifest.json">
+    {{-- PWA Assets (Bersih dari crossorigin) --}}
+    <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icons/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/pwa-icons/icon-512.png">
     <link rel="apple-touch-icon" sizes="192x192" href="/pwa-icons/icon-192.png">
@@ -23,7 +26,7 @@
     <meta name="application-name" content="AgenDAmay">
     <meta name="msapplication-TileColor" content="#1a56db">
     <meta name="msapplication-TileImage" content="/pwa-icons/icon-192.png">
-
+    
     {{-- Google Fonts: Inter --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
