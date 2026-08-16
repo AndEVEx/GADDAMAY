@@ -39,6 +39,8 @@ use App\Livewire\Guru\KktpHub;
 use App\Livewire\Guru\SettingKktp;
 use App\Livewire\Guru\NilaiKktpIndex;
 use App\Livewire\Guru\NilaiKktpDetail;
+use App\Livewire\Guru\PengajuanIzin;
+use App\Livewire\Waka\VerifikasiIzin;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -103,6 +105,9 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
     Route::get('/menu-kktp/nilai', NilaiKktpIndex::class)->name('guru.kktp-nilai');
     Route::get('/menu-kktp/nilai/{rombel}/{mapel}', NilaiKktpDetail::class)->name('guru.kktp-nilai-detail');
 
+    // Pengajuan Izin Guru
+    Route::get('/izin', PengajuanIzin::class)->name('guru.izin');
+
     // These require time restriction
     Route::middleware('time-restriction')->group(function () {
         Route::get('/mulai/{jadwal}', MulaiKelas::class)->name('guru.mulai');
@@ -139,6 +144,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/motivasi', ManajemenMotivasiPantun::class)->name('admin.motivasi');
     Route::get('/koreksi', KoreksiAgenda::class)->name('admin.koreksi');
     Route::get('/override/{agenda}', OverrideAgenda::class)->name('admin.override');
+    Route::get('/verifikasi-izin', VerifikasiIzin::class)->name('admin.verifikasi-izin');
 
     // Direct Form Upload Fallbacks (Fail-safe HTTP POST routes)
     Route::post('/direct-import-jadwal', [DirectImportController::class, 'importJadwal'])->name('admin.direct-import-jadwal');
@@ -164,4 +170,5 @@ Route::middleware(['auth', 'role:admin,kepsek,waka'])->prefix('monitoring')->gro
 Route::middleware(['auth', 'role:waka'])->prefix('waka')->group(function () {
     Route::get('/koreksi', KoreksiAgenda::class)->name('waka.koreksi');
     Route::get('/override/{agenda}', OverrideAgenda::class)->name('waka.override');
+    Route::get('/verifikasi-izin', VerifikasiIzin::class)->name('waka.verifikasi-izin');
 });

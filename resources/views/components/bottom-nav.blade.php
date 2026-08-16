@@ -9,6 +9,10 @@
             <i class="bi bi-list-check"></i>
             <span>KKTP</span>
         </a>
+        <a href="{{ route('guru.izin') }}" class="nav-item {{ request()->routeIs('guru.izin*') ? 'active' : '' }}" wire:navigate>
+            <i class="bi bi-calendar-x"></i>
+            <span>Izin</span>
+        </a>
         <a href="{{ route('guru.jurnal') }}" class="nav-item {{ request()->routeIs('guru.jurnal*') ? 'active' : '' }}" wire:navigate>
             <i class="bi bi-journal-text"></i>
             <span>Jurnal</span>
@@ -22,6 +26,10 @@
             <i class="bi bi-calendar3"></i>
             <span>Jadwal</span>
         </a>
+        <a href="{{ route('admin.verifikasi-izin') }}" class="nav-item {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
+            <i class="bi bi-patch-check"></i>
+            <span>Izin</span>
+        </a>
         <a href="{{ route('monitoring.dashboard') }}" class="nav-item {{ request()->routeIs('monitoring.*') ? 'active' : '' }}" wire:navigate>
             <i class="bi bi-graph-up"></i>
             <span>Monitor</span>
@@ -33,8 +41,14 @@
         </a>
         <a href="{{ route('monitoring.progress') }}" class="nav-item {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
             <i class="bi bi-graph-up"></i>
-            <span>Progress TP</span>
+            <span>Progress KKTP</span>
         </a>
+        @if($role === 'waka')
+        <a href="{{ route('waka.verifikasi-izin') }}" class="nav-item {{ request()->routeIs('waka.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
+            <i class="bi bi-patch-check"></i>
+            <span>Izin Guru</span>
+        </a>
+        @endif
     @elseif($role === 'ketua_kelas')
         <a href="{{ route('ketua.verifikasi') }}" class="nav-item {{ request()->routeIs('ketua.*') ? 'active' : '' }}" wire:navigate>
             <i class="bi bi-qr-code-scan"></i>

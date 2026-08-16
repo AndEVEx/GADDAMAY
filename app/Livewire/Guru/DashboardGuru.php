@@ -233,6 +233,14 @@ class DashboardGuru extends Component
             return ['text' => 'Belum Mulai', 'class' => 'status-abu', 'icon' => 'bi-circle'];
         }
 
+        if (in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar'])) {
+            return [
+                'text' => 'Guru ' . ucfirst($agenda->status_kehadiran_guru),
+                'class' => 'status-kuning',
+                'icon' => 'bi-info-circle-fill'
+            ];
+        }
+
         return match ($agenda->status) {
             'menunggu_token' => ['text' => 'Menunggu Token', 'class' => 'status-kuning', 'icon' => 'bi-hourglass-split'],
             'token_terverifikasi' => ['text' => 'Token Verified', 'class' => 'status-kuning', 'icon' => 'bi-shield-check'],
@@ -246,6 +254,7 @@ class DashboardGuru extends Component
     private function canStart(array $block, ?AgendaHarian $agenda, bool $timeArrived, bool $isLate): bool
     {
         if ($block['is_kegiatan_khusus']) return false;
+        if ($agenda && in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar'])) return false;
         if ($isLate && !$agenda) return false;
         if (!$timeArrived && !$agenda) return false;
         if (!$agenda) return true;

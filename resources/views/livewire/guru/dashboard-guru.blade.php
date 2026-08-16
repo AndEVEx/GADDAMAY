@@ -12,6 +12,37 @@
         </div>
     </div>
 
+    {{-- Quick Access Shortcut Cards --}}
+    <div class="row g-2 mb-3">
+        <div class="col-4">
+            <a href="{{ route('guru.kktp-hub') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 38px; height: 38px;">
+                    <i class="bi bi-list-check fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark" style="font-size: 0.78rem;">Menu KKTP</div>
+                <div class="text-muted" style="font-size: 0.65rem;">Setting & Nilai</div>
+            </a>
+        </div>
+        <div class="col-4">
+            <a href="{{ route('guru.izin') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 38px; height: 38px;">
+                    <i class="bi bi-calendar-x fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark" style="font-size: 0.78rem;">Izin Guru</div>
+                <div class="text-muted" style="font-size: 0.65rem;">Pengajuan Izin</div>
+            </a>
+        </div>
+        <div class="col-4">
+            <a href="{{ route('guru.jurnal') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 38px; height: 38px;">
+                    <i class="bi bi-journal-text fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark" style="font-size: 0.78rem;">Jurnal Guru</div>
+                <div class="text-muted" style="font-size: 0.65rem;">Rekap Tahunan</div>
+            </a>
+        </div>
+    </div>
+
     {{-- Jadwal Hari Ini Header --}}
     <h5 class="fw-bold mb-3 d-flex align-items-center justify-content-between">
         <span><i class="bi bi-journal-check me-2 text-primary"></i>Jadwal Mengajar Hari Ini</span>

@@ -120,11 +120,14 @@
                     <a href="{{ route('admin.motivasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.motivasi') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-chat-quote-fill me-2"></i>Motivasi & Pantun
                     </a>
+                    <a href="{{ route('admin.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-patch-check-fill me-2 text-warning"></i>Verifikasi Izin Guru
+                    </a>
                     <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-graph-up-arrow me-2"></i>Monitoring Realtime
                     </a>
                     <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-bar-chart-line me-2"></i>Progress TP
+                        <i class="bi bi-bar-chart-line me-2"></i>Progress KKTP (Analytic)
                     </a>
                 @elseif(in_array($role, ['guru', 'ketua_mgmp']))
                     <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
@@ -133,12 +136,31 @@
                     <a href="{{ route('guru.jurnal') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.jurnal*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-journal-text me-2"></i>Jurnal Mengajar
                     </a>
+
+                    {{-- Menu KKTP Section --}}
+                    <a href="{{ route('guru.kktp-hub') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.kktp-hub') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-list-check me-2 text-primary"></i>Menu KKTP (Utama)
+                    </a>
+                    <div class="ps-3 mb-1">
+                        <a href="{{ route('guru.kktp-setting') }}" class="list-group-item list-group-item-action border-0 rounded py-1 mb-1 small {{ request()->routeIs('guru.kktp-setting') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-gear-fill me-2 text-secondary"></i>Setting KKTP / TP
+                        </a>
+                        <a href="{{ route('guru.kktp-nilai') }}" class="list-group-item list-group-item-action border-0 rounded py-1 mb-1 small {{ request()->routeIs('guru.kktp-nilai*') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-clipboard2-check-fill me-2 text-success"></i>Nilai KKTP Murid
+                        </a>
+                    </div>
+
+                    {{-- Pengajuan Izin Guru --}}
+                    <a href="{{ route('guru.izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.izin*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-x me-2 text-warning"></i>Pengajuan Izin Guru
+                    </a>
+
                     @if($role === 'ketua_mgmp')
                         <a href="{{ route('mgmp.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.dashboard') ? 'active' : '' }}" wire:navigate>
                             <i class="bi bi-diagram-3-fill me-2"></i>Dashboard MGMP
                         </a>
                         <a href="{{ route('mgmp.tp') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.tp') ? 'active' : '' }}" wire:navigate>
-                            <i class="bi bi-list-check me-2"></i>Manajemen TP
+                            <i class="bi bi-card-checklist me-2"></i>Manajemen TP MGMP
                         </a>
                     @endif
                 @elseif(in_array($role, ['kepsek', 'waka']))
@@ -146,8 +168,13 @@
                         <i class="bi bi-graph-up-arrow me-2"></i>Monitoring Agenda
                     </a>
                     <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-bar-chart-line me-2"></i>Progress TP
+                        <i class="bi bi-bar-chart-line me-2"></i>Progress KKTP (Analytic)
                     </a>
+                    @if($role === 'waka')
+                    <a href="{{ route('waka.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('waka.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-patch-check-fill me-2 text-success"></i>Verifikasi Izin Guru
+                    </a>
+                    @endif
                 @elseif($role === 'ketua_kelas')
                     <a href="{{ route('ketua.verifikasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ketua.verifikasi') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-qr-code-scan me-2"></i>Verifikasi Token
