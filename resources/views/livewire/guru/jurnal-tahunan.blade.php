@@ -20,24 +20,33 @@
     <h6 class="fw-bold text-dark mb-2">Daftar Kelas Mengajar ({{ $rombels->count() }} Kelas):</h6>
 
     @forelse($rombels as $rombel)
-    <a href="{{ route('guru.jurnal-kelas', ['rombel' => $rombel->id, 'bulan' => $bulan]) }}" 
-       class="card mb-2 text-decoration-none animate-fade-in-up border shadow-sm hover-shadow" 
-       style="border-radius: 12px;" wire:navigate>
-        <div class="card-body p-3 d-flex justify-content-between align-items-center">
-            <div>
+    <div class="card mb-2 animate-fade-in-up border shadow-sm" style="border-radius: 12px;">
+        <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <a href="{{ route('guru.jurnal-kelas', ['rombel' => $rombel->id, 'bulan' => $bulan]) }}" 
+               class="text-decoration-none flex-grow-1" wire:navigate>
                 <div class="fw-bold text-dark fs-6 mb-1">{{ $rombel->nama_kelas }}</div>
                 <div class="small text-muted d-flex align-items-center gap-2">
                     <span><i class="bi bi-clock me-1 text-primary"></i>{{ $rombel->merged_sesi_minggu }} sesi/minggu</span>
                     <span>&bull;</span>
                     <span class="text-primary fw-semibold">{{ $namaBulan }}</span>
+                    <span>&bull;</span>
+                    <span class="text-success fw-bold">{{ $rombel->agenda_selesai_count }} pertemuan</span>
                 </div>
-            </div>
-            <div class="text-end">
-                <div class="fw-extrabold text-success fs-5">{{ $rombel->agenda_selesai_count }}</div>
-                <div class="small text-muted" style="font-size: 0.72rem;">pertemuan selesai</div>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('guru.jurnal.export-pdf', ['rombel' => $rombel->id, 'bulan' => $bulan, 'tipe' => 'gabungan']) }}" 
+                   target="_blank" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" style="border-radius: 8px; min-height: 38px;" title="Export PDF Jurnal Gabungan">
+                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                    <span class="d-none d-sm-inline small fw-bold">PDF</span>
+                </a>
+                <a href="{{ route('guru.jurnal-kelas', ['rombel' => $rombel->id, 'bulan' => $bulan]) }}" 
+                   class="btn btn-sm btn-primary d-flex align-items-center gap-1" style="border-radius: 8px; min-height: 38px;" wire:navigate>
+                    <span class="small fw-semibold">Buka</span>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
             </div>
         </div>
-    </a>
+    </div>
     @empty
     <div class="card border shadow-sm" style="border-radius: 12px;">
         <div class="card-body text-center py-5 text-muted">

@@ -5,6 +5,7 @@ use Livewire\Mechanisms\HandleRequests\EndpointResolver;
 use App\Http\Controllers\LivewireCustomFileUploadController;
 use App\Http\Controllers\DirectImportController;
 use App\Http\Controllers\Api\GuruScheduleController;
+use App\Http\Controllers\Guru\JurnalExportController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Guru\DashboardGuru;
 use App\Livewire\Guru\MulaiKelas;
@@ -97,6 +98,7 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
     Route::get('/dashboard', DashboardGuru::class)->name('guru.dashboard');
     Route::get('/jurnal', JurnalTahunan::class)->name('guru.jurnal');
     Route::get('/jurnal/{rombel}', JurnalPerKelas::class)->name('guru.jurnal-kelas');
+    Route::get('/jurnal/{rombel}/export-pdf', [JurnalExportController::class, 'exportPdf'])->name('guru.jurnal.export-pdf');
     Route::get('/detail/{agenda}', DetailAgenda::class)->name('guru.detail-agenda')->withTrashed();
 
     // KKTP Menu (Setting & Nilai)

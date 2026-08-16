@@ -11,9 +11,64 @@
         this.modalAgenda = null;
     }
 }">
-    <div class="page-header mb-3">
-        <h1><i class="bi bi-journal-text me-2"></i>Jurnal Mengajar {{ $rombel->nama_kelas }}</h1>
-        <p class="subtitle mb-0">Riwayat mengajar perbulan & perminggu lengkap dengan foto & materi</p>
+    <div class="page-header mb-3 d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1"><i class="bi bi-journal-text text-primary me-2"></i>Jurnal Mengajar {{ $rombel->nama_kelas }}</h1>
+            <p class="subtitle mb-0 text-muted">Riwayat mengajar perbulan & perminggu lengkap dengan absensi & ketercapaian KKTP</p>
+        </div>
+
+        {{-- Export PDF Buttons Dropdown --}}
+        <div class="dropdown">
+            <button class="btn btn-danger dropdown-toggle d-flex align-items-center gap-2 shadow-sm py-2 px-3 fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 10px; min-height: 42px;">
+                <i class="bi bi-file-earmark-pdf-fill fs-6"></i>
+                <span>Export PDF Jurnal</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="border-radius: 12px; min-width: 280px;">
+                <li class="px-2 py-1 text-muted small fw-bold text-uppercase" style="font-size: 0.68rem;">Pilihan Format PDF:</li>
+                <li>
+                    <a class="dropdown-item rounded py-2 d-flex align-items-center gap-2 fw-semibold text-danger" 
+                       href="{{ route('guru.jurnal.export-pdf', ['rombel' => $rombel->id, 'bulan' => $bulan, 'tipe' => 'gabungan']) }}" target="_blank">
+                        <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
+                        <div>
+                            <div class="text-dark fw-bold small">Jurnal Lengkap (Gabungan)</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">KBM + Rekap Absensi + Nilai KKTP</div>
+                        </div>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                    <a class="dropdown-item rounded py-2 d-flex align-items-center gap-2" 
+                       href="{{ route('guru.jurnal.export-pdf', ['rombel' => $rombel->id, 'bulan' => $bulan, 'tipe' => 'absensi']) }}" target="_blank">
+                        <i class="bi bi-person-x-fill text-warning fs-5"></i>
+                        <div>
+                            <div class="text-dark fw-semibold small">Rekap Siswa Tidak Hadir</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Sakit, Izin, dan Alpha saat KBM</div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item rounded py-2 d-flex align-items-center gap-2" 
+                       href="{{ route('guru.jurnal.export-pdf', ['rombel' => $rombel->id, 'bulan' => $bulan, 'tipe' => 'kktp']) }}" target="_blank">
+                        <i class="bi bi-clipboard-x-fill text-danger fs-5"></i>
+                        <div>
+                            <div class="text-dark fw-semibold small">Siswa Belum Capai KKTP</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Daftar remedial & butir TP belum tuntas</div>
+                        </div>
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li>
+                    <a class="dropdown-item rounded py-2 d-flex align-items-center gap-2 text-primary" 
+                       href="{{ route('guru.jurnal.export-pdf', ['rombel' => $rombel->id, 'bulan' => $bulan, 'tipe' => 'gabungan', 'stream' => 1]) }}" target="_blank">
+                        <i class="bi bi-printer-fill fs-5"></i>
+                        <div>
+                            <div class="fw-semibold small">Cetak / Preview Langsung</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Buka layout printer-friendly di browser</div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 
     {{-- Month & Week Filter Section --}}
