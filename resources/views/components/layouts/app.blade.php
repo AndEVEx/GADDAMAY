@@ -120,6 +120,9 @@
                     <a href="{{ route('admin.motivasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.motivasi') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-chat-quote-fill me-2"></i>Motivasi & Pantun
                     </a>
+                    <a href="{{ route('admin.hari-libur') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.hari-libur') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-check-fill me-2 text-danger"></i>Kelola Hari Libur
+                    </a>
                     <a href="{{ route('admin.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-patch-check-fill me-2 text-warning"></i>Verifikasi Izin Guru
                     </a>

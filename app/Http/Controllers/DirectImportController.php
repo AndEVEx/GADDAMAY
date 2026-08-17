@@ -199,4 +199,60 @@ class DirectImportController extends Controller
             return redirect()->back()->with('error', 'Gagal import user: ' . $e->getMessage());
         }
     }
+
+    public function importHariLibur(Request $request)
+    {
+        $request->validate(['file' => 'required|file|mimes:xlsx,xls,csv|max:10240']);
+        try {
+            $spreadsheet = IOFactory::load($request->file('file')->getRealPath());
+            $rows = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
+            array_shift($rows);
+            $count = 0;
+
+            foreach ($rows as $row) {
+                $nama = trim($row['A'] ?? '');
+                $mulaiRaw = trim($row['B'] ?? '');
+                $selesaiRaw = trim($row['C'] ?? '');
+                $tipe = strtolower(trim($row['D'] ?? 'nasional'));
+                $ket = trim($row['E'] ?? '');
+
+                if (empty($nama) || empty($mulaiRaw)) continue;
+
+                try {
+                    $tglMulai = is_numeric($mulaiRaw)
+                        ? \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($mulaiRaw))->format('Y-m-d')
+                        : \Carbon\Carbon::parse($mulaiRaw)->format('Y-m-d');
+                    
+                    $tglSelesai = !empty($selesaiRaw)
+                        ? (is_numeric($selesaiRaw)
+                            ? \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($selesaiRaw))->format('Y-m-d')
+                            : \Carbon\Carbon::parse($selesaiRaw)->format('Y-m-d'))
+                        : $tglMulai;
+                } catch (\Exception $e) {
+                    continue;
+                }
+
+                if (!in_array($tipe, ['nasional', 'sekolah', 'cuti_bersama', 'khusus'])) {
+                    $tipe = 'nasional';
+                }
+
+                \App\Models\HariLibur::updateOrCreate(
+                    [
+                        'nama_hari_libur' => $nama,
+                        'tanggal_mulai' => $tglMulai,
+                    ],
+                    [
+                        'tanggal_selesai' => $tglSelesai,
+                        'tipe_libur' => $tipe,
+                        'keterangan' => $ket ?: null,
+                        'created_by_id' => auth()->id(),
+                    ]
+                );
+                $count++;
+            }
+            return redirect()->back()->with('success', "Berhasil import {$count} hari libur!");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal import hari libur: ' . $e->getMessage());
+        }
+    }
 }

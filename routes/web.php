@@ -29,6 +29,7 @@ use App\Livewire\Admin\ManajemenMapel;
 use App\Livewire\Admin\ManajemenSiswa;
 use App\Livewire\Admin\ManajemenUser;
 use App\Livewire\Admin\ManajemenMotivasiPantun;
+use App\Livewire\Admin\ManajemenHariLibur;
 use App\Livewire\Admin\KoreksiAgenda;
 use App\Livewire\Admin\OverrideAgenda;
 use App\Livewire\Admin\ImportKktp;
@@ -144,6 +145,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/siswa', ManajemenSiswa::class)->name('admin.siswa');
     Route::get('/users', ManajemenUser::class)->name('admin.users');
     Route::get('/motivasi', ManajemenMotivasiPantun::class)->name('admin.motivasi');
+    Route::get('/hari-libur', ManajemenHariLibur::class)->name('admin.hari-libur');
     Route::get('/koreksi', KoreksiAgenda::class)->name('admin.koreksi');
     Route::get('/override/{agenda}', OverrideAgenda::class)->name('admin.override');
     Route::get('/verifikasi-izin', VerifikasiIzin::class)->name('admin.verifikasi-izin');
@@ -156,6 +158,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/direct-import-kelas', [DirectImportController::class, 'importKelas'])->name('admin.direct-import-kelas');
     Route::post('/direct-import-mapel', [DirectImportController::class, 'importMapel'])->name('admin.direct-import-mapel');
     Route::post('/direct-import-user', [DirectImportController::class, 'importUser'])->name('admin.direct-import-user');
+    Route::post('/direct-import-hari-libur', [DirectImportController::class, 'importHariLibur'])->name('admin.direct-import-hari-libur');
 });
 
 // ============================================================

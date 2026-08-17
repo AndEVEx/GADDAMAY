@@ -71,6 +71,7 @@
             ['route' => 'admin.siswa', 'icon' => 'bi-mortarboard', 'color' => 'secondary', 'label' => 'Kelola Siswa'],
             ['route' => 'admin.users', 'icon' => 'bi-person-gear', 'color' => 'dark', 'label' => 'Kelola User'],
             ['route' => 'admin.koreksi', 'icon' => 'bi-pencil-square', 'color' => 'primary', 'label' => 'Koreksi Agenda'],
+            ['route' => 'admin.hari-libur', 'icon' => 'bi-calendar-check', 'color' => 'danger', 'label' => 'Hari Libur'],
             ['route' => 'monitoring.dashboard', 'icon' => 'bi-graph-up', 'color' => 'success', 'label' => 'Monitoring'],
             ['route' => 'admin.motivasi', 'icon' => 'bi-emoji-smile', 'color' => 'info', 'label' => 'Motivasi/Pantun'],
         ];

@@ -84,6 +84,20 @@
         </div>
     </div>
 
+    {{-- Holiday Alert Banner for Monitoring --}}
+    @if($todayHoliday)
+    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center gap-3 p-3 mb-3 animate-fade-in-up" style="border-radius: 14px; background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff;">
+        <div class="bg-white bg-opacity-20 rounded-circle p-2 d-flex align-items-center justify-content-center">
+            <i class="bi bi-brightness-alt-high-fill fs-3 text-white"></i>
+        </div>
+        <div>
+            <div class="badge bg-white text-danger fw-bold mb-1">HARI INI LIBUR SEKOLAH ({{ $todayHoliday->tipe_label }})</div>
+            <h5 class="fw-extrabold text-white mb-0">{{ $todayHoliday->nama_hari_libur }}</h5>
+            <small class="text-white-50">KBM pada hari ini ditiadakan. Monitoring KBM non-aktif.</small>
+        </div>
+    </div>
+    @endif
+
     {{-- Summary Statistics Grid (2x2 Grid) --}}
     <div class="row g-2 mb-3">
         {{-- Row 1: Lengkap & Izin --}}

@@ -23,6 +23,17 @@ class GuruScheduleController extends Controller
         $now = Carbon::now('Asia/Jakarta');
         $hariIni = $now->dayOfWeekIso; // 1=Monday
 
+        $holiday = \App\Models\HariLibur::isHariLibur($now);
+        if ($holiday) {
+            return response()->json([
+                'tanggal' => $now->format('Y-m-d'),
+                'server_time' => $now->format('H:i'),
+                'is_holiday' => true,
+                'holiday_name' => $holiday->nama_hari_libur,
+                'jadwal' => [],
+            ]);
+        }
+
         $officialPeriods = [
             0  => ['mulai' => '06:25', 'selesai' => '06:45'],
             1  => ['mulai' => '06:45', 'selesai' => '07:30'],

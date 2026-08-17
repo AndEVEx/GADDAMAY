@@ -242,12 +242,14 @@ class DashboardMonitoring extends Component
         });
 
         $currentJamObj = $jamPelajaranList->firstWhere('jam_ke', $this->currentJam);
+        $todayHoliday = \App\Models\HariLibur::isHariLibur($this->tanggal);
 
         return view('livewire.monitoring.dashboard-monitoring', [
             'monitoringData' => $data,
             'summary' => $summary,
             'jamPelajaranList' => $jamPelajaranList,
             'currentJamObj' => $currentJamObj,
+            'todayHoliday' => $todayHoliday,
         ]);
     }
 }

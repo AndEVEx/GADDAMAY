@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use App\Models\JadwalPelajaran;
 use App\Models\AgendaHarian;
+use App\Models\HariLibur;
 use Carbon\Carbon;
 
 #[Layout('components.layouts.app')]
@@ -15,11 +16,13 @@ class DashboardGuru extends Component
 {
     public string $tanggal;
     public int $hariIni;
+    public ?HariLibur $todayHoliday = null;
 
     public function mount()
     {
         $this->tanggal = Carbon::now('Asia/Jakarta')->format('Y-m-d');
         $this->hariIni = Carbon::now('Asia/Jakarta')->dayOfWeekIso; // 1=Senin
+        $this->todayHoliday = HariLibur::isHariLibur($this->tanggal);
     }
 
     public function getJadwalHariIniProperty()
@@ -229,6 +232,14 @@ class DashboardGuru extends Component
 
     private function getStatusLabel(?AgendaHarian $agenda): array
     {
+        if ($this->todayHoliday && !$agenda) {
+            return [
+                'text' => 'Libur: ' . $this->todayHoliday->nama_hari_libur,
+                'class' => 'status-kuning',
+                'icon' => 'bi-brightness-alt-high-fill'
+            ];
+        }
+
         if (!$agenda) {
             return ['text' => 'Belum Mulai', 'class' => 'status-abu', 'icon' => 'bi-circle'];
         }
@@ -253,6 +264,8 @@ class DashboardGuru extends Component
 
     private function canStart(array $block, ?AgendaHarian $agenda, bool $timeArrived, bool $isLate): bool
     {
+        $user = auth()->user();
+        if ($this->todayHoliday && !$user->canOverride()) return false;
         if ($block['is_kegiatan_khusus']) return false;
         if ($agenda && in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar'])) return false;
         if ($isLate && !$agenda) return false;
@@ -267,6 +280,7 @@ class DashboardGuru extends Component
     {
         return view('livewire.guru.dashboard-guru', [
             'jadwals' => $this->jadwalHariIni,
+            'todayHoliday' => $this->todayHoliday,
         ]);
     }
 }

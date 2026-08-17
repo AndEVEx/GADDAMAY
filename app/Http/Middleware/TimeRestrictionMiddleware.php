@@ -28,6 +28,19 @@ class TimeRestrictionMiddleware
 
         $now = Carbon::now('Asia/Jakarta');
 
+        // Blokir jika hari ini adalah Hari Libur Sekolah / Nasional
+        $holiday = \App\Models\HariLibur::isHariLibur($now);
+        if ($holiday) {
+            if ($request->expectsJson() || $request->header('X-Livewire')) {
+                return response()->json([
+                    'message' => 'Hari ini adalah Hari Libur (' . $holiday->nama_hari_libur . '). KBM ditiadakan.'
+                ], 403);
+            }
+
+            session()->flash('error', 'Hari ini adalah Hari Libur (' . $holiday->nama_hari_libur . '). KBM ditiadakan.');
+            return redirect()->route('guru.dashboard');
+        }
+
         if ($now->hour >= 16) {
             if ($request->expectsJson() || $request->header('X-Livewire')) {
                 return response()->json([

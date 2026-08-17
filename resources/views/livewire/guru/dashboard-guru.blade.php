@@ -12,6 +12,27 @@
         </div>
     </div>
 
+    {{-- Holiday Alert Banner --}}
+    @if($todayHoliday)
+    <div class="card mb-3 border-0 shadow-sm animate-fade-in-up text-white" style="border-radius: 14px; background: linear-gradient(135deg, #ef4444, #b91c1c);">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+            <div class="bg-white bg-opacity-20 rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                <i class="bi bi-brightness-alt-high-fill fs-3 text-white"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge bg-white text-danger fw-bold" style="font-size: 0.7rem;">HARI LIBUR SEKOLAH</span>
+                    <span class="badge bg-white bg-opacity-20 text-white" style="font-size: 0.7rem;">{{ $todayHoliday->tipe_label }}</span>
+                </div>
+                <h6 class="fw-bold mb-0 text-white">{{ $todayHoliday->nama_hari_libur }}</h6>
+                <div class="text-white-50 small" style="font-size: 0.75rem;">
+                    KBM hari ini ditiadakan. @if($todayHoliday->keterangan) ({{ $todayHoliday->keterangan }}) @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Quick Access Shortcut Cards --}}
     <div class="row g-2 mb-3">
         <div class="col-4">
