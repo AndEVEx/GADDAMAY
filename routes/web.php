@@ -5,6 +5,7 @@ use Livewire\Mechanisms\HandleRequests\EndpointResolver;
 use App\Http\Controllers\LivewireCustomFileUploadController;
 use App\Http\Controllers\DirectImportController;
 use App\Http\Controllers\Api\GuruScheduleController;
+use App\Http\Controllers\Api\PushSubscriptionController;
 use App\Http\Controllers\Guru\JurnalExportController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Guru\DashboardGuru;
@@ -73,6 +74,19 @@ Route::get('/ganti-password', GantiPassword::class)->middleware('auth')->name('g
 Route::get('/api/guru/jadwal-hari-ini', [GuruScheduleController::class, 'todaySchedule'])
     ->middleware(['auth'])
     ->name('api.guru.jadwal');
+
+// API: Web Push Subscription Endpoints
+Route::get('/api/push/vapid-public-key', [PushSubscriptionController::class, 'getVapidPublicKey'])
+    ->name('api.push.vapid-key');
+Route::post('/api/push/subscribe', [PushSubscriptionController::class, 'subscribe'])
+    ->middleware(['auth'])
+    ->name('api.push.subscribe');
+Route::post('/api/push/unsubscribe', [PushSubscriptionController::class, 'unsubscribe'])
+    ->middleware(['auth'])
+    ->name('api.push.unsubscribe');
+Route::post('/api/push/test-notification', [PushSubscriptionController::class, 'sendTestPush'])
+    ->middleware(['auth'])
+    ->name('api.push.test');
 
 Route::get('/', function () {
     if (!auth()->check()) return redirect()->route('login');

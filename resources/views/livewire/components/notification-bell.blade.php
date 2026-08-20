@@ -17,7 +17,7 @@
                 @endif
             </button>
 
-            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 mt-2" style="width: 320px; max-width: 90vw; border-radius: 14px; overflow: hidden; z-index: 1070;">
+            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 mt-2" style="width: 340px; max-width: 92vw; border-radius: 14px; overflow: hidden; z-index: 1070;">
                 <div class="p-3 text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
                     <div class="d-flex align-items-center gap-2">
                         <i class="bi bi-bell-fill"></i>
@@ -40,7 +40,20 @@
                     </div>
                 </div>
 
-                <div class="p-2" style="max-height: 340px; overflow-y: auto;">
+                {{-- Web Push Subscription Controls --}}
+                <div class="p-2 bg-light border-bottom">
+                    <div id="webpush-subscribe-box" class="d-flex align-items-center justify-content-between gap-1">
+                        <button type="button" onclick="subscribeToWebPush()" class="btn btn-primary btn-sm flex-fill py-1 fw-semibold d-flex align-items-center justify-content-center gap-1" style="font-size: 0.75rem; border-radius: 8px;">
+                            <i class="bi bi-phone-vibrate"></i>
+                            <span id="webpush-btn-text">Aktifkan Notifikasi HP (Web Push)</span>
+                        </button>
+                        <button type="button" onclick="testWebPushNotification()" class="btn btn-outline-secondary btn-sm py-1" title="Uji Coba Notifikasi HP" style="font-size: 0.75rem; border-radius: 8px;">
+                            <i class="bi bi-send-check"></i> Test
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-2" style="max-height: 320px; overflow-y: auto;">
                     @forelse($notifications as $notif)
                         @php
                             $data = $notif->data ?? [];
@@ -96,7 +109,7 @@
             @endif
         </a>
 
-        <div class="collapse px-2 py-2 bg-light rounded my-1 border shadow-sm" id="notificationListCollapse" onclick="event.stopPropagation();" style="max-height: 280px; overflow-y: auto;">
+        <div class="collapse px-2 py-2 bg-light rounded my-1 border shadow-sm" id="notificationListCollapse" onclick="event.stopPropagation();" style="max-height: 300px; overflow-y: auto;">
             <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
                 <span class="fw-bold text-dark" style="font-size: 0.75rem;"><i class="bi bi-clock-history me-1 text-primary"></i>Riwayat Notifikasi</span>
                 <div class="d-flex align-items-center gap-2">
@@ -111,6 +124,14 @@
                         </button>
                     @endif
                 </div>
+            </div>
+
+            {{-- Web Push Controls in Sidebar --}}
+            <div class="mb-2">
+                <button type="button" onclick="subscribeToWebPush()" class="btn btn-primary btn-sm w-100 py-1 fw-semibold d-flex align-items-center justify-content-center gap-1" style="font-size: 0.72rem; border-radius: 6px;">
+                    <i class="bi bi-phone-vibrate"></i>
+                    <span>Aktifkan Notifikasi HP (Web Push)</span>
+                </button>
             </div>
 
             @forelse($notifications as $notif)

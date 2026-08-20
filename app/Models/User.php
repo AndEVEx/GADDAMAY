@@ -99,6 +99,11 @@ class User extends Authenticatable
         return $this->hasMany(TujuanPembelajaran::class, 'ketua_mgmp_id');
     }
 
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class, 'user_id');
+    }
+
     public function rombel(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Rombel::class, 'rombel_id');

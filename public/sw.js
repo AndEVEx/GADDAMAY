@@ -1,6 +1,6 @@
-// AgenDAmay Service Worker - PWA Standalone & Push Notification Support
-// Version: 2.3.0
-const CACHE_NAME = 'agendamay-pwa-v7';
+// AgenDAmay Service Worker - PWA Standalone & Full Web Push Notification
+// Version: 2.4.0
+const CACHE_NAME = 'agendamay-pwa-v8';
 const OFFLINE_URL = '/offline.html';
 
 // Pre-cache essential shell assets
@@ -97,33 +97,39 @@ self.addEventListener('fetch', (event) => {
 });
 
 // =================================================================
-// WEB PUSH NOTIFICATION LISTENERS (WAJIB UNTUK NOTIFIKASI ANDROID)
+// WEB PUSH NOTIFICATION LISTENERS (STANDARD W3C / FCM / VAPID)
 // =================================================================
 
-// 1. Menangkap sinyal Push dari Server / FCM
+// 1. Menangkap sinyal Push dari Server Laravel / Google FCM
 self.addEventListener('push', function(event) {
-    if (!(self.Notification && self.Notification.permission === 'granted')) {
-        return;
-    }
-
     let data = {};
     if (event.data) {
         try {
             data = event.data.json();
         } catch (e) {
-            data = { body: event.data.text() };
+            data = {
+                title: 'AgenDAmay SMKN 2 Indramayu',
+                body: event.data.text()
+            };
         }
     }
 
     const title = data.title || 'AgenDAmay SMKN 2 Indramayu';
     const options = {
-        body: data.body || 'Ada pemberitahuan KBM baru.',
+        body: data.body || 'Pemberitahuan KBM & Agenda Sekolah.',
         icon: data.icon || '/pwa-icons/icon-192.png',
-        badge: '/pwa-icons/icon-192.png',
-        vibrate: [200, 100, 200],
+        badge: data.badge || '/pwa-icons/icon-192.png',
+        vibrate: data.vibrate || [300, 150, 300, 150, 300],
+        tag: data.tag || ('agendamay-' + Date.now()),
+        renotify: true,
+        requireInteraction: true,
         data: {
-            url: data.action_url || '/guru/dashboard'
-        }
+            url: data.action_url || (data.data && data.data.url) || '/guru/dashboard',
+            timestamp: Date.now()
+        },
+        actions: [
+            { action: 'open', title: 'Buka Aplikasi' }
+        ]
     };
 
     event.waitUntil(
@@ -131,7 +137,7 @@ self.addEventListener('push', function(event) {
     );
 });
 
-// 2. Ketika Notifikasi di HP diklik oleh Guru
+// 2. Ketika Notifikasi di HP / Desktop diklik oleh Guru
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
 
@@ -149,5 +155,19 @@ self.addEventListener('notificationclick', function(event) {
                 return clients.openWindow(targetUrl);
             }
         })
+    );
+});
+
+// 3. Menangani pembaruan token langganan otomatis oleh browser
+self.addEventListener('pushsubscriptionchange', function(event) {
+    event.waitUntil(
+        self.registration.pushManager.subscribe(event.oldSubscription.options)
+            .then(function(newSubscription) {
+                return fetch('/api/push/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newSubscription)
+                });
+            })
     );
 });

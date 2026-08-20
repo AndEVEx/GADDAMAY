@@ -325,10 +325,127 @@
         }
     };
 
+    // Helper untuk konversi VAPID Public Key base64 string ke Uint8Array
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    // Fungsi Registrasi Notifikasi Push HP (VAPID + Service Worker)
+    window.subscribeToWebPush = async function() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+            alert('Browser atau perangkat ini belum mendukung fitur Web Push Notification.');
+            return;
+        }
+
+        try {
+            const btnText = document.getElementById('webpush-btn-text');
+            if (btnText) btnText.innerText = 'Menghubungkan...';
+
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+                alert('Izin notifikasi ditolak oleh browser. Silakan aktifkan izin notifikasi di pengaturan browser Anda.');
+                if (btnText) btnText.innerText = 'Aktifkan Notifikasi HP (Web Push)';
+                return;
+            }
+
+            const reg = await navigator.serviceWorker.ready;
+
+            // Ambil VAPID Public Key dari Server
+            const keyResp = await fetch('/api/push/vapid-public-key');
+            const { publicKey } = await keyResp.json();
+
+            if (!publicKey) {
+                throw new Error('VAPID Public Key tidak ditemukan di server.');
+            }
+
+            const convertedVapidKey = urlBase64ToUint8Array(publicKey);
+
+            // Berlangganan ke Push Service
+            let subscription = await reg.pushManager.getSubscription();
+            if (!subscription) {
+                subscription = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: convertedVapidKey
+                });
+            }
+
+            // Kirim data subscription ke server Laravel
+            const subResp = await fetch('/api/push/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify(subscription.toJSON())
+            });
+
+            const subResult = await subResp.json();
+
+            if (btnText) btnText.innerText = 'Notifikasi HP Aktif ✅';
+            if (window.Livewire) {
+                window.Livewire.dispatch('show-toast', {
+                    message: '🔔 Notifikasi Push HP Berhasil Diaktifkan! Anda akan menerima pengingat KBM & notifikasi izin.',
+                    type: 'success'
+                });
+            } else {
+                alert('Notifikasi Push HP Berhasil Diaktifkan!');
+            }
+        } catch (err) {
+            console.error('Gagal subscribe Web Push:', err);
+            alert('Gagal mengaktifkan notifikasi push: ' + err.message);
+            const btnText = document.getElementById('webpush-btn-text');
+            if (btnText) btnText.innerText = 'Aktifkan Notifikasi HP (Web Push)';
+        }
+    };
+
+    // Fungsi Uji Coba Notifikasi HP
+    window.testWebPushNotification = async function() {
+        try {
+            const resp = await fetch('/api/push/test-notification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+            const data = await resp.json();
+
+            if (window.Livewire) {
+                window.Livewire.dispatch('show-toast', {
+                    message: data.message,
+                    type: data.sent_count > 0 ? 'success' : 'warning'
+                });
+            } else {
+                alert(data.message);
+            }
+        } catch (e) {
+            alert('Gagal mengirim test notifikasi: ' + e.message);
+        }
+    };
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').then(function(reg) {
                 console.log('PWA ServiceWorker registered with scope:', reg.scope);
+
+                // Check initial push subscription state
+                reg.pushManager.getSubscription().then(function(sub) {
+                    const btnText = document.getElementById('webpush-btn-text');
+                    if (sub && btnText) {
+                        btnText.innerText = 'Notifikasi HP Aktif ✅';
+                    }
+                });
 
                 // Auto-reload saat Service Worker versi baru terdeteksi
                 reg.onupdatefound = function() {

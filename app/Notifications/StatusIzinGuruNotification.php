@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\IzinGuru;
+use App\Services\WebPushService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -43,6 +44,19 @@ class StatusIzinGuruNotification extends Notification
             }
             $icon = 'bi-x-circle-fill';
             $color = 'text-danger';
+        }
+
+        // Trigger WebPush
+        try {
+            WebPushService::sendToUser(
+                $notifiable,
+                $title,
+                $message,
+                '/guru/izin',
+                ['type' => 'status_izin', 'status' => $this->statusDecision, 'izin_id' => $this->izin->id]
+            );
+        } catch (\Throwable $e) {
+            // Silently ignore push error
         }
 
         return [

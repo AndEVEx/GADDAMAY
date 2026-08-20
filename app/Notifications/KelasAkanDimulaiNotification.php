@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\JadwalPelajaran;
+use App\Services\WebPushService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -24,14 +25,33 @@ class KelasAkanDimulaiNotification extends Notification
     {
         $mapel = $this->jadwal->mataPelajaran?->nama_mapel ?? 'Mengajar';
         $kelas = $this->jadwal->rombel?->nama_kelas ?? '';
+        $title = "⏰ 15 Menit Lagi Mengajar!";
+        $message = "{$notifiable->name}, 15 menit lagi Anda mengajar {$mapel} di kelas {$kelas}! \"{$this->motivasi}\"";
+
+        // Also trigger WebPush directly to user's devices
+        try {
+            WebPushService::sendToUser(
+                $notifiable,
+                $title,
+                "{$mapel} — {$kelas} segera dimulai. \"{$this->motivasi}\"",
+                "/guru/dashboard",
+                ['jadwal_id' => $this->jadwal->id, 'type' => 'kelas_mulai']
+            );
+        } catch (\Throwable $e) {
+            // Silently log or ignore push failures to keep database notification reliable
+        }
 
         return [
-            'title' => "⏰ Pengingat Mengajar (-15 Menit)",
-            'message' => "{$notifiable->name}, 15 menit lagi Anda mengajar {$mapel} di kelas {$kelas}! \"{$this->motivasi}\"",
+            'type' => 'kelas_mulai',
+            'title' => $title,
+            'message' => $message,
             'jadwal_id' => $this->jadwal->id,
             'mapel' => $mapel,
             'kelas' => $kelas,
             'motivasi' => $this->motivasi,
+            'action_url' => '/guru/dashboard',
+            'icon' => 'bi-clock-fill',
+            'color' => 'text-warning',
         ];
     }
 }
