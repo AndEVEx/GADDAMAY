@@ -86,13 +86,14 @@
                                     <small class="text-muted">{{ $item->guru?->email }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-dark border px-2 py-1 mb-1">{{ $item->jenis_izin_label }}</span>
+                                    <div class="d-flex align-items-center gap-1 mb-1 flex-wrap">
+                                        <span class="badge bg-light text-dark border px-2 py-1">{{ $item->jenis_izin_label }}</span>
+                                        <span class="badge {{ $item->is_seharian ? 'bg-primary bg-opacity-10 text-primary' : 'bg-warning bg-opacity-10 text-warning border border-warning' }} px-2 py-1" style="font-size: 0.7rem;">
+                                            <i class="bi bi-clock-fill me-1"></i>{{ $item->waktu_display }}
+                                        </span>
+                                    </div>
                                     <div class="small fw-semibold text-dark">
-                                        @if($item->tanggal_mulai->format('Y-m-d') === $item->tanggal_selesai->format('Y-m-d'))
-                                            {{ $item->tanggal_mulai->translatedFormat('d M Y') }}
-                                        @else
-                                            {{ $item->tanggal_mulai->translatedFormat('d M') }} — {{ $item->tanggal_selesai->translatedFormat('d M Y') }}
-                                        @endif
+                                        {{ $item->tanggal_mulai->translatedFormat('l, d M Y') }}
                                     </div>
                                 </td>
                                 <td>

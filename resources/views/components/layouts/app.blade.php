@@ -145,6 +145,9 @@
                         <i class="bi bi-list-check me-2 text-primary"></i>Menu KKTP (Utama)
                     </a>
                     <div class="ps-3 mb-1">
+                        <a href="{{ route('guru.import-kktp') }}" class="list-group-item list-group-item-action border-0 rounded py-1 mb-1 small {{ request()->routeIs('guru.import-kktp') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-file-earmark-excel me-2 text-success"></i>Import KKTP (Excel)
+                        </a>
                         <a href="{{ route('guru.kktp-setting') }}" class="list-group-item list-group-item-action border-0 rounded py-1 mb-1 small {{ request()->routeIs('guru.kktp-setting') ? 'active' : '' }}" wire:navigate>
                             <i class="bi bi-gear-fill me-2 text-secondary"></i>Setting KKTP / TP
                         </a>

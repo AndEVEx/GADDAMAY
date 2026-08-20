@@ -38,6 +38,7 @@ use App\Livewire\Monitoring\ProgressTp;
 use App\Livewire\Guru\FotoGuru;
 use App\Livewire\Guru\DetailAgenda;
 use App\Livewire\Guru\KktpHub;
+use App\Livewire\Guru\ImportKktpGuru;
 use App\Livewire\Guru\SettingKktp;
 use App\Livewire\Guru\NilaiKktpIndex;
 use App\Livewire\Guru\NilaiKktpDetail;
@@ -102,8 +103,9 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
     Route::get('/jurnal/{rombel}/export-pdf', [JurnalExportController::class, 'exportPdf'])->name('guru.jurnal.export-pdf');
     Route::get('/detail/{agenda}', DetailAgenda::class)->name('guru.detail-agenda')->withTrashed();
 
-    // KKTP Menu (Setting & Nilai)
+    // KKTP Menu (Setting, Nilai, Import)
     Route::get('/menu-kktp', KktpHub::class)->name('guru.kktp-hub');
+    Route::get('/menu-kktp/import', ImportKktpGuru::class)->name('guru.import-kktp');
     Route::get('/menu-kktp/setting', SettingKktp::class)->name('guru.kktp-setting');
     Route::get('/menu-kktp/nilai', NilaiKktpIndex::class)->name('guru.kktp-nilai');
     Route::get('/menu-kktp/nilai/{rombel}/{mapel}', NilaiKktpDetail::class)->name('guru.kktp-nilai-detail');

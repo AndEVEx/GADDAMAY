@@ -2,13 +2,21 @@
     {{-- Page Header --}}
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <div>
-            <h4 class="fw-bold mb-1"><i class="bi bi-calendar-x text-primary me-2"></i>Pengajuan Izin Guru</h4>
-            <p class="text-muted small mb-0">Ajukan izin tidak mengajar dan pantau status verifikasi oleh Waka Kurikulum</p>
+            <h4 class="fw-bold mb-1"><i class="bi bi-calendar-x text-primary me-2"></i>Pengajuan Izin Harian Guru</h4>
+            <p class="text-muted small mb-0">Izin mendadak / harian langsung ke Waka Kurikulum & Admin tanpa perlu input tanggal</p>
         </div>
         <button wire:click="openForm" class="btn btn-primary d-flex align-items-center gap-2" style="min-height: 44px; border-radius: 10px;">
             <i class="bi bi-plus-circle-fill"></i>
-            <span>Ajukan Izin Baru</span>
+            <span>Ajukan Izin Hari Ini</span>
         </button>
+    </div>
+
+    {{-- Info Card --}}
+    <div class="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 p-3 mb-3 animate-fade-in-up" style="border-radius: 14px;">
+        <i class="bi bi-info-circle-fill fs-3 text-info"></i>
+        <div class="small">
+            <strong>Izin bersifat Harian / Mendesak:</strong> Izin yang diajukan otomatis berlaku untuk <strong>Hari Ini ({{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }})</strong>. Anda cukup memilih apakah izin untuk <em>Seharian Penuh</em> atau <em>Jam Pelajaran Tertentu</em>.
+        </div>
     </div>
 
     {{-- History Cards / Table --}}
@@ -19,9 +27,9 @@
                     <i class="bi bi-calendar2-check fs-2"></i>
                 </div>
                 <h6 class="fw-bold">Belum Ada Riwayat Pengajuan Izin</h6>
-                <p class="text-muted small mb-3">Jika Anda berhalangan hadir atau ada tugas luar, silakan klik tombol di bawah.</p>
+                <p class="text-muted small mb-3">Jika Anda berhalangan hadir atau ada urusan mendesak hari ini, silakan klik tombol di bawah.</p>
                 <button wire:click="openForm" class="btn btn-outline-primary" style="border-radius: 10px;">
-                    <i class="bi bi-plus-lg me-1"></i> Buat Pengajuan Izin
+                    <i class="bi bi-plus-lg me-1"></i> Buat Pengajuan Izin Hari Ini
                 </button>
             </div>
         </div>
@@ -30,7 +38,6 @@
             @foreach($riwayatIzin as $izin)
                 @php
                     $badge = $izin->status_badge;
-                    $isSelesai = Carbon\Carbon::parse($izin->tanggal_selesai)->isPast();
                 @endphp
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card border-0 shadow-sm h-100 animate-fade-in-up" style="border-radius: 14px; transition: transform 0.2s;">
@@ -45,15 +52,16 @@
                                 </span>
                             </div>
 
-                            {{-- Tanggal --}}
+                            {{-- Tanggal & Waktu --}}
                             <h6 class="fw-bold text-dark mb-1">
                                 <i class="bi bi-calendar-event text-primary me-1"></i>
-                                @if($izin->tanggal_mulai->format('Y-m-d') === $izin->tanggal_selesai->format('Y-m-d'))
-                                    {{ $izin->tanggal_mulai->translatedFormat('d F Y') }}
-                                @else
-                                    {{ $izin->tanggal_mulai->translatedFormat('d M') }} — {{ $izin->tanggal_selesai->translatedFormat('d M Y') }}
-                                @endif
+                                {{ $izin->tanggal_mulai->translatedFormat('l, d F Y') }}
                             </h6>
+                            <div class="mb-2">
+                                <span class="badge {{ $izin->is_seharian ? 'bg-primary bg-opacity-10 text-primary' : 'bg-warning bg-opacity-10 text-warning border border-warning' }} px-2 py-1 small">
+                                    <i class="bi bi-clock-fill me-1"></i> {{ $izin->waktu_display }}
+                                </span>
+                            </div>
 
                             {{-- Alasan --}}
                             <p class="text-muted small mb-2 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
@@ -94,96 +102,146 @@
         </div>
     @endif
 
-    {{-- MODAL PENGAJUAN IZIN --}}
+    {{-- MODAL PENGAJUAN IZIN HARIAN --}}
     @if($showFormModal)
     <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
                 <div class="modal-header text-white" style="background: linear-gradient(135deg, #1a56db, #0d47a1); border-radius: 16px 16px 0 0;">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-calendar-plus me-2"></i>Form Pengajuan Izin Guru</h5>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0"><i class="bi bi-calendar-plus me-2"></i>Form Pengajuan Izin Harian</h5>
+                        <small class="text-white-50">Izin berlaku untuk hari ini: {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}</small>
+                    </div>
                     <button type="button" class="btn-close btn-close-white" wire:click="closeForm"></button>
                 </div>
                 <form wire:submit.prevent="submitIzin">
                     <div class="modal-body p-3 p-md-4">
                         <div class="row g-3">
+                            {{-- Info Tanggal Otomatis --}}
+                            <div class="col-12">
+                                <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2 border">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-calendar-check fs-3 text-primary"></i>
+                                        <div>
+                                            <div class="small text-muted fw-semibold">Tanggal Pengajuan Izin:</div>
+                                            <div class="fw-bold fs-6 text-dark">{{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }} (Hari Ini)</div>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 fw-semibold">
+                                        <i class="bi bi-lightning-charge-fill me-1"></i>Izin Mendadak / Harian
+                                    </span>
+                                </div>
+                            </div>
+
+                            {{-- Pilihan Jam Pelajaran / Waktu Izin --}}
+                            <div class="col-12">
+                                <label class="form-label fw-bold small">Waktu / Jam Pelajaran Izin <span class="text-danger">*</span></label>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-12 col-md-6">
+                                        <label class="card p-3 border cursor-pointer h-100 {{ $isSeharian ? 'border-primary bg-primary bg-opacity-10' : 'bg-white' }}" style="cursor: pointer; border-radius: 10px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="radio" wire:model.live="isSeharian" value="1" class="form-check-input mt-0" style="width: 20px; height: 20px;">
+                                                <div>
+                                                    <div class="fw-bold text-dark">Seharian Penuh</div>
+                                                    <div class="small text-muted">Izin untuk seluruh jam pelajaran hari ini</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="card p-3 border cursor-pointer h-100 {{ !$isSeharian ? 'border-primary bg-primary bg-opacity-10' : 'bg-white' }}" style="cursor: pointer; border-radius: 10px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="radio" wire:model.live="isSeharian" value="0" class="form-check-input mt-0" style="width: 20px; height: 20px;">
+                                                <div>
+                                                    <div class="fw-bold text-dark">Jam / Sesi Tertentu</div>
+                                                    <div class="small text-muted">Pilih jam atau jadwal mengajar tertentu</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {{-- Selector Jam Pelajaran jika tidak seharian --}}
+                                @if(!$isSeharian)
+                                    <div class="card border p-3 bg-light animate-fade-in-up" style="border-radius: 10px;">
+                                        <h6 class="fw-bold small text-primary mb-2"><i class="bi bi-clock-history me-1"></i>Pilih Sesi Mengajar Hari Ini:</h6>
+                                        @if($jadwalHariIni->isNotEmpty())
+                                            <div class="row g-2 mb-3">
+                                                @foreach($jadwalHariIni as $jadwal)
+                                                    <div class="col-12 col-md-6">
+                                                        <label class="d-flex align-items-start gap-2 p-2 bg-white rounded border cursor-pointer" style="cursor: pointer;">
+                                                            <input type="checkbox" wire:model="selectedJadwalIds" value="{{ $jadwal->id }}" class="form-check-input mt-1" style="min-width: 18px; min-height: 18px;">
+                                                            <div class="small">
+                                                                <div class="fw-bold text-dark">Jam {{ $jadwal->jam_ke_mulai }} - {{ $jadwal->jam_ke_selesai }}</div>
+                                                                <div class="text-primary">{{ $jadwal->rombel?->nama_kelas }} &bull; {{ $jadwal->mataPelajaran?->nama_mapel }}</div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div class="alert alert-warning py-2 px-3 small mb-2">
+                                                <i class="bi bi-exclamation-circle me-1"></i> Anda tidak memiliki jadwal mengajar terdaftar untuk hari ini. Silakan pilih nomor jam pelajaran di bawah:
+                                            </div>
+                                        @endif
+
+                                        <label class="form-label small fw-bold text-muted mb-1">Atau Pilih Nomor Jam Pelajaran:</label>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @for($i = 0; $i <= 12; $i++)
+                                                <label class="btn btn-sm btn-outline-secondary px-2 py-1 d-flex align-items-center gap-1 {{ in_array($i, $selectedJam) ? 'active bg-primary text-white border-primary' : '' }}" style="border-radius: 6px; cursor: pointer;">
+                                                    <input type="checkbox" wire:model="selectedJam" value="{{ $i }}" class="d-none">
+                                                    <span>{{ $i === 0 ? 'Jam 0 (Apel)' : 'Jam ' . $i }}</span>
+                                                </label>
+                                            @endfor
+                                        </div>
+                                        @error('selectedJadwalIds') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                    </div>
+                                @endif
+                            </div>
+
                             {{-- Jenis Izin --}}
                             <div class="col-12 col-md-6">
                                 <label class="form-label fw-bold small">Jenis Izin <span class="text-danger">*</span></label>
                                 <select wire:model="jenisIzin" class="form-select" style="min-height: 48px;">
-                                    <option value="izin">Izin Pribadi / Keperluan Mendesak</option>
-                                    <option value="sakit">Sakit</option>
-                                    <option value="cuti">Cuti</option>
-                                    <option value="dinas">Perjalanan Dinas</option>
-                                    <option value="tugas_luar">Tugas Luar / Pelatihan / MGMP</option>
+                                    <option value="sakit">🤒 Sakit (Mendadak Sakit / Istirahat)</option>
+                                    <option value="izin">🚗 Izin Pribadi / Keperluan Mendesak</option>
+                                    <option value="dinas">🏛️ Perjalanan Dinas</option>
+                                    <option value="tugas_luar">📚 Tugas Luar / Pelatihan / MGMP</option>
+                                    <option value="cuti">🏖️ Cuti Mendesak</option>
                                 </select>
                             </div>
 
-                            {{-- Guru Pengganti (Opsional) --}}
+                            {{-- Usulan Guru Pengganti --}}
                             <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold small">Usulan Guru Pengganti (Opsional)</label>
+                                <label class="form-label fw-bold small">Usulan Guru Pengganti / Piket (Opsional)</label>
                                 <select wire:model="guruPenggantiId" class="form-select" style="min-height: 48px;">
-                                    <option value="">— Tidak Ada / Ditentukan Waka —</option>
+                                    <option value="">— Tidak Ada / Ditentukan Waka / Guru Piket —</option>
                                     @foreach($daftarGuru as $guru)
                                         <option value="{{ $guru->id }}">{{ $guru->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
-                            {{-- Tanggal Mulai --}}
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Tanggal Mulai <span class="text-danger">*</span></label>
-                                <input type="date" wire:model.live="tanggalMulai" class="form-control @error('tanggalMulai') is-invalid @enderror" style="min-height: 48px;">
-                                @error('tanggalMulai') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
-                            {{-- Tanggal Selesai --}}
-                            <div class="col-6">
-                                <label class="form-label fw-bold small">Tanggal Selesai <span class="text-danger">*</span></label>
-                                <input type="date" wire:model.live="tanggalSelesai" class="form-control @error('tanggalSelesai') is-invalid @enderror" style="min-height: 48px;">
-                                @error('tanggalSelesai') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
-
                             {{-- Alasan / Keterangan --}}
                             <div class="col-12">
                                 <label class="form-label fw-bold small">Alasan / Keterangan Izin <span class="text-danger">*</span></label>
-                                <textarea wire:model="alasan" class="form-control @error('alasan') is-invalid @enderror" rows="3" placeholder="Tuliskan keterangan keperluan izin secara jelas..." style="border-radius: 10px;"></textarea>
+                                <textarea wire:model="alasan" class="form-control @error('alasan') is-invalid @enderror" rows="3" placeholder="Tuliskan keterangan izin (misal: Demam tinggi sejak subuh / Urusan keluarga mendesak)..." style="border-radius: 10px;"></textarea>
                                 @error('alasan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             {{-- Lampiran Surat / Bukti --}}
                             <div class="col-12">
-                                <label class="form-label fw-bold small">Upload File Lampiran (Surat Dokter / Surat Tugas / Surat Permohonan)</label>
+                                <label class="form-label fw-bold small">Upload File / Foto Surat Keterangan / Resep Dokter (Opsional)</label>
                                 <input type="file" wire:model="fileLampiran" class="form-control @error('fileLampiran') is-invalid @enderror" accept=".pdf,.jpg,.jpeg,.png">
-                                <div class="form-text small">Format: PDF, JPG, PNG (Maks 5MB). Opsional.</div>
+                                <div class="form-text small">Mendukung format JPG, PNG, PDF (Maks 5MB).</div>
                                 @error('fileLampiran') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
-
-                            {{-- Jadwal Terdampak Preview --}}
-                            @if($jadwalTerdampak->isNotEmpty())
-                                <div class="col-12">
-                                    <div class="card border bg-light">
-                                        <div class="card-header bg-light py-2">
-                                            <span class="small fw-bold text-dark"><i class="bi bi-clock-history me-1 text-primary"></i>Jadwal Mengajar yang Terdampak ({{ $jadwalTerdampak->count() }} Sesi):</span>
-                                        </div>
-                                        <div class="card-body p-2" style="max-height: 180px; overflow-y: auto;">
-                                            <div class="list-group list-group-flush">
-                                                @foreach($jadwalTerdampak as $j)
-                                                    <div class="list-group-item bg-transparent px-2 py-1 small d-flex justify-content-between align-items-center">
-                                                        <span><strong>{{ $j->hari_label }}</strong> (Jam {{ $j->jam_ke_mulai }}-{{ $j->jam_ke_selesai }})</span>
-                                                        <span class="text-primary fw-semibold">{{ $j->rombel?->nama_kelas }} &bull; {{ $j->mataPelajaran?->nama_mapel }}</span>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                     </div>
                     <div class="modal-footer bg-light p-3">
                         <button type="button" class="btn btn-secondary px-4" wire:click="closeForm" style="min-height: 44px; border-radius: 10px;">Batal</button>
                         <button type="submit" class="btn btn-primary px-4 d-flex align-items-center gap-2" style="min-height: 44px; border-radius: 10px;" wire:loading.attr="disabled">
-                            <span wire:loading.remove><i class="bi bi-send-fill me-1"></i>Kirim Pengajuan</span>
+                            <span wire:loading.remove><i class="bi bi-send-fill me-1"></i>Kirim Pengajuan Izin</span>
                             <span wire:loading><span class="spinner-border spinner-border-sm me-2"></span>Mengirim...</span>
                         </button>
                     </div>
@@ -212,9 +270,15 @@
 
                     <div class="list-group list-group-flush mb-3">
                         <div class="list-group-item px-0 py-2">
-                            <small class="text-muted d-block">Periode Izin</small>
+                            <small class="text-muted d-block">Tanggal Izin</small>
                             <span class="fw-bold text-dark">
-                                {{ $detailIzin->tanggal_mulai->translatedFormat('d F Y') }} — {{ $detailIzin->tanggal_selesai->translatedFormat('d F Y') }}
+                                {{ $detailIzin->tanggal_mulai->translatedFormat('l, d F Y') }}
+                            </span>
+                        </div>
+                        <div class="list-group-item px-0 py-2">
+                            <small class="text-muted d-block">Waktu / Jam Pelajaran</small>
+                            <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-2 py-1">
+                                {{ $detailIzin->waktu_display }}
                             </span>
                         </div>
                         <div class="list-group-item px-0 py-2">

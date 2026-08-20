@@ -12,14 +12,15 @@ use App\Models\JadwalPelajaran;
 use Carbon\Carbon;
 
 #[Layout('components.layouts.app')]
-#[Title('Pengajuan Izin Guru')]
+#[Title('Pengajuan Izin Harian Guru')]
 class PengajuanIzin extends Component
 {
     use WithFileUploads;
 
-    public string $jenisIzin = 'izin';
-    public string $tanggalMulai = '';
-    public string $tanggalSelesai = '';
+    public string $jenisIzin = 'sakit'; // 'sakit', 'izin', 'dinas', 'tugas_luar', 'cuti'
+    public bool $isSeharian = true;
+    public array $selectedJadwalIds = [];
+    public array $selectedJam = [];
     public string $alasan = '';
     public ?string $guruPenggantiId = null;
     public $fileLampiran;
@@ -29,17 +30,23 @@ class PengajuanIzin extends Component
 
     public function mount()
     {
-        $today = Carbon::now('Asia/Jakarta')->format('Y-m-d');
-        $this->tanggalMulai = $today;
-        $this->tanggalSelesai = $today;
+        $this->initForm();
+    }
+
+    public function initForm()
+    {
+        $this->jenisIzin = 'sakit';
+        $this->isSeharian = true;
+        $this->alasan = '';
+        $this->guruPenggantiId = null;
+        $this->fileLampiran = null;
+        $this->selectedJadwalIds = $this->jadwalHariIni->pluck('id')->toArray();
+        $this->selectedJam = [];
     }
 
     public function openForm()
     {
-        $today = Carbon::now('Asia/Jakarta')->format('Y-m-d');
-        $this->reset(['jenisIzin', 'alasan', 'guruPenggantiId', 'fileLampiran']);
-        $this->tanggalMulai = $today;
-        $this->tanggalSelesai = $today;
+        $this->initForm();
         $this->showFormModal = true;
     }
 
@@ -48,33 +55,76 @@ class PengajuanIzin extends Component
         $this->showFormModal = false;
     }
 
+    public function updatedIsSeharian($value)
+    {
+        if ($value) {
+            $this->selectedJadwalIds = $this->jadwalHariIni->pluck('id')->toArray();
+            $this->selectedJam = [];
+        }
+    }
+
+    public function getJadwalHariIniProperty()
+    {
+        $now = Carbon::now('Asia/Jakarta');
+        $hariIni = $now->dayOfWeekIso; // 1=Senin..7=Minggu
+
+        return JadwalPelajaran::where('hari', $hariIni)
+            ->whereHas('jadwalGuru', fn($q) => $q->where('guru_id', auth()->id()))
+            ->with(['rombel', 'mataPelajaran'])
+            ->orderBy('jam_ke_mulai')
+            ->get();
+    }
+
     public function submitIzin()
     {
         $this->validate([
             'jenisIzin' => 'required|in:izin,sakit,cuti,dinas,tugas_luar',
-            'tanggalMulai' => 'required|date',
-            'tanggalSelesai' => 'required|date|after_or_equal:tanggalMulai',
-            'alasan' => 'required|min:5|max:1000',
+            'alasan' => 'required|min:3|max:1000',
             'guruPenggantiId' => 'nullable|exists:users,id',
             'fileLampiran' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ], [
-            'tanggalSelesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
             'alasan.required' => 'Mohon sertakan alasan / keterangan pengajuan izin.',
-            'alasan.min' => 'Alasan izin minimal 5 karakter.',
+            'alasan.min' => 'Alasan izin minimal 3 karakter.',
             'fileLampiran.max' => 'Ukuran file lampiran maksimal 5MB.',
         ]);
 
+        if (!$this->isSeharian && empty($this->selectedJadwalIds) && empty($this->selectedJam)) {
+            $this->addError('selectedJadwalIds', 'Pilih minimal satu sesi jam mengajar atau jam pelajaran.');
+            return;
+        }
+
+        $today = Carbon::now('Asia/Jakarta')->format('Y-m-d');
         $filePath = null;
+
         if ($this->fileLampiran) {
             $filePath = $this->fileLampiran->store('lampiran_izin', 'public');
+        }
+
+        // Build waktu keterangan
+        $waktuKeterangan = 'Seharian Penuh';
+        if (!$this->isSeharian) {
+            $parts = [];
+            if (!empty($this->selectedJadwalIds)) {
+                $selectedJadwals = JadwalPelajaran::whereIn('id', $this->selectedJadwalIds)->with(['rombel', 'mataPelajaran'])->get();
+                foreach ($selectedJadwals as $j) {
+                    $parts[] = "Jam {$j->jam_ke_mulai}-{$j->jam_ke_selesai} ({$j->rombel?->nama_kelas})";
+                }
+            }
+            if (!empty($this->selectedJam)) {
+                $parts[] = "Jam ke-" . implode(',', $this->selectedJam);
+            }
+            $waktuKeterangan = !empty($parts) ? implode(', ', $parts) : 'Jam Tertentu';
         }
 
         IzinGuru::create([
             'guru_id' => auth()->id(),
             'jenis_izin' => $this->jenisIzin,
-            'tanggal_mulai' => $this->tanggalMulai,
-            'tanggalSelesai' => $this->tanggalSelesai,
-            'tanggal_selesai' => $this->tanggalSelesai,
+            'is_seharian' => $this->isSeharian,
+            'waktu_keterangan' => $waktuKeterangan,
+            'jam_terpilih' => $this->selectedJam ?: null,
+            'jadwal_ids' => $this->selectedJadwalIds ?: null,
+            'tanggal_mulai' => $today,
+            'tanggal_selesai' => $today,
             'alasan' => $this->alasan,
             'file_lampiran' => $filePath,
             'guru_pengganti_id' => $this->guruPenggantiId ?: null,
@@ -82,8 +132,8 @@ class PengajuanIzin extends Component
         ]);
 
         $this->showFormModal = false;
-        $this->reset(['alasan', 'guruPenggantiId', 'fileLampiran']);
-        $this->dispatch('show-toast', message: 'Pengajuan izin berhasil dikirim ke Waka Kurikulum!', type: 'success');
+        $this->initForm();
+        $this->dispatch('show-toast', message: 'Pengajuan izin harian berhasil dikirim ke Waka / Admin!', type: 'success');
     }
 
     public function batalkanIzin(string $id)
@@ -109,32 +159,6 @@ class PengajuanIzin extends Component
         $this->detailIzinId = null;
     }
 
-    public function getJadwalTerdampakProperty()
-    {
-        if (!$this->tanggalMulai || !$this->tanggalSelesai) return collect();
-
-        try {
-            $start = Carbon::parse($this->tanggalMulai);
-            $end = Carbon::parse($this->tanggalSelesai);
-            if ($start->gt($end)) return collect();
-
-            $days = [];
-            for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-                $days[] = $date->dayOfWeekIso; // 1=Senin ... 7=Minggu
-            }
-            $days = array_unique($days);
-
-            return JadwalPelajaran::whereIn('hari', $days)
-                ->whereHas('jadwalGuru', fn($q) => $q->where('guru_id', auth()->id()))
-                ->with(['rombel', 'mataPelajaran'])
-                ->orderBy('hari')
-                ->orderBy('jam_ke_mulai')
-                ->get();
-        } catch (\Exception $e) {
-            return collect();
-        }
-    }
-
     public function render()
     {
         $riwayatIzin = IzinGuru::where('guru_id', auth()->id())
@@ -155,7 +179,7 @@ class PengajuanIzin extends Component
             'riwayatIzin' => $riwayatIzin,
             'daftarGuru' => $daftarGuru,
             'detailIzin' => $detailIzin,
-            'jadwalTerdampak' => $this->jadwalTerdampak,
+            'jadwalHariIni' => $this->jadwalHariIni,
         ]);
     }
 }

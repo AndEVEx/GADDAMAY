@@ -17,6 +17,10 @@ class IzinGuru extends Model
     protected $fillable = [
         'guru_id',
         'jenis_izin',
+        'is_seharian',
+        'waktu_keterangan',
+        'jam_terpilih',
+        'jadwal_ids',
         'tanggal_mulai',
         'tanggal_selesai',
         'alasan',
@@ -31,6 +35,9 @@ class IzinGuru extends Model
     protected function casts(): array
     {
         return [
+            'is_seharian' => 'boolean',
+            'jam_terpilih' => 'array',
+            'jadwal_ids' => 'array',
             'tanggal_mulai' => 'date',
             'tanggal_selesai' => 'date',
             'waktu_verifikasi' => 'datetime',
@@ -80,5 +87,22 @@ class IzinGuru extends Model
             'ditolak' => ['text' => 'Ditolak', 'class' => 'bg-danger text-white', 'icon' => 'bi-x-circle-fill'],
             default => ['text' => 'Unknown', 'class' => 'bg-secondary text-white', 'icon' => 'bi-question-circle'],
         };
+    }
+
+    public function getWaktuDisplayAttribute(): string
+    {
+        if ($this->is_seharian) {
+            return 'Seharian Penuh';
+        }
+
+        if (!empty($this->waktu_keterangan)) {
+            return $this->waktu_keterangan;
+        }
+
+        if (!empty($this->jam_terpilih) && is_array($this->jam_terpilih)) {
+            return 'Jam ke-' . implode(', ', $this->jam_terpilih);
+        }
+
+        return 'Jam Pelajaran Tertentu';
     }
 }

@@ -98,9 +98,22 @@ class VerifikasiIzin extends Component
             $dateStr = $date->format('Y-m-d');
 
             // Find all teaching schedules for this teacher on this day
-            $jadwals = JadwalPelajaran::where('hari', $dayOfWeek)
-                ->whereHas('jadwalGuru', fn($q) => $q->where('guru_id', $izin->guru_id))
-                ->get();
+            $jadwalsQuery = JadwalPelajaran::where('hari', $dayOfWeek)
+                ->whereHas('jadwalGuru', fn($q) => $q->where('guru_id', $izin->guru_id));
+
+            $jadwals = $jadwalsQuery->get();
+
+            // If not seharian, filter by selected schedules or periods
+            if (!$izin->is_seharian) {
+                if (!empty($izin->jadwal_ids) && is_array($izin->jadwal_ids)) {
+                    $jadwals = $jadwals->whereIn('id', $izin->jadwal_ids);
+                } elseif (!empty($izin->jam_terpilih) && is_array($izin->jam_terpilih)) {
+                    $jadwals = $jadwals->filter(function ($j) use ($izin) {
+                        $periodRange = range($j->jam_ke_mulai, $j->jam_ke_selesai);
+                        return count(array_intersect($periodRange, $izin->jam_terpilih)) > 0;
+                    });
+                }
+            }
 
             foreach ($jadwals as $jadwal) {
                 // Determine agenda status and presence
@@ -119,7 +132,7 @@ class VerifikasiIzin extends Component
                         'status_kehadiran_guru' => $kehadiranStatus,
                         'guru_pengganti_id' => $izin->guru_pengganti_id,
                         'koreksi_oleh_id' => auth()->id(),
-                        'materi_diajarkan' => 'Izin: ' . $izin->jenis_izin_label . ' (' . $izin->alasan . ')',
+                        'materi_diajarkan' => 'Izin: ' . $izin->jenis_izin_label . ' (' . $izin->waktu_display . ' - ' . $izin->alasan . ')',
                         'waktu_mulai' => $date->copy()->setTime(7, 0),
                         'waktu_selesai' => $date->copy()->setTime(15, 0),
                     ]
@@ -129,7 +142,7 @@ class VerifikasiIzin extends Component
         }
 
         $this->closeModals();
-        $this->dispatch('show-toast', message: "Izin guru {$izin->guru?->name} berhasil disetujui & diverifikasi! ({$affectedCount} sesi KBM disesuaikan).", type: 'success');
+        $this->dispatch('show-toast', message: "Izin guru {$izin->guru?->name} ({$izin->waktu_display}) berhasil disetujui & diverifikasi! ({$affectedCount} sesi KBM disesuaikan).", type: 'success');
     }
 
     public function rejectIzin()
