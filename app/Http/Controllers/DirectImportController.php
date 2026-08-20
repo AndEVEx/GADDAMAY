@@ -70,13 +70,32 @@ class DirectImportController extends Controller
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls|max:10240',
-            'mapel_id' => 'required|exists:mata_pelajaran,id',
+            'mapel_id' => 'nullable|exists:mata_pelajaran,id',
         ]);
 
         try {
             $importer = new KktpImport();
             $importer->parse($request->file('file')->getRealPath());
-            $count = $importer->import($request->input('mapel_id'));
+
+            $mapelId = $request->input('mapel_id') ?: $importer->mapelId;
+
+            if (!$mapelId) {
+                $rawMapel = $importer->metadata['mapel'] ?? '';
+                if (!empty($rawMapel)) {
+                    $cleaned = KktpImport::cleanValue($rawMapel);
+                    $newMapel = MataPelajaran::firstOrCreate(
+                        ['nama_mapel' => $cleaned],
+                        ['kode_mapel' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $cleaned), 0, 10))]
+                    );
+                    $mapelId = $newMapel->id;
+                }
+            }
+
+            if (!$mapelId) {
+                return redirect()->back()->with('error', 'Mata pelajaran tidak ditemukan dari file. Silakan pilih mata pelajaran secara manual.');
+            }
+
+            $count = $importer->import($mapelId, auth()->id());
 
             return redirect()->back()->with('success', "Berhasil import {$count} Tujuan Pembelajaran!");
         } catch (\Exception $e) {

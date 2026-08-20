@@ -9,6 +9,8 @@ use Livewire\Attributes\Title;
 use App\Imports\KktpImport;
 use App\Models\MataPelajaran;
 use App\Models\TujuanPembelajaran;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 #[Layout('components.layouts.app')]
 #[Title('Import KKTP')]
@@ -27,7 +29,7 @@ class ImportKktp extends Component
 
     public function downloadTemplate()
     {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Sheet1');
         
@@ -69,7 +71,7 @@ class ImportKktp extends Component
         
         $filename = 'template_kktp.xlsx';
         $tempPath = storage_path('app/' . $filename);
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer = new Xlsx($spreadsheet);
         $writer->save($tempPath);
         
         return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
@@ -77,7 +79,7 @@ class ImportKktp extends Component
 
     public function parse()
     {
-        $this->validate(['file' => 'required|mimes:xlsx,xls|max:5120']);
+        $this->validate(['file' => 'required|mimes:xlsx,xls|max:10240']);
 
         $path = $this->file->getRealPath();
         $importer = new KktpImport();
@@ -97,16 +99,24 @@ class ImportKktp extends Component
     public function importData()
     {
         if (!$this->selectedMapelId) {
-            $this->error = 'Pilih mata pelajaran terlebih dahulu!';
-            return;
+            $rawMapel = $this->metadata['mapel'] ?? '';
+            if (!empty($rawMapel)) {
+                $cleaned = KktpImport::cleanValue($rawMapel);
+                $newMapel = MataPelajaran::firstOrCreate(
+                    ['nama_mapel' => $cleaned],
+                    ['kode_mapel' => strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $cleaned), 0, 10))]
+                );
+                $this->selectedMapelId = $newMapel->id;
+            } else {
+                $this->error = 'Pilih mata pelajaran terlebih dahulu!';
+                return;
+            }
         }
 
-        $path = $this->file->getRealPath();
         $importer = new KktpImport();
-        $importer->parse($path);
         $importer->tpData = $this->tpData;
 
-        $this->importedCount = $importer->import($this->selectedMapelId);
+        $this->importedCount = $importer->import($this->selectedMapelId, auth()->id());
         $this->showResult = true;
         $this->parsed = false;
         $this->dispatch('show-toast', message: "Berhasil import {$this->importedCount} Tujuan Pembelajaran!", type: 'success');
@@ -119,7 +129,7 @@ class ImportKktp extends Component
 
     public function exportExcel()
     {
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data TP KKTP');
 
@@ -133,7 +143,7 @@ class ImportKktp extends Component
         $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
         $sheet->getStyle('A1:D1')->getFont()->getColor()->setRGB('FFFFFF');
 
-        $tps = TujuanPembelajaran::with('mataPelajaran')->get();
+        $tps = TujuanPembelajaran::with('mataPelajaran')->orderBy('mapel_id')->orderBy('order_sequence')->get();
 
         $row = 2;
         $no = 1;
@@ -151,7 +161,7 @@ class ImportKktp extends Component
 
         $filename = 'export_kktp_' . date('Y-m-d') . '.xlsx';
         $path = storage_path('app/' . $filename);
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+        (new Xlsx($spreadsheet))->save($path);
 
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
@@ -167,4 +177,3 @@ class ImportKktp extends Component
         ]);
     }
 }
-

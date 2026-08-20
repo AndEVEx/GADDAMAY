@@ -21,8 +21,8 @@
                         <div class="fs-2 fw-extrabold my-1">{{ $globalPercentage }}%</div>
                         <div class="small text-white-50" style="font-size: 0.72rem;">{{ number_format($totalTercapai) }} tuntas / {{ number_format($totalTercapai + $totalBelum) }} data</div>
                     </div>
-                    <div class="bg-white bg-opacity-20 p-2 rounded-3">
-                        <i class="bi bi-award-fill fs-4"></i>
+                    <div class="bg-white bg-opacity-25 p-2 rounded-3 text-white d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
+                        <i class="bi bi-award-fill fs-3 text-white"></i>
                     </div>
                 </div>
             </div>

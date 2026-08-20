@@ -1,12 +1,12 @@
 <div>
     <style>
         .animate-fade-in-up {
-            animation: fadeInUp 0.4s ease-out;
+            animation: fadeInUp 0.35s ease-out;
         }
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(15px);
+                transform: translateY(12px);
             }
             to {
                 opacity: 1;
@@ -14,104 +14,123 @@
             }
         }
         .card-custom {
-            border-radius: 12px;
-            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            border-radius: 14px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.06);
             border: none;
             margin-bottom: 1rem;
         }
         .btn-touch {
-            min-height: 48px;
+            min-height: 46px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-        }
-        .form-control-touch, .form-select-touch {
-            min-height: 48px;
+            border-radius: 10px;
         }
     </style>
 
     <!-- Header -->
-    <div class="d-flex align-items-center justify-content-between mb-4 animate-fade-in-up">
-        <div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2 animate-fade-in-up">
+        <div class="d-flex align-items-center gap-2">
             <a href="{{ route('guru.kktp-hub') }}" class="btn btn-outline-secondary btn-touch px-3" wire:navigate>
                 <i class="bi bi-arrow-left"></i>
             </a>
-            <h4 class="mb-0 fw-bold"><i class="bi bi-gear text-primary me-2"></i>Setting KKTP</h4>
+            <div>
+                <h4 class="mb-0 fw-bold"><i class="bi bi-gear text-primary me-2"></i>Setting KKTP / Tujuan Pembelajaran</h4>
+                <p class="text-muted small mb-0">Kelola TP per pertemuan untuk setiap mata pelajaran yang diampu</p>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            @if($selectedMapelId)
+                <button type="button" class="btn btn-success btn-touch px-3" wire:click="toggleImport">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Import Excel KKTP
+                </button>
+            @endif
         </div>
     </div>
 
-    @if($mapels->count() > 1)
-        <!-- Mapel Selector -->
-        <div class="card card-custom animate-fade-in-up">
-            <div class="card-body p-3">
-                <label class="form-label text-muted small fw-bold mb-1">Pilih Mata Pelajaran</label>
-                <select class="form-select form-select-touch" wire:model.live="selectedMapelId">
-                    <option value="">-- Pilih Mata Pelajaran --</option>
-                    @foreach($mapels as $mapel)
-                        <option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>
-                    @endforeach
-                </select>
+    <!-- Mapel Selector -->
+    <div class="card card-custom animate-fade-in-up mb-3">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                <label class="form-label text-muted small fw-bold mb-0">
+                    <i class="bi bi-book me-1"></i> Pilih Mata Pelajaran
+                </label>
+                <button type="button" wire:click="toggleAllMapels" class="btn btn-sm btn-link text-decoration-none p-0 text-primary">
+                    <i class="bi {{ $showAllMapels ? 'bi-filter' : 'bi-collection' }} me-1"></i>
+                    {{ $showAllMapels ? 'Tampilkan Mapel Saya Saja' : 'Tampilkan Semua Mapel Sekolah' }}
+                </button>
             </div>
+            <select class="form-select form-select-lg" wire:model.live="selectedMapelId" style="min-height: 48px; border-radius: 10px;">
+                <option value="">-- Pilih Mata Pelajaran --</option>
+                @foreach($mapels as $mapel)
+                    <option value="{{ $mapel->id }}">
+                        {{ $mapel->nama_mapel }} @if(!empty($mapel->kode_mapel)) ({{ $mapel->kode_mapel }}) @endif
+                    </option>
+                @endforeach
+            </select>
         </div>
-    @elseif($mapels->count() === 1 && !$selectedMapelId)
-        <div class="alert alert-info">Memuat Mata Pelajaran...</div>
-    @elseif($mapels->count() === 0)
-        <div class="alert alert-warning animate-fade-in-up">
-            <i class="bi bi-exclamation-triangle me-2"></i>Anda belum memiliki jadwal mata pelajaran.
-        </div>
-    @endif
+    </div>
 
     @if($selectedMapelId)
         <!-- Import Section -->
         @if($showImport)
-            <div class="card card-custom bg-light animate-fade-in-up mb-3 border">
-                <div class="card-body p-4">
+            <div class="card card-custom bg-light animate-fade-in-up mb-3 border border-success">
+                <div class="card-body p-3 p-md-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-excel text-success me-2"></i>Import dari Excel</h5>
+                        <h5 class="mb-0 fw-bold text-success"><i class="bi bi-cloud-upload me-2"></i>Import KKTP dari File Excel</h5>
                         <button type="button" class="btn-close" wire:click="toggleImport"></button>
                     </div>
 
                     @if(!$importParsed)
                         <div class="mb-3">
-                            <label class="form-label">Pilih file Excel (.xlsx, .xls)</label>
-                            <input type="file" class="form-control form-control-touch" wire:model="importFile" accept=".xlsx,.xls">
+                            <label class="form-label fw-bold small">Pilih file format KKTP (.xlsx, .xls)</label>
+                            <input type="file" class="form-control" wire:model="importFile" accept=".xlsx,.xls" style="min-height: 48px;">
                             @error('importFile') <span class="text-danger small">{{ $message }}</span> @enderror
+                            <div class="form-text small">Upload file format KKTP MGMP (baris data dimulai dari baris ke-12).</div>
                         </div>
-                        <button type="button" class="btn btn-primary btn-touch w-100" wire:click="parseImport" wire:loading.attr="disabled">
-                            <span wire:loading.remove wire:target="parseImport">Baca File</span>
-                            <span wire:loading wire:target="parseImport">Membaca...</span>
+                        <button type="button" class="btn btn-primary btn-touch w-100" wire:click="parseImport" wire:loading.attr="disabled" {{ !$importFile ? 'disabled' : '' }}>
+                            <span wire:loading.remove wire:target="parseImport"><i class="bi bi-search me-1"></i> Baca & Pratinjau File</span>
+                            <span wire:loading wire:target="parseImport"><span class="spinner-border spinner-border-sm me-2"></span>Membaca file...</span>
                         </button>
                     @else
-                        <div class="alert alert-info py-2 mb-3">
-                            Ditemukan <strong>{{ count($importPreview) }}</strong> Tujuan Pembelajaran.
+                        <!-- Preview Metadata -->
+                        <div class="alert alert-info py-2 px-3 small mb-3">
+                            <div class="fw-bold mb-1"><i class="bi bi-info-circle me-1"></i> Informasi File Terbaca:</div>
+                            <div class="row g-1">
+                                <div class="col-sm-6"><strong>Mata Pelajaran:</strong> {{ $importMetadata['mapel'] ?? '-' }}</div>
+                                <div class="col-sm-6"><strong>Guru:</strong> {{ $importMetadata['guru'] ?? '-' }}</div>
+                                <div class="col-sm-6"><strong>Kelas/Tingkat:</strong> {{ $importMetadata['kelas'] ?? '-' }} ({{ $importMetadata['tingkat'] ?? '-' }})</div>
+                                <div class="col-sm-6"><strong>Total TP Terbaca:</strong> {{ count($importPreview) }} Pertemuan / Item</div>
+                            </div>
                         </div>
-                        <div class="table-responsive mb-3 bg-white rounded border">
+
+                        <!-- Preview Table -->
+                        <div class="table-responsive mb-3 bg-white rounded border" style="max-height: 320px; overflow-y: auto;">
                             <table class="table table-sm table-hover mb-0">
-                                <thead class="table-light">
+                                <thead class="table-light sticky-top">
                                     <tr>
-                                        <th>Kode</th>
-                                        <th>Deskripsi</th>
+                                        <th style="width: 80px;">No</th>
+                                        <th style="width: 140px;">Pertemuan</th>
+                                        <th>Capaian & Tujuan Pembelajaran (CP/TP)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach(array_slice($importPreview, 0, 5) as $preview)
+                                    @foreach($importPreview as $preview)
                                         <tr>
-                                            <td class="fw-bold">{{ $preview['kode_tp'] ?? '-' }}</td>
-                                            <td class="text-truncate" style="max-width: 250px;">{{ $preview['deskripsi_tp'] ?? '-' }}</td>
+                                            <td class="fw-bold">{{ $preview['no'] ?? $loop->iteration }}</td>
+                                            <td><span class="badge bg-primary bg-opacity-10 text-primary">{{ $preview['pertemuan'] ?? 'Pertemuan ' . $loop->iteration }}</span></td>
+                                            <td class="small">{{ $preview['deskripsi_tp'] ?? $preview['tp'] ?? '-' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                            @if(count($importPreview) > 5)
-                                <div class="text-center py-2 text-muted small bg-light border-top">
-                                    ... dan {{ count($importPreview) - 5 }} lainnya
-                                </div>
-                            @endif
                         </div>
+
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-outline-secondary btn-touch flex-grow-1" wire:click="$set('importParsed', false)">Batal</button>
                             <button type="button" class="btn btn-success btn-touch flex-grow-1" wire:click="executeImport" wire:loading.attr="disabled">
-                                <i class="bi bi-cloud-upload me-2"></i>Simpan Data
+                                <span wire:loading.remove wire:target="executeImport"><i class="bi bi-cloud-upload me-1"></i> Simpan {{ count($importPreview) }} TP ke Sistem</span>
+                                <span wire:loading wire:target="executeImport"><span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...</span>
                             </button>
                         </div>
                     @endif
@@ -119,93 +138,105 @@
             </div>
         @endif
 
-        <!-- List TP -->
+        <!-- TP List Card -->
         <div class="card card-custom animate-fade-in-up">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
-                    <h5 class="mb-0 fw-bold">Daftar Tujuan Pembelajaran</h5>
-                    <div class="text-muted small">Total: {{ $tps->count() }} TP</div>
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-list-check text-primary me-2"></i>Daftar TP: {{ $currentMapel?->nama_mapel }}
+                    </h5>
+                    <small class="text-muted">Total {{ $tps->count() }} Tujuan Pembelajaran terdaftar</small>
                 </div>
-                <button type="button" class="btn btn-success btn-touch px-3 shadow-sm rounded-pill" wire:click="toggleImport">
-                    <i class="bi bi-file-earmark-excel me-1"></i><span class="d-none d-md-inline">Import Excel</span>
-                </button>
+                <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3 py-2">
+                    {{ $tps->count() }} TP
+                </span>
             </div>
             <div class="card-body p-0">
                 @if($tps->isEmpty())
-                    <div class="p-5 text-center text-muted">
-                        <i class="bi bi-clipboard-x display-4 text-light mb-3 d-block"></i>
-                        Belum ada Tujuan Pembelajaran untuk mata pelajaran ini.
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                        <p class="mb-2 fw-semibold">Belum ada Tujuan Pembelajaran untuk mata pelajaran ini.</p>
+                        <p class="small text-muted mb-3">Silakan gunakan fitur <strong>Import Excel</strong> di atas atau input manual di bawah.</p>
+                        <button type="button" class="btn btn-success btn-touch px-4" wire:click="toggleImport">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Import KKTP dari Excel
+                        </button>
                     </div>
                 @else
-                    <div class="list-group list-group-flush">
-                        @foreach($tps as $index => $tp)
-                            <div class="list-group-item p-3 {{ $index % 2 == 0 ? 'bg-light' : '' }}">
-                                @if($editingTpId === $tp->id)
-                                    <!-- Edit Mode -->
-                                    <div class="row g-2">
-                                        <div class="col-12 col-md-3">
-                                            <input type="text" class="form-control form-control-touch fw-bold" wire:model="editKodeTP" placeholder="Kode TP">
-                                            @error('editKodeTP') <span class="text-danger small">{{ $message }}</span> @enderror
-                                        </div>
-                                        <div class="col-12 col-md-7">
-                                            <textarea class="form-control" rows="2" wire:model="editDeskripsiTP" placeholder="Deskripsi TP"></textarea>
-                                            @error('editDeskripsiTP') <span class="text-danger small">{{ $message }}</span> @enderror
-                                        </div>
-                                        <div class="col-12 col-md-2 d-flex gap-1 flex-md-column flex-row">
-                                            <button class="btn btn-primary btn-sm flex-grow-1 btn-touch" wire:click="saveTpEdit"><i class="bi bi-check-lg"></i></button>
-                                            <button class="btn btn-outline-secondary btn-sm flex-grow-1 btn-touch" wire:click="cancelEdit"><i class="bi bi-x-lg"></i></button>
-                                        </div>
-                                    </div>
-                                @else
-                                    <!-- View Mode -->
-                                    <div class="d-flex justify-content-between align-items-start gap-3">
-                                        <div class="d-flex gap-3">
-                                            <span class="badge bg-secondary rounded-circle p-2 mt-1">{{ $index + 1 }}</span>
-                                            <div>
-                                                <div class="fw-bold text-dark">{{ $tp->kode_tp }}</div>
-                                                <div class="text-muted small mt-1" style="white-space: pre-line;">{{ $tp->deskripsi_tp }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-nowrap gap-2">
-                                            <button class="btn btn-light btn-sm text-primary shadow-sm btn-touch" style="min-height:36px; padding: 0.25rem 0.75rem;" wire:click="startEdit('{{ $tp->id }}')">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <button class="btn btn-light btn-sm text-danger shadow-sm btn-touch" style="min-height:36px; padding: 0.25rem 0.75rem;" wire:confirm="Yakin ingin menghapus TP ini?" wire:click="deleteTp('{{ $tp->id }}')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
-                        @endforeach
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 60px;" class="text-center">No</th>
+                                    <th style="width: 120px;">Kode</th>
+                                    <th>Deskripsi Tujuan Pembelajaran</th>
+                                    <th style="width: 110px;" class="text-end pe-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($tps as $tp)
+                                    @if($editingTpId === $tp->id)
+                                        <tr class="table-warning">
+                                            <td class="text-center fw-bold">{{ $loop->iteration }}</td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" wire:model="editKodeTP">
+                                            </td>
+                                            <td>
+                                                <textarea class="form-control form-control-sm" rows="2" wire:model="editDeskripsiTP"></textarea>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-success" wire:click="saveTpEdit" title="Simpan"><i class="bi bi-check-lg"></i></button>
+                                                    <button type="button" class="btn btn-secondary" wire:click="cancelEdit" title="Batal"><i class="bi bi-x-lg"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @else
+                                        <tr>
+                                            <td class="text-center fw-bold text-muted">{{ $loop->iteration }}</td>
+                                            <td>
+                                                <span class="badge bg-primary text-white px-2 py-1">{{ $tp->kode_tp }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="small text-dark" style="line-height: 1.5;">{{ $tp->deskripsi_tp }}</div>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-outline-primary" wire:click="startEdit('{{ $tp->id }}')" title="Edit"><i class="bi bi-pencil"></i></button>
+                                                    <button type="button" class="btn btn-outline-danger" wire:confirm="Yakin ingin menghapus TP ini?" wire:click="deleteTp('{{ $tp->id }}')" title="Hapus"><i class="bi bi-trash"></i></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 @endif
             </div>
         </div>
 
-        <!-- Add Form -->
-        <div class="card card-custom bg-light bg-gradient animate-fade-in-up border border-primary border-opacity-25 mt-4">
-            <div class="card-body p-4">
-                <h6 class="fw-bold mb-3"><i class="bi bi-plus-circle text-primary me-2"></i>Tambah TP Baru</h6>
-                <form wire:submit="addTp">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-3">
-                            <label class="form-label small text-muted">Kode TP</label>
-                            <input type="text" class="form-control form-control-touch fw-bold" wire:model="newKodeTP" placeholder="Cth: TP-1">
+        <!-- Add Manual TP Card -->
+        <div class="card card-custom animate-fade-in-up">
+            <div class="card-header bg-light py-3">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-plus-circle text-primary me-2"></i>Tambah TP Baru Manual</h6>
+            </div>
+            <div class="card-body p-3 p-md-4">
+                <form wire:submit.prevent="addTp">
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-bold">Kode TP / Pertemuan <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" wire:model="newKodeTP" placeholder="Contoh: TP-01" style="min-height: 44px;">
                             @error('newKodeTP') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
-                        <div class="col-12 col-md-7">
-                            <label class="form-label small text-muted">Deskripsi Tujuan Pembelajaran</label>
-                            <textarea class="form-control" rows="2" wire:model="newDeskripsiTP" placeholder="Menjelaskan konsep dasar..."></textarea>
+                        <div class="col-md-9">
+                            <label class="form-label small fw-bold">Deskripsi Tujuan Pembelajaran <span class="text-danger">*</span></label>
+                            <textarea class="form-control" wire:model="newDeskripsiTP" rows="2" placeholder="Contoh: [Pertemuan 1] Murid dapat menerapkan berpikir komputasional..."></textarea>
                             @error('newDeskripsiTP') <span class="text-danger small">{{ $message }}</span> @enderror
                         </div>
-                        <div class="col-12 col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary btn-touch w-100 shadow-sm" wire:loading.attr="disabled">
-                                <span wire:loading.remove wire:target="addTp">Tambah</span>
-                                <span wire:loading wire:target="addTp"><i class="bi bi-hourglass-split"></i></span>
-                            </button>
-                        </div>
                     </div>
+                    <button type="submit" class="btn btn-primary btn-touch px-4" wire:loading.attr="disabled">
+                        <i class="bi bi-plus-lg me-1"></i> Tambah Tujuan Pembelajaran
+                    </button>
                 </form>
             </div>
         </div>
