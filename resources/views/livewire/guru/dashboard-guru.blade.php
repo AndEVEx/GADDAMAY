@@ -33,8 +33,8 @@
     </div>
     @endif
 
-    {{-- Quick Access Shortcut Cards --}}
-    <div class="row g-2 mb-3">
+    {{-- Quick Access Shortcut Cards (Desktop Only - on mobile, bottom navigation bar handles navigation) --}}
+    <div class="row g-2 mb-3 d-none d-md-flex">
         <div class="col-4">
             <a href="{{ route('guru.kktp-hub') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
                 <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 38px; height: 38px;">

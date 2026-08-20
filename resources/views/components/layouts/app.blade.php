@@ -62,16 +62,7 @@
                 </a>
             </div>
 
-            {{-- Right Navbar Items: Notification Bell & User Pill --}}
-            <div class="d-flex align-items-center gap-2">
-                {{-- Top Navbar Notification Bell --}}
-                @livewire('components.notification-bell', ['isNavbar' => true])
-
-                {{-- User Quick Profile Pill (Desktop) --}}
-                <div class="d-none d-md-flex align-items-center gap-1 bg-white bg-opacity-15 py-1 px-3 rounded-pill text-white small shadow-sm">
-                    <i class="bi bi-person-circle fs-6"></i>
-                    <span class="fw-semibold text-truncate" style="max-width: 150px;">{{ Auth::user()->name }}</span>
-                </div>
+                </a>
             </div>
         </div>
     </nav>
@@ -223,10 +214,6 @@
                         <button type="button" onclick="window.installPWA()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2 text-primary fw-semibold pwa-install-btn">
                             <i class="bi bi-download text-primary me-2 fs-6"></i>
                             <span class="small">Install Aplikasi (PWA)</span>
-                        </button>
-                        <button type="button" onclick="window.toggleFullscreen()" data-bs-dismiss="offcanvas" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2">
-                            <i class="bi bi-arrows-fullscreen text-info me-2 fs-6"></i>
-                            <span class="small">Layar Penuh (Fullscreen)</span>
                         </button>
                         <a href="{{ route('ganti-password') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2 {{ request()->routeIs('ganti-password') ? 'active' : '' }}" wire:navigate>
                             <i class="bi bi-key-fill text-warning me-2 fs-6"></i>
