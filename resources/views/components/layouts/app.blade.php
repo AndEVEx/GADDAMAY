@@ -61,6 +61,18 @@
                     </div>
                 </a>
             </div>
+
+            {{-- Right Navbar Items: Notification Bell & User Pill --}}
+            <div class="d-flex align-items-center gap-2">
+                {{-- Top Navbar Notification Bell --}}
+                @livewire('components.notification-bell', ['isNavbar' => true])
+
+                {{-- User Quick Profile Pill (Desktop) --}}
+                <div class="d-none d-md-flex align-items-center gap-1 bg-white bg-opacity-15 py-1 px-3 rounded-pill text-white small shadow-sm">
+                    <i class="bi bi-person-circle fs-6"></i>
+                    <span class="fw-semibold text-truncate" style="max-width: 150px;">{{ Auth::user()->name }}</span>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -389,12 +401,30 @@
             } catch (e) { }
         }
 
+        let globalAudioCtx = null;
+        function getAudioContext() {
+            if (!globalAudioCtx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) globalAudioCtx = new AudioCtx();
+            }
+            if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+                globalAudioCtx.resume().catch(function() {});
+            }
+            return globalAudioCtx;
+        }
+
+        // Unlock Web Audio on first user interaction
+        ['click', 'touchstart', 'keydown'].forEach(function(evt) {
+            document.addEventListener(evt, function() {
+                getAudioContext();
+            }, { once: false, passive: true });
+        });
+
         // Play notification sound using Web Audio API
         function playNotifSound() {
             try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                const ctx = new AudioContext();
+                const ctx = getAudioContext();
+                if (!ctx) return;
 
                 function playTone(freq, startTime, duration) {
                     const osc = ctx.createOscillator();
@@ -403,27 +433,28 @@
                     gain.connect(ctx.destination);
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + startTime);
-                    gain.gain.setValueAtTime(0.3, ctx.currentTime + startTime);
+                    gain.gain.setValueAtTime(0.4, ctx.currentTime + startTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + startTime + duration);
                     osc.start(ctx.currentTime + startTime);
                     osc.stop(ctx.currentTime + startTime + duration);
                 }
 
-                // 3-tone ascending chime: C5 → E5 → G5
+                // 3-tone ascending chime: C5 (523Hz) → E5 (659Hz) → G5 (784Hz)
                 playTone(523, 0, 0.25);
                 playTone(659, 0.2, 0.25);
-                playTone(784, 0.4, 0.4);
+                playTone(784, 0.4, 0.45);
             } catch (e) {
                 console.warn('Audio notification failed:', e);
             }
         }
 
-        // Show browser notification (Icon path fixed to /pwa-icons/)
-        function showTeachingNotification(block) {
-            const title = '📚 15 Menit Lagi Mengajar!';
+        // Show browser notification
+        function showTeachingNotification(block, type) {
+            const is15Min = type === '15min';
+            const title = is15Min ? '⏰ 15 Menit Lagi Mengajar!' : '🔔 Waktu Mengajar Dimulai!';
             const body = block.mapel + ' — ' + block.kelas + '\nPukul ' + block.waktu_mulai + ' WIB';
 
-            // Play sound first (works even if Notification is denied)
+            // Play sound chime
             playNotifSound();
 
             if ('Notification' in window && Notification.permission === 'granted') {
@@ -432,10 +463,10 @@
                         body: body,
                         icon: '/pwa-icons/icon-192.png',
                         badge: '/pwa-icons/icon-192.png',
-                        tag: 'teaching-' + block.waktu_mulai,
+                        tag: 'teaching-' + type + '-' + block.waktu_mulai,
                         renotify: false,
                         requireInteraction: true,
-                        vibrate: [200, 100, 200, 100, 200],
+                        vibrate: [300, 150, 300, 150, 300],
                     });
 
                     notif.onclick = function() {
@@ -443,18 +474,17 @@
                         notif.close();
                     };
 
-                    // Auto-close after 30 seconds
                     setTimeout(function() { notif.close(); }, 30000);
                 } catch (e) {
                     console.warn('Notification display failed:', e);
                 }
             }
 
-            // Also show in-app toast as fallback
+            // Also show in-app toast banner
             if (window.Livewire) {
                 window.Livewire.dispatch('show-toast', {
-                    message: '📚 15 menit lagi: ' + block.mapel + ' — ' + block.kelas + ' (pkl ' + block.waktu_mulai + ')',
-                    type: 'warning'
+                    message: (is15Min ? '⏰ 15 Menit Lagi: ' : '🔔 Waktu Mengajar: ') + block.mapel + ' — ' + block.kelas + ' (pkl ' + block.waktu_mulai + ' WIB)',
+                    type: is15Min ? 'warning' : 'info'
                 });
             }
         }
@@ -502,12 +532,23 @@
                 const startMinutes = timeToMinutes(block.waktu_mulai);
                 const diff = startMinutes - nowMinutes;
 
-                if (diff >= (NOTIF_MINUTES_BEFORE - 2) && diff <= (NOTIF_MINUTES_BEFORE + 2)) {
-                    const notifKey = block.waktu_mulai + '_' + block.kelas + '_' + block.mapel;
+                // 1. Notifikasi 15 Menit Sebelum (jika selisih antara 0 dan 15 menit)
+                if (diff >= 0 && diff <= NOTIF_MINUTES_BEFORE) {
+                    const notifKey = '15min_' + block.waktu_mulai + '_' + block.kelas + '_' + block.mapel;
 
                     if (!alreadyNotified(notifKey)) {
                         markNotified(notifKey);
-                        showTeachingNotification(block);
+                        showTeachingNotification(block, '15min');
+                    }
+                }
+
+                // 2. Notifikasi Saat Jam Masuk Mulai (0 s/d 10 menit setelah jam mulai)
+                if (nowMinutes >= startMinutes && nowMinutes <= (startMinutes + 10)) {
+                    const notifKey = 'start_' + block.waktu_mulai + '_' + block.kelas + '_' + block.mapel;
+
+                    if (!alreadyNotified(notifKey)) {
+                        markNotified(notifKey);
+                        showTeachingNotification(block, 'start');
                     }
                 }
             });

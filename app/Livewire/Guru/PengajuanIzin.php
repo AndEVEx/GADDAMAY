@@ -116,7 +116,7 @@ class PengajuanIzin extends Component
             $waktuKeterangan = !empty($parts) ? implode(', ', $parts) : 'Jam Tertentu';
         }
 
-        IzinGuru::create([
+        $izin = IzinGuru::create([
             'guru_id' => auth()->id(),
             'jenis_izin' => $this->jenisIzin,
             'is_seharian' => $this->isSeharian,
@@ -130,6 +130,16 @@ class PengajuanIzin extends Component
             'guru_pengganti_id' => $this->guruPenggantiId ?: null,
             'status' => 'menunggu',
         ]);
+
+        // Kirim notifikasi ke Admin, Waka Kurikulum, dan Kepala Sekolah
+        try {
+            $verifikatorUsers = User::whereIn('role', ['admin', 'waka', 'kepsek'])->get();
+            foreach ($verifikatorUsers as $verifikator) {
+                $verifikator->notify(new \App\Notifications\PengajuanIzinBaruNotification($izin));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal kirim notifikasi izin baru: ' . $e->getMessage());
+        }
 
         $this->showFormModal = false;
         $this->initForm();

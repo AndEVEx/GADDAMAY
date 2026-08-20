@@ -142,6 +142,17 @@ class VerifikasiIzin extends Component
         }
 
         $this->closeModals();
+
+        // Kirim notifikasi ke Guru bersangkutan
+        try {
+            $guru = $izin->guru;
+            if ($guru) {
+                $guru->notify(new \App\Notifications\StatusIzinGuruNotification($izin, 'disetujui', $this->catatanWaka));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal kirim notifikasi izin disetujui: ' . $e->getMessage());
+        }
+
         $this->dispatch('show-toast', message: "Izin guru {$izin->guru?->name} ({$izin->waktu_display}) berhasil disetujui & diverifikasi! ({$affectedCount} sesi KBM disesuaikan).", type: 'success');
     }
 
@@ -167,6 +178,17 @@ class VerifikasiIzin extends Component
         ]);
 
         $this->closeModals();
+
+        // Kirim notifikasi penolakan ke Guru bersangkutan
+        try {
+            $guru = $izin->guru;
+            if ($guru) {
+                $guru->notify(new \App\Notifications\StatusIzinGuruNotification($izin, 'ditolak', $this->catatanWaka));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Gagal kirim notifikasi izin ditolak: ' . $e->getMessage());
+        }
+
         $this->dispatch('show-toast', message: "Pengajuan izin guru {$izin->guru?->name} ditolak.", type: 'warning');
     }
 
