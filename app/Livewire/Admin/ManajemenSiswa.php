@@ -205,6 +205,47 @@ class ManajemenSiswa extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $siswas = Siswa::with('rombel')
+            ->when($this->search, function($q) {
+                $q->where('nama', 'like', "%{$this->search}%")
+                  ->orWhere('nis', 'like', "%{$this->search}%");
+            })
+            ->when($this->filterRombel, fn($q) => $q->where('rombel_id', $this->filterRombel))
+            ->orderBy('nama')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '6%', 'align' => 'center'],
+            ['name' => 'NIS / NISN', 'width' => '20%', 'align' => 'center'],
+            ['name' => 'Nama Lengkap Peserta Didik', 'width' => '50%', 'align' => 'left'],
+            ['name' => 'Kelas / Rombel', 'width' => '24%', 'align' => 'center'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($siswas as $s) {
+            $rows[] = [
+                $no++,
+                e($s->nis ?? '-'),
+                '<strong>' . e($s->nama) . '</strong>',
+                e($s->rombel->nama_kelas ?? '-'),
+            ];
+        }
+
+        $filename = 'Laporan_Data_Siswa_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'LAPORAN DATA PESERTA DIDIK',
+            'Sistem Informasi Agenda Guru SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Peserta Didik' => count($rows) . ' Siswa']
+        );
+    }
+
     public function render()
     {
         $rombels = Rombel::orderBy('tingkat')->orderBy('nama_kelas')->get();

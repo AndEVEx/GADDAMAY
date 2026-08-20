@@ -192,6 +192,110 @@ class VerifikasiIzin extends Component
         $this->dispatch('show-toast', message: "Pengajuan izin guru {$izin->guru?->name} ditolak.", type: 'warning');
     }
 
+    public function exportExcel()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Rekap Izin Guru');
+
+        // Headers
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'Tanggal Pengajuan');
+        $sheet->setCellValue('C1', 'Nama Guru');
+        $sheet->setCellValue('D1', 'Jenis Izin');
+        $sheet->setCellValue('E1', 'Waktu / Jam');
+        $sheet->setCellValue('F1', 'Alasan');
+        $sheet->setCellValue('G1', 'Guru Pengganti');
+        $sheet->setCellValue('H1', 'Status');
+        $sheet->setCellValue('I1', 'Diverifikasi Oleh');
+
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('1A56DB');
+        $sheet->getStyle('A1:I1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $items = IzinGuru::with(['guru', 'guruPengganti', 'diverifikasiOleh'])
+            ->when($this->filterStatus !== 'semua', fn($q) => $q->where('status', $this->filterStatus))
+            ->when($this->search, function ($q) {
+                $q->whereHas('guru', fn($g) => $g->where('name', 'like', '%' . $this->search . '%'))
+                  ->orWhere('alasan', 'like', '%' . $this->search . '%');
+            })
+            ->latest()->get();
+
+        $row = 2;
+        $no = 1;
+        foreach ($items as $item) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $item->created_at->format('Y-m-d H:i'));
+            $sheet->setCellValue('C' . $row, $item->guru?->name ?? '-');
+            $sheet->setCellValue('D' . $row, $item->jenis_izin_label);
+            $sheet->setCellValue('E' . $row, $item->waktu_display);
+            $sheet->setCellValue('F' . $row, $item->alasan);
+            $sheet->setCellValue('G' . $row, $item->guruPengganti?->name ?? '-');
+            $sheet->setCellValue('H' . $row, ucfirst($item->status));
+            $sheet->setCellValue('I' . $row, $item->diverifikasiOleh?->name ?? '-');
+            $row++;
+        }
+
+        foreach (range('A', 'I') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'rekap_izin_guru_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportPdf()
+    {
+        $items = IzinGuru::with(['guru', 'guruPengganti', 'diverifikasiOleh'])
+            ->when($this->filterStatus !== 'semua', fn($q) => $q->where('status', $this->filterStatus))
+            ->when($this->search, function ($q) {
+                $q->whereHas('guru', fn($g) => $g->where('name', 'like', '%' . $this->search . '%'))
+                  ->orWhere('alasan', 'like', '%' . $this->search . '%');
+            })
+            ->latest()->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '5%', 'align' => 'center'],
+            ['name' => 'Tanggal & Waktu', 'width' => '15%', 'align' => 'center'],
+            ['name' => 'Nama Guru', 'width' => '22%', 'align' => 'left'],
+            ['name' => 'Jenis Izin', 'width' => '12%', 'align' => 'center'],
+            ['name' => 'Sesi / Jam', 'width' => '15%', 'align' => 'center'],
+            ['name' => 'Alasan & Keterangan', 'width' => '21%', 'align' => 'left'],
+            ['name' => 'Status', 'width' => '10%', 'align' => 'center'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($items as $item) {
+            $rows[] = [
+                $no++,
+                $item->created_at->format('d/m/Y H:i'),
+                '<strong>' . e($item->guru?->name ?? '-') . '</strong>',
+                e($item->jenis_izin_label),
+                e($item->waktu_display),
+                e($item->alasan),
+                e(ucfirst($item->status)),
+            ];
+        }
+
+        $filename = 'Laporan_Izin_Guru_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'REKAPITULASI PENGAJUAN & VERIFIKASI IZIN GURU',
+            'Tahun Pelajaran 2026/2027 — SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'landscape',
+            ['Total Data Izin' => count($rows) . ' Pengajuan'],
+            auth()->user()?->name,
+            'Waka Kurikulum / Verifikator'
+        );
+    }
+
     public function render()
     {
         $query = IzinGuru::with(['guru', 'guruPengganti', 'diverifikasiOleh'])

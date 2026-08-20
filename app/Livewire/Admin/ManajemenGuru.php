@@ -207,6 +207,46 @@ class ManajemenGuru extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $users = User::whereIn('role', ['guru', 'kepsek', 'waka', 'ketua_mgmp', 'admin', 'ketua_kelas'])
+                     ->when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('email', 'like', "%{$this->search}%"))
+                     ->when($this->filterRole, fn($q) => $q->where('role', $this->filterRole))
+                     ->orderBy('name')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '6%', 'align' => 'center'],
+            ['name' => 'Nama Tenaga Pendidik', 'width' => '32%', 'align' => 'left'],
+            ['name' => 'Email Akun', 'width' => '32%', 'align' => 'left'],
+            ['name' => 'Role / Jabatan', 'width' => '16%', 'align' => 'center'],
+            ['name' => 'Terdaftar Sejak', 'width' => '14%', 'align' => 'center'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($users as $u) {
+            $rows[] = [
+                $no++,
+                '<strong>' . e($u->name) . '</strong>',
+                e($u->email),
+                ucfirst(str_replace('_', ' ', $u->role)),
+                $u->created_at ? $u->created_at->format('d/m/Y') : '-',
+            ];
+        }
+
+        $filename = 'Laporan_Data_Guru_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'LAPORAN DATA GURU & TENAGA KEPENDIDIKAN',
+            'Sistem Informasi Agenda Guru SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Guru' => count($rows) . ' Orang']
+        );
+    }
+
     public function render()
     {
         $users = User::when($this->search, fn($q) => $q->where('name', 'like', "%{$this->search}%")->orWhere('email', 'like', "%{$this->search}%"))

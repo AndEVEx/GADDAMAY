@@ -181,6 +181,43 @@ class ManajemenMapel extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $mapels = MataPelajaran::when($this->search, function($q) {
+                $q->where('nama_mapel', 'like', "%{$this->search}%")
+                  ->orWhere('kode_mapel', 'like', "%{$this->search}%");
+            })
+            ->orderBy('nama_mapel')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '10%', 'align' => 'center'],
+            ['name' => 'Kode Mapel', 'width' => '25%', 'align' => 'center'],
+            ['name' => 'Nama Mata Pelajaran', 'width' => '65%', 'align' => 'left'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($mapels as $m) {
+            $rows[] = [
+                $no++,
+                '<strong>' . e($m->kode_mapel ?? '-') . '</strong>',
+                e($m->nama_mapel),
+            ];
+        }
+
+        $filename = 'Laporan_Mata_Pelajaran_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'LAPORAN DATA MATA PELAJARAN',
+            'Sistem Informasi Agenda Guru SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Mata Pelajaran' => count($rows) . ' Mapel']
+        );
+    }
+
     public function render()
     {
         $mapels = MataPelajaran::when($this->search, function($q) {

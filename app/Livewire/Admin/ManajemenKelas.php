@@ -184,6 +184,51 @@ class ManajemenKelas extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $rombels = Rombel::withCount('siswa')
+            ->when($this->search, fn($q) => $q->where('nama_kelas', 'like', "%{$this->search}%"))
+            ->when($this->filterTingkat, fn($q) => $q->where('tingkat', $this->filterTingkat))
+            ->orderBy('tingkat')
+            ->orderBy('nama_kelas')
+            ->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '8%', 'align' => 'center'],
+            ['name' => 'Nama Rombongan Belajar (Kelas)', 'width' => '42%', 'align' => 'left'],
+            ['name' => 'Tingkat / Fase', 'width' => '25%', 'align' => 'center'],
+            ['name' => 'Jumlah Siswa Terdaftar', 'width' => '25%', 'align' => 'center'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        $totalSiswa = 0;
+        foreach ($rombels as $r) {
+            $totalSiswa += $r->siswa_count;
+            $rows[] = [
+                $no++,
+                '<strong>' . e($r->nama_kelas) . '</strong>',
+                'Tingkat ' . e($r->tingkat),
+                e($r->siswa_count) . ' Siswa',
+            ];
+        }
+
+        $filename = 'Laporan_Data_Kelas_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'LAPORAN DATA KELAS & ROMBONGAN BELAJAR',
+            'Sistem Informasi Agenda Guru SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            [
+                'Total Rombel' => count($rows) . ' Kelas',
+                'Total Siswa' => $totalSiswa . ' Siswa',
+            ]
+        );
+    }
+
     public function render()
     {
         $rombels = Rombel::withCount('siswa')

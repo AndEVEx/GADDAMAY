@@ -311,6 +311,51 @@ class ManajemenHariLibur extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $data = HariLibur::query()
+            ->when($this->search, function ($q) {
+                $q->where('nama_hari_libur', 'like', '%' . $this->search . '%')
+                  ->orWhere('keterangan', 'like', '%' . $this->search . '%');
+            })
+            ->when($this->filterTipe !== 'all', fn($q) => $q->where('tipe_libur', $this->filterTipe))
+            ->orderBy('tanggal_mulai', 'asc')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '5%', 'align' => 'center'],
+            ['name' => 'Nama Hari Libur / Agenda', 'width' => '32%', 'align' => 'left'],
+            ['name' => 'Tanggal Mulai', 'width' => '14%', 'align' => 'center'],
+            ['name' => 'Tanggal Selesai', 'width' => '14%', 'align' => 'center'],
+            ['name' => 'Durasi', 'width' => '10%', 'align' => 'center'],
+            ['name' => 'Kategori', 'width' => '25%', 'align' => 'left'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($data as $d) {
+            $rows[] = [
+                $no++,
+                '<strong>' . e($d->nama_hari_libur) . '</strong>',
+                $d->tanggal_mulai->format('d/m/Y'),
+                $d->tanggal_selesai->format('d/m/Y'),
+                $d->durasi_hari . ' Hari',
+                e($d->tipe_label) . ($d->keterangan ? ' (' . e($d->keterangan) . ')' : ''),
+            ];
+        }
+
+        $filename = 'Laporan_Hari_Libur_Sekolah_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'DAFTAR HARI LIBUR & AGENDA SEKOLAH',
+            'Tahun Pelajaran 2026/2027 — SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Hari Libur Terdaftar' => count($rows) . ' Agenda']
+        );
+    }
+
     public function render()
     {
         $todayStr = Carbon::now('Asia/Jakarta')->format('Y-m-d');

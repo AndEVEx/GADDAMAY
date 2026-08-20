@@ -16,6 +16,9 @@
                 <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
                     <i class="bi bi-file-earmark-excel me-2"></i>Export Excel (.xlsx)
                 </button>
+                <button wire:click="exportPdf" class="btn btn-outline-danger" style="min-height: 48px;">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF (Kop Surat)
+                </button>
             </div>
             <div class="mb-3">
                 <input type="file" wire:model="importFile" accept=".xlsx,.xls,.csv" class="form-control" style="min-height: 48px;">

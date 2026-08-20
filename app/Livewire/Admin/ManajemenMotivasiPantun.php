@@ -219,6 +219,44 @@ class ManajemenMotivasiPantun extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $items = MotivasiPantun::when($this->search, fn($q) => $q->where('isi', 'like', "%{$this->search}%"))
+            ->when($this->filterTipe, fn($q) => $q->where('tipe', $this->filterTipe))
+            ->when($this->filterKategori, fn($q) => $q->where('kategori', $this->filterKategori))
+            ->orderBy('created_at', 'desc')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '6%', 'align' => 'center'],
+            ['name' => 'Tipe Konten', 'width' => '16%', 'align' => 'center'],
+            ['name' => 'Kategori Waktu', 'width' => '20%', 'align' => 'center'],
+            ['name' => 'Isi Teks Motivasi / Pantun Prompter KBM', 'width' => '58%', 'align' => 'left'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($items as $item) {
+            $rows[] = [
+                $no++,
+                '<strong>' . ucfirst($item->tipe) . '</strong>',
+                ucwords(str_replace('_', ' ', $item->kategori ?? 'Semua')),
+                e($item->isi),
+            ];
+        }
+
+        $filename = 'Laporan_Motivasi_Pantun_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'BANK KONTEN MOTIVASI & PANTUN PROMPTER GURU',
+            'Sistem Informasi Agenda Guru SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Konten Aktif' => count($rows) . ' Butir']
+        );
+    }
+
     public function render()
     {
         $items = MotivasiPantun::when($this->search, fn($q) => $q->where('isi', 'like', "%{$this->search}%"))

@@ -216,6 +216,48 @@ class ManajemenUser extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $users = User::when($this->search, function($q) {
+                $q->where('name', 'like', "%{$this->search}%")
+                  ->orWhere('email', 'like', "%{$this->search}%");
+            })
+            ->when($this->filterRole, fn($q) => $q->where('role', $this->filterRole))
+            ->orderBy('name')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '6%', 'align' => 'center'],
+            ['name' => 'Nama Lengkap Pengguna', 'width' => '32%', 'align' => 'left'],
+            ['name' => 'Alamat Email', 'width' => '32%', 'align' => 'left'],
+            ['name' => 'Hak Akses / Role', 'width' => '16%', 'align' => 'center'],
+            ['name' => 'Terdaftar Sejak', 'width' => '14%', 'align' => 'center'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($users as $u) {
+            $rows[] = [
+                $no++,
+                '<strong>' . e($u->name) . '</strong>',
+                e($u->email),
+                ucfirst(str_replace('_', ' ', $u->role)),
+                $u->created_at ? $u->created_at->format('d/m/Y') : '-',
+            ];
+        }
+
+        $filename = 'Laporan_Data_User_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'LAPORAN DATA PENGGUNA & HAK AKSES SISTEM',
+            'Sistem Informasi Agenda Guru SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Akun Terdaftar' => count($rows) . ' User']
+        );
+    }
+
     public function render()
     {
         $users = User::when($this->search, function($q) {

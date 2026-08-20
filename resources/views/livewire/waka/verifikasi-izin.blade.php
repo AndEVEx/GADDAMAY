@@ -5,6 +5,16 @@
             <h4 class="fw-bold mb-1"><i class="bi bi-patch-check-fill text-success me-2"></i>Verifikasi & Izin Guru</h4>
             <p class="text-muted small mb-0">Verifikasi pengajuan izin mengajar guru dan atur penugasan guru pengganti</p>
         </div>
+        <div class="d-flex gap-2">
+            <button wire:click="exportExcel" class="btn btn-outline-success d-flex align-items-center gap-1" style="min-height: 40px; border-radius: 8px;" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="exportExcel"><i class="bi bi-file-earmark-excel"></i> Export Excel</span>
+                <span wire:loading wire:target="exportExcel"><span class="spinner-border spinner-border-sm"></span> Menyiapkan...</span>
+            </button>
+            <button wire:click="exportPdf" class="btn btn-outline-danger d-flex align-items-center gap-1" style="min-height: 40px; border-radius: 8px;" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="exportPdf"><i class="bi bi-file-earmark-pdf"></i> Export PDF (Kop Surat)</span>
+                <span wire:loading wire:target="exportPdf"><span class="spinner-border spinner-border-sm"></span> Menyiapkan...</span>
+            </button>
+        </div>
     </div>
 
     {{-- Stats Cards --}}

@@ -1,5 +1,5 @@
 <div>
-    <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div class="d-flex align-items-center gap-3">
             <a href="{{ route('guru.kktp-nilai') }}" wire:navigate class="btn btn-light rounded-circle shadow-sm" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                 <i class="bi bi-arrow-left"></i>
@@ -8,6 +8,16 @@
                 <h4 class="mb-0 fw-bold">Nilai KKTP &mdash; {{ $rombel->nama_kelas }}</h4>
                 <p class="text-muted mb-0 small">{{ $mapel->nama_mapel }}</p>
             </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button wire:click="exportExcel" class="btn btn-outline-success d-flex align-items-center gap-1" style="min-height: 40px; border-radius: 8px;" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="exportExcel"><i class="bi bi-file-earmark-excel"></i> Export Excel</span>
+                <span wire:loading wire:target="exportExcel"><span class="spinner-border spinner-border-sm"></span> Menyiapkan...</span>
+            </button>
+            <button wire:click="exportPdf" class="btn btn-outline-danger d-flex align-items-center gap-1" style="min-height: 40px; border-radius: 8px;" wire:loading.attr="disabled">
+                <span wire:loading.remove wire:target="exportPdf"><i class="bi bi-file-earmark-pdf"></i> Export PDF (Kop Surat)</span>
+                <span wire:loading wire:target="exportPdf"><span class="spinner-border spinner-border-sm"></span> Menyiapkan...</span>
+            </button>
         </div>
     </div>
 

@@ -206,6 +206,60 @@ class ManajemenJadwal extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $jadwals = JadwalPelajaran::with(['rombel', 'mataPelajaran', 'guru'])
+            ->when($this->filterHari, fn($q) => $q->where('hari', $this->filterHari))
+            ->when($this->filterRombel, fn($q) => $q->where('rombel_id', $this->filterRombel))
+            ->when($this->filterMapel, fn($q) => $q->where('mapel_id', $this->filterMapel))
+            ->when($this->search, function($q) {
+                $q->where('keterangan', 'like', "%{$this->search}%")
+                  ->orWhere('kegiatan_khusus', 'like', "%{$this->search}%")
+                  ->orWhereHas('mataPelajaran', fn($m) => $m->where('nama_mapel', 'like', "%{$this->search}%"))
+                  ->orWhereHas('rombel', fn($r) => $r->where('nama_kelas', 'like', "%{$this->search}%"));
+            })
+            ->orderBy('hari')
+            ->orderBy('rombel_id')
+            ->orderBy('jam_ke_mulai')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '5%', 'align' => 'center'],
+            ['name' => 'Hari', 'width' => '10%', 'align' => 'center'],
+            ['name' => 'Jam Ke-', 'width' => '12%', 'align' => 'center'],
+            ['name' => 'Kelas / Rombel', 'width' => '15%', 'align' => 'center'],
+            ['name' => 'Mata Pelajaran / Kegiatan', 'width' => '30%', 'align' => 'left'],
+            ['name' => 'Guru Pengajar', 'width' => '28%', 'align' => 'left'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($jadwals as $j) {
+            $mapelAtauKegiatan = $j->kegiatan_khusus ?: ($j->mataPelajaran->nama_mapel ?? 'Tanpa Mapel');
+            $guru = $j->guru->pluck('name')->join(', ') ?: 'Belum ditentukan';
+
+            $rows[] = [
+                $no++,
+                '<strong>' . e($j->hari_label) . '</strong>',
+                'Jam ' . e($j->jam_ke_mulai) . ($j->jam_ke_mulai != $j->jam_ke_selesai ? ' - ' . e($j->jam_ke_selesai) : ''),
+                e($j->rombel->nama_kelas ?? '-'),
+                e($mapelAtauKegiatan),
+                e($guru),
+            ];
+        }
+
+        $filename = 'Laporan_Jadwal_Pelajaran_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'JADWAL PELAJARAN & PEMBAGIAN JAM MENGAJAR',
+            'Tahun Pelajaran 2026/2027 — SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'landscape',
+            ['Total Sesi Terjadwal' => count($rows) . ' Jadwal']
+        );
+    }
+
     public function render()
     {
         $rombels = Rombel::orderBy('tingkat')->orderBy('nama_kelas')->get();

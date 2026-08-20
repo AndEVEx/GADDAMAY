@@ -112,6 +112,82 @@ class ProgressTp extends Component
         return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $mapels = MataPelajaran::with(['tujuanPembelajaran', 'jadwalPelajaran.rombel'])->orderBy('nama_mapel')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '5%', 'align' => 'center'],
+            ['name' => 'Mata Pelajaran', 'width' => '25%', 'align' => 'left'],
+            ['name' => 'Kelas / Rombel', 'width' => '15%', 'align' => 'center'],
+            ['name' => 'Jml TP', 'width' => '10%', 'align' => 'center'],
+            ['name' => 'Jml Siswa', 'width' => '10%', 'align' => 'center'],
+            ['name' => 'Tercapai', 'width' => '10%', 'align' => 'center'],
+            ['name' => 'Belum', 'width' => '10%', 'align' => 'center'],
+            ['name' => '% Ketercapaian', 'width' => '15%', 'align' => 'center'],
+        ];
+
+        $rows = [];
+        $no = 1;
+
+        foreach ($mapels as $mapel) {
+            $tpCount = $mapel->tujuanPembelajaran->count();
+            $rombels = $mapel->jadwalPelajaran->pluck('rombel')->filter()->unique('id');
+
+            if ($rombels->isEmpty()) {
+                $rows[] = [
+                    $no++,
+                    '<strong>' . e($mapel->nama_mapel) . '</strong>',
+                    '-',
+                    $tpCount,
+                    0,
+                    0,
+                    0,
+                    '0%',
+                ];
+                continue;
+            }
+
+            foreach ($rombels as $rombel) {
+                $siswaCount = Siswa::where('rombel_id', $rombel->id)->count();
+                $tercapai = NilaiKktp::where('rombel_id', $rombel->id)
+                    ->whereHas('tujuanPembelajaran', fn($q) => $q->where('mapel_id', $mapel->id))
+                    ->where('status', 'tercapai')
+                    ->count();
+                $belum = NilaiKktp::where('rombel_id', $rombel->id)
+                    ->whereHas('tujuanPembelajaran', fn($q) => $q->where('mapel_id', $mapel->id))
+                    ->where('status', 'belum_tercapai')
+                    ->count();
+
+                $totalEntries = $tercapai + $belum;
+                $pct = $totalEntries > 0 ? round(($tercapai / $totalEntries) * 100, 1) : 0;
+
+                $rows[] = [
+                    $no++,
+                    '<strong>' . e($mapel->nama_mapel) . '</strong>',
+                    e($rombel->nama_kelas),
+                    $tpCount,
+                    $siswaCount,
+                    $tercapai,
+                    $belum,
+                    '<strong>' . $pct . '%</strong>',
+                ];
+            }
+        }
+
+        $filename = 'Laporan_Analitik_Progress_KKTP_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'REKAPITULASI ANALITIK PROGRESS KETERCAPAIAN KKTP',
+            'Tahun Pelajaran 2026/2027 — SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'landscape',
+            ['Total Data Rekap' => count($rows) . ' Rombel/Mapel']
+        );
+    }
+
     public function render()
     {
         $mapelList = MataPelajaran::orderBy('nama_mapel')->get();

@@ -115,6 +115,45 @@ class ManajemenTP extends Component
         return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportPdf()
+    {
+        $tps = TujuanPembelajaran::with('mataPelajaran')
+            ->when($this->selectedMapel, fn($q) => $q->where('mapel_id', $this->selectedMapel))
+            ->orderBy('mapel_id')->orderBy('order_sequence')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '6%', 'align' => 'center'],
+            ['name' => 'Kode TP', 'width' => '14%', 'align' => 'center'],
+            ['name' => 'Mata Pelajaran', 'width' => '25%', 'align' => 'left'],
+            ['name' => 'Deskripsi Tujuan Pembelajaran (TP)', 'width' => '55%', 'align' => 'left'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($tps as $tp) {
+            $rows[] = [
+                $no++,
+                '<strong>' . e($tp->kode_tp) . '</strong>',
+                e($tp->mataPelajaran->nama_mapel ?? '-'),
+                e($tp->deskripsi_tp),
+            ];
+        }
+
+        $filename = 'Laporan_TP_MGMP_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'DAFTAR TUJUAN PEMBELAJARAN (MGMP)',
+            'Musyawarah Guru Mata Pelajaran — SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Butir TP' => count($rows) . ' TP'],
+            auth()->user()?->name,
+            'Ketua MGMP'
+        );
+    }
+
     public function render()
     {
         $mapelList = MataPelajaran::orderBy('nama_mapel')->get();

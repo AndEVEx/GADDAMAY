@@ -55,6 +55,9 @@
         <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
             <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
         </button>
+        <button wire:click="exportPdf" class="btn btn-outline-danger" style="min-height: 48px;">
+            <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF (Kop Surat)
+        </button>
     </div>
 
     {{-- Form Modal / Card --}}

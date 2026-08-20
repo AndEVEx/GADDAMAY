@@ -82,10 +82,14 @@
                         <option value="khusus">Kegiatan Khusus</option>
                     </select>
                 </div>
-                <div class="col-6 col-md-3 text-end">
-                    <button wire:click="exportExcel" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-1">
+                <div class="col-12 col-md-3 d-flex gap-1">
+                    <button wire:click="exportExcel" class="btn btn-outline-success flex-fill d-flex align-items-center justify-content-center gap-1" title="Export Excel">
                         <i class="bi bi-file-earmark-excel"></i>
-                        <span>Export (.xlsx)</span>
+                        <span>Excel</span>
+                    </button>
+                    <button wire:click="exportPdf" class="btn btn-outline-danger flex-fill d-flex align-items-center justify-content-center gap-1" title="Export PDF (Kop Surat)">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        <span>PDF</span>
                     </button>
                 </div>
             </div>

@@ -94,6 +94,139 @@ class NilaiKktpDetail extends Component
         $this->dispatch('show-toast', message: 'Nilai KKTP berhasil disimpan!', type: 'success');
     }
 
+    public function exportExcel()
+    {
+        $siswaList = Siswa::where('rombel_id', $this->rombel->id)->orderBy('nama')->get();
+        $tps = TujuanPembelajaran::where('mapel_id', $this->mapel->id)->orderBy('order_sequence')->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Nilai KKTP ' . substr($this->rombel->nama_kelas, 0, 20));
+
+        // Header info
+        $sheet->setCellValue('A1', 'DAFTAR NILAI KKTP — ' . $this->rombel->nama_kelas);
+        $sheet->setCellValue('A2', 'Mata Pelajaran: ' . $this->mapel->nama_mapel . ' | Guru: ' . auth()->user()->name);
+
+        $sheet->setCellValue('A4', 'No');
+        $sheet->setCellValue('B4', 'NIS');
+        $sheet->setCellValue('C4', 'Nama Siswa');
+
+        $col = 'D';
+        foreach ($tps as $tp) {
+            $sheet->setCellValue($col . '4', $tp->kode_tp);
+            $col++;
+        }
+        $sheet->setCellValue($col . '4', 'Tuntas');
+        $col++;
+        $sheet->setCellValue($col . '4', '%');
+
+        $lastCol = $col;
+        $sheet->getStyle('A4:' . $lastCol . '4')->getFont()->setBold(true);
+        $sheet->getStyle('A4:' . $lastCol . '4')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('1A56DB');
+        $sheet->getStyle('A4:' . $lastCol . '4')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $row = 5;
+        $no = 1;
+        $tpCount = $tps->count();
+
+        foreach ($siswaList as $siswa) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $siswa->nis ?? '-');
+            $sheet->setCellValue('C' . $row, $siswa->nama);
+
+            $col = 'D';
+            $tercapaiCount = 0;
+            foreach ($tps as $tp) {
+                $status = $this->nilaiData[$siswa->id][$tp->id] ?? 'tercapai';
+                $sheet->setCellValue($col . $row, $status === 'tercapai' ? 'V' : 'X');
+                if ($status === 'tercapai') $tercapaiCount++;
+                $col++;
+            }
+
+            $sheet->setCellValue($col . $row, $tercapaiCount . '/' . $tpCount);
+            $col++;
+            $pct = $tpCount > 0 ? round(($tercapaiCount / $tpCount) * 100) : 0;
+            $sheet->setCellValue($col . $row, $pct . '%');
+            $row++;
+        }
+
+        foreach (range('A', $lastCol) as $c) {
+            $sheet->getColumnDimension($c)->setAutoSize(true);
+        }
+
+        $filename = 'Nilai_KKTP_' . str_replace(' ', '_', $this->rombel->nama_kelas) . '_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportPdf()
+    {
+        $siswaList = Siswa::where('rombel_id', $this->rombel->id)->orderBy('nama')->get();
+        $tps = TujuanPembelajaran::where('mapel_id', $this->mapel->id)->orderBy('order_sequence')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '5%', 'align' => 'center'],
+            ['name' => 'NIS', 'width' => '12%', 'align' => 'center'],
+            ['name' => 'Nama Lengkap Siswa', 'width' => '30%', 'align' => 'left'],
+        ];
+
+        foreach ($tps as $tp) {
+            $headers[] = ['name' => $tp->kode_tp, 'width' => '7%', 'align' => 'center'];
+        }
+
+        $headers[] = ['name' => 'Tuntas', 'width' => '10%', 'align' => 'center'];
+        $headers[] = ['name' => '%', 'width' => '8%', 'align' => 'center'];
+
+        $rows = [];
+        $no = 1;
+        $tpCount = $tps->count();
+
+        foreach ($siswaList as $siswa) {
+            $row = [
+                $no++,
+                e($siswa->nis ?? '-'),
+                '<strong>' . e($siswa->nama) . '</strong>',
+            ];
+
+            $tercapaiCount = 0;
+            foreach ($tps as $tp) {
+                $status = $this->nilaiData[$siswa->id][$tp->id] ?? 'tercapai';
+                if ($status === 'tercapai') {
+                    $row[] = '<span style="color: green; font-weight: bold;">&#10004;</span>';
+                    $tercapaiCount++;
+                } else {
+                    $row[] = '<span style="color: red; font-weight: bold;">&#10008;</span>';
+                }
+            }
+
+            $pct = $tpCount > 0 ? round(($tercapaiCount / $tpCount) * 100) : 0;
+            $row[] = $tercapaiCount . ' / ' . $tpCount;
+            $row[] = '<strong>' . $pct . '%</strong>';
+
+            $rows[] = $row;
+        }
+
+        $filename = 'Laporan_Nilai_KKTP_' . str_replace(' ', '_', $this->rombel->nama_kelas) . '_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'DAFTAR NILAI KETERCAPAIAN KKTP SISWA',
+            'Kelas: ' . $this->rombel->nama_kelas . ' | Mapel: ' . $this->mapel->nama_mapel,
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            count($tps) > 5 ? 'landscape' : 'portrait',
+            [
+                'Kelas / Rombel' => $this->rombel->nama_kelas,
+                'Mata Pelajaran' => $this->mapel->nama_mapel,
+                'Guru Pengajar' => auth()->user()->name,
+            ],
+            auth()->user()->name,
+            'Guru Mata Pelajaran'
+        );
+    }
+
     public function render()
     {
         $siswaList = Siswa::where('rombel_id', $this->rombel->id)->orderBy('nama')->get();
