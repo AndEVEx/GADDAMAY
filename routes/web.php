@@ -35,6 +35,8 @@ use App\Livewire\Admin\KoreksiAgenda;
 use App\Livewire\Admin\OverrideAgenda;
 use App\Livewire\Admin\ImportKktp;
 use App\Livewire\Monitoring\DashboardMonitoring;
+use App\Livewire\Monitoring\MonitoringHarian;
+use App\Livewire\Monitoring\MonitoringMingguan;
 use App\Livewire\Monitoring\ProgressTp;
 use App\Livewire\Guru\FotoGuru;
 use App\Livewire\Guru\DetailAgenda;
@@ -182,7 +184,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 // ============================================================
 Route::middleware(['auth', 'role:admin,kepsek,waka'])->prefix('monitoring')->group(function () {
     Route::get('/dashboard', DashboardMonitoring::class)->name('monitoring.dashboard');
+    Route::get('/harian', MonitoringHarian::class)->name('monitoring.harian');
+    Route::get('/mingguan', MonitoringMingguan::class)->name('monitoring.mingguan');
     Route::get('/progress-tp', ProgressTp::class)->name('monitoring.progress');
+    Route::get('/izin-guru', VerifikasiIzin::class)->name('monitoring.izin-guru');
 });
 
 // ============================================================

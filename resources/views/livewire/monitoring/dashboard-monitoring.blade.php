@@ -82,6 +82,22 @@
                 <span class="fw-extrabold" style="letter-spacing: 0.5px;">LIVE (Kembali ke Jam Sekarang)</span>
             </button>
         </div>
+
+        {{-- Quick Sub-Navigation Pills --}}
+        <div class="mt-3 pt-2 border-top border-white border-opacity-25 d-flex gap-2 flex-wrap">
+            <a href="{{ route('monitoring.dashboard') }}" class="btn btn-sm btn-light text-primary fw-bold px-3 py-1" style="border-radius: 8px;">
+                <i class="bi bi-speedometer2 me-1"></i>Realtime Live
+            </a>
+            <a href="{{ route('monitoring.harian') }}" class="btn btn-sm btn-outline-light fw-semibold px-3 py-1" style="border-radius: 8px;" wire:navigate>
+                <i class="bi bi-calendar2-day me-1"></i>Monitoring Harian (Tabel)
+            </a>
+            <a href="{{ route('monitoring.mingguan') }}" class="btn btn-sm btn-outline-light fw-semibold px-3 py-1" style="border-radius: 8px;" wire:navigate>
+                <i class="bi bi-calendar-range me-1"></i>Monitoring Mingguan
+            </a>
+            <a href="{{ route('monitoring.izin-guru') }}" class="btn btn-sm btn-outline-light fw-semibold px-3 py-1" style="border-radius: 8px;" wire:navigate>
+                <i class="bi bi-patch-check me-1"></i>Tabel Manajemen Izin
+            </a>
+        </div>
     </div>
 
     {{-- Holiday Alert Banner for Monitoring --}}

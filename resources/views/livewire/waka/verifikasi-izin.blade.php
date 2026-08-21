@@ -17,7 +17,23 @@
         </div>
     </div>
 
-    {{-- Stats Cards --}}
+    {{-- Sub-Navigation Tabs for Kepsek / Waka / Admin --}}
+    @if(in_array(auth()->user()->role, ['admin', 'kepsek', 'waka']))
+    <div class="d-flex gap-2 mb-3 flex-wrap">
+        <a href="{{ route('monitoring.dashboard') }}" class="btn btn-sm btn-light text-muted fw-semibold px-3 py-1 shadow-sm" style="border-radius: 8px;" wire:navigate>
+            <i class="bi bi-speedometer2 me-1"></i>Realtime Live
+        </a>
+        <a href="{{ route('monitoring.harian') }}" class="btn btn-sm btn-light text-muted fw-semibold px-3 py-1 shadow-sm" style="border-radius: 8px;" wire:navigate>
+            <i class="bi bi-calendar2-day me-1"></i>Monitoring Harian (Tabel)
+        </a>
+        <a href="{{ route('monitoring.mingguan') }}" class="btn btn-sm btn-light text-muted fw-semibold px-3 py-1 shadow-sm" style="border-radius: 8px;" wire:navigate>
+            <i class="bi bi-calendar-range me-1"></i>Monitoring Mingguan
+        </a>
+        <a href="{{ route('monitoring.izin-guru') }}" class="btn btn-sm btn-primary fw-bold px-3 py-1 shadow-sm" style="border-radius: 8px;" wire:navigate>
+            <i class="bi bi-patch-check me-1"></i>Tabel Manajemen Izin
+        </a>
+    </div>
+    @endif
     <div class="row g-2 mb-3">
         <div class="col-4">
             <div class="card border-0 shadow-sm text-center p-2 {{ $filterStatus === 'menunggu' ? 'border-bottom border-warning border-3 bg-warning bg-opacity-10' : 'bg-light' }}"

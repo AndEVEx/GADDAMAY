@@ -13,7 +13,7 @@ use App\Models\AgendaHarian;
 use Carbon\Carbon;
 
 #[Layout('components.layouts.app')]
-#[Title('Verifikasi Izin Guru')]
+#[Title('Manajemen & Verifikasi Izin Guru')]
 class VerifikasiIzin extends Component
 {
     use WithPagination;

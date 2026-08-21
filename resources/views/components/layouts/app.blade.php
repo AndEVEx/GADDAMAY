@@ -132,6 +132,12 @@
                     <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-graph-up-arrow me-2"></i>Monitoring Realtime
                     </a>
+                    <a href="{{ route('monitoring.harian') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.harian') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar2-day me-2 text-primary"></i>Monitoring Harian
+                    </a>
+                    <a href="{{ route('monitoring.mingguan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.mingguan') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-range me-2 text-info"></i>Monitoring Mingguan
+                    </a>
                     <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-bar-chart-line me-2"></i>Progress KKTP (Analytic)
                     </a>
@@ -174,16 +180,20 @@
                     @endif
                 @elseif(in_array($role, ['kepsek', 'waka']))
                     <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-graph-up-arrow me-2"></i>Monitoring Agenda
+                        <i class="bi bi-speedometer2 me-2"></i>Monitoring Realtime
+                    </a>
+                    <a href="{{ route('monitoring.harian') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.harian') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar2-day me-2 text-primary"></i>Monitoring Harian
+                    </a>
+                    <a href="{{ route('monitoring.mingguan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.mingguan') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-range me-2 text-info"></i>Monitoring Mingguan
                     </a>
                     <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-bar-chart-line me-2"></i>Progress KKTP (Analytic)
                     </a>
-                    @if($role === 'waka')
-                    <a href="{{ route('waka.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('waka.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-patch-check-fill me-2 text-success"></i>Verifikasi Izin Guru
+                    <a href="{{ route('monitoring.izin-guru') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.izin-guru') || request()->routeIs('waka.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-patch-check-fill me-2 text-warning"></i>Tabel Manajemen Izin
                     </a>
-                    @endif
                 @elseif($role === 'ketua_kelas')
                     <a href="{{ route('ketua.verifikasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ketua.verifikasi') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-qr-code-scan me-2"></i>Verifikasi Token
