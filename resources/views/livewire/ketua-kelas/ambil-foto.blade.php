@@ -188,8 +188,12 @@ function pwaCameraComponent() {
             this.processing = true;
             try {
                 const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-                await new Promise((resolve) => img.onload = resolve);
+                const objectUrl = URL.createObjectURL(file);
+                img.src = objectUrl;
+                await new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = () => reject(new Error("Gagal membaca file foto perangkat."));
+                });
 
                 const metadata = {
                     namaSekolah: 'SMKN 2 INDRAMAYU',
@@ -201,11 +205,11 @@ function pwaCameraComponent() {
 
                 const base64Image = await window.WatermarkCamera.processAndWatermark(img, metadata);
                 this.previewBase64 = base64Image;
-                URL.revokeObjectURL(img.src);
-                @this.simpanFotoBase64(base64Image);
+                URL.revokeObjectURL(objectUrl);
+                event.target.value = '';
+                await @this.simpanFotoBase64(base64Image);
             } catch (err) {
-                alert('Gagal memproses foto: ' + err.message);
-            } finally {
+                alert('Gagal memproses foto kamera HP: ' + err.message);
                 this.processing = false;
             }
         },
@@ -226,10 +230,9 @@ function pwaCameraComponent() {
                 const base64Image = await window.WatermarkCamera.processAndWatermark(this.$refs.video, metadata);
                 this.previewBase64 = base64Image;
                 this.stopCamera();
-                @this.simpanFotoBase64(base64Image);
+                await @this.simpanFotoBase64(base64Image);
             } catch (err) {
                 alert('Gagal memproses watermark foto: ' + err.message);
-            } finally {
                 this.processing = false;
             }
         }

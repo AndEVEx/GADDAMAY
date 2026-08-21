@@ -7,11 +7,12 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\WithFileUploads;
 use App\Models\AgendaHarian;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 #[Layout('components.layouts.app')]
-#[Title('Ambil Foto')]
+#[Title('Ambil Foto Bukti Agenda')]
 class AmbilFoto extends Component
 {
     use WithFileUploads;
@@ -47,7 +48,7 @@ class AmbilFoto extends Component
             $this->agenda->update([
                 'foto_bukti_path' => $filename,
                 'status' => 'berjalan',
-                'waktu_mulai' => now(),
+                'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
             ]);
 
             $this->uploaded = true;
@@ -60,7 +61,7 @@ class AmbilFoto extends Component
     public function simpanFoto()
     {
         $this->validate([
-            'foto' => 'required|image|max:5120',
+            'foto' => 'required|image|max:10240',
         ]);
 
         $path = $this->foto->store('foto-bukti', 'public');
@@ -68,7 +69,7 @@ class AmbilFoto extends Component
         $this->agenda->update([
             'foto_bukti_path' => $path,
             'status' => 'berjalan',
-            'waktu_mulai' => now(),
+            'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
         ]);
 
         $this->uploaded = true;

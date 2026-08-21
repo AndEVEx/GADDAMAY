@@ -178,7 +178,7 @@ window.WatermarkCamera = {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
-            const maxWidth = 1200;
+            const maxDimension = 960;
             let srcWidth = imageSource.videoWidth || imageSource.naturalWidth || imageSource.width;
             let srcHeight = imageSource.videoHeight || imageSource.naturalHeight || imageSource.height;
 
@@ -186,9 +186,9 @@ window.WatermarkCamera = {
                 throw new Error("Sumber gambar tidak valid atau belum siap.");
             }
 
-            const scaleFactor = Math.min(1, maxWidth / srcWidth);
-            canvas.width = srcWidth * scaleFactor;
-            canvas.height = srcHeight * scaleFactor;
+            const scaleFactor = Math.min(1, Math.min(maxDimension / srcWidth, maxDimension / srcHeight));
+            canvas.width = Math.round(srcWidth * scaleFactor);
+            canvas.height = Math.round(srcHeight * scaleFactor);
 
             const w = canvas.width;
             const h = canvas.height;
@@ -227,15 +227,15 @@ window.WatermarkCamera = {
                 };
                 logoImg.onload = onDone;
                 logoImg.onerror = () => {
-                    if (!logoImg.src.includes('/pwa-icons/')) {
-                        logoImg.src = '/pwa-icons/logo-sekolah.png';
+                    if (!logoImg.src.includes('/icons/')) {
+                        logoImg.src = '/icons/logo-sekolah.png';
                     } else {
                         onDone();
                     }
                 };
-                logoImg.src = '/pwa-icons/logosekolah.png';
+                logoImg.src = '/icons/logo-sekolah.png';
                 if (logoImg.complete && logoImg.naturalWidth > 0) onDone();
-                setTimeout(onDone, 1500);
+                setTimeout(onDone, 800);
             });
 
             const logoSize = Math.max(54, bannerHeight * 0.55);
@@ -310,8 +310,8 @@ window.WatermarkCamera = {
             ctx.fillStyle = '#fde047';
             ctx.fillText(`"${tagline}"`, textX, currentY);
 
-            // Compress to Base64 JPEG
-            return canvas.toDataURL('image/jpeg', 0.85);
+            // Compress to Base64 JPEG with optimal 0.72 quality (~90KB - 160KB, sharp & ultralight)
+            return canvas.toDataURL('image/jpeg', 0.72);
         } catch (error) {
             throw error;
         }
