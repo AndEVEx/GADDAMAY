@@ -2,13 +2,14 @@
     elapsed: 0,
     interval: null,
     running: true,
-    startTime: Date.now(),
+    startTime: {{ $agenda->waktu_mulai ? $agenda->waktu_mulai->timestamp * 1000 : 'Date.now()' }},
     init() {
-        @if($agenda->waktu_mulai)
-        this.startTime = new Date('{{ $agenda->waktu_mulai->toIso8601String() }}').getTime();
-        this.elapsed = Date.now() - this.startTime;
-        @endif
-        this.interval = setInterval(() => { if(this.running) this.elapsed = Date.now() - this.startTime; }, 100);
+        this.elapsed = Math.max(0, Date.now() - this.startTime);
+        this.interval = setInterval(() => { 
+            if (this.running) {
+                this.elapsed = Math.max(0, Date.now() - this.startTime); 
+            }
+        }, 200);
     },
     get formatted() {
         const s = Math.floor(this.elapsed / 1000);
@@ -67,6 +68,22 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    {{-- Akses KKTP Siswa --}}
+    <div class="card mb-3">
+        <a href="{{ route('guru.kktp', $agenda->id) }}" class="card-body d-flex align-items-center justify-content-between text-decoration-none" wire:navigate>
+            <div class="d-flex align-items-center gap-2">
+                <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                    <i class="bi bi-list-check fs-5"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark small">Input KKTP Siswa</div>
+                    <div class="text-muted" style="font-size: 0.7rem;">Tentukan ketercapaian TP siswa saat kelas berlangsung</div>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right text-muted"></i>
+        </a>
     </div>
 
     {{-- End Class & Cancel Buttons --}}

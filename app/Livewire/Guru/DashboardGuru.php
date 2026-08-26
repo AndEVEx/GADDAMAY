@@ -29,6 +29,9 @@ class DashboardGuru extends Component
     {
         $user = auth()->user();
 
+        // Auto-close any expired agendas for today
+        AgendaHarian::autoCloseExpiredAgendas(null, $this->tanggal);
+
         // 1. Fetch teacher's teaching schedules for today
         $jadwals = JadwalPelajaran::where('hari', $this->hariIni)
             ->whereHas('jadwalGuru', fn($q) => $q->where('guru_id', $user->id))
@@ -192,13 +195,15 @@ class DashboardGuru extends Component
                 $displayStartStr = $mulaiCarbon->format('H:i');
 
                 $startTimeStr = $mulaiCarbon->format('H:i');
-                $lateLimitStr = $mulaiCarbon->copy()->addMinutes(30)->format('H:i');
+                // Tolerance: 60 minutes on Wednesday (Rabu, 3) & Friday (Jumat, 5) due to morning literacy / special activities; 30 minutes on other days
+                $toleranceMinutes = in_array($this->hariIni, [3, 5]) ? 60 : 30;
+                $lateLimitStr = $mulaiCarbon->copy()->addMinutes($toleranceMinutes)->format('H:i');
 
                 if ($timeNow >= $startTimeStr) {
                     $timeArrived = true;
                 }
 
-                // Task 1: If current time > start_time + 30 min and no agenda started yet
+                // If current time > start_time + tolerance minutes and no agenda started yet
                 if ($timeNow > $lateLimitStr && !$agenda && !$user->canOverride()) {
                     $isLate = true;
                 }

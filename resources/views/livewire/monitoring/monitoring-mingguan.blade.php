@@ -23,8 +23,8 @@
         </div>
     </div>
 
-    {{-- Sub-Navigation Tabs --}}
-    <div class="d-flex gap-2 mb-3 flex-wrap">
+    {{-- Sub-Navigation Tabs (Hidden on mobile) --}}
+    <div class="d-none d-md-flex gap-2 mb-3 flex-wrap">
         <a href="{{ route('monitoring.dashboard') }}" class="btn btn-sm btn-light text-muted fw-semibold px-3 py-1 shadow-sm" style="border-radius: 8px;" wire:navigate>
             <i class="bi bi-speedometer2 me-1"></i>Realtime Live
         </a>

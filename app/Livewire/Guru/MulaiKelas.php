@@ -20,11 +20,15 @@ class MulaiKelas extends Component
     public function mount(JadwalPelajaran $jadwal)
     {
         $this->jadwal = $jadwal->load(['rombel', 'mataPelajaran', 'jadwalGuru.guru']);
+        $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+
+        // Auto-close past-due expired agendas
+        AgendaHarian::autoCloseExpiredAgendas($jadwal->rombel_id, $today);
 
         // Check if agenda already exists for today
         $this->agenda = AgendaHarian::where('jadwal_pelajaran_id', $jadwal->id)
             ->where('guru_id', auth()->id())
-            ->where('tanggal', Carbon::today('Asia/Jakarta')->format('Y-m-d'))
+            ->where('tanggal', $today)
             ->first();
 
         if ($this->agenda) {
@@ -35,6 +39,9 @@ class MulaiKelas extends Component
     public function generateToken()
     {
         $tanggal = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+
+        // Auto-close past-due expired agendas for this class first
+        AgendaHarian::autoCloseExpiredAgendas($this->jadwal->rombel_id, $tanggal);
 
         $this->agenda = AgendaHarian::updateOrCreate(
             [

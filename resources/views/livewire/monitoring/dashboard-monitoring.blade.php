@@ -83,8 +83,8 @@
             </button>
         </div>
 
-        {{-- Quick Sub-Navigation Pills --}}
-        <div class="mt-3 pt-2 border-top border-white border-opacity-25 d-flex gap-2 flex-wrap">
+        {{-- Quick Sub-Navigation Pills (Hidden on mobile) --}}
+        <div class="mt-3 pt-2 border-top border-white border-opacity-25 d-none d-md-flex gap-2 flex-wrap">
             <a href="{{ route('monitoring.dashboard') }}" class="btn btn-sm btn-light text-primary fw-bold px-3 py-1" style="border-radius: 8px;">
                 <i class="bi bi-speedometer2 me-1"></i>Realtime Live
             </a>

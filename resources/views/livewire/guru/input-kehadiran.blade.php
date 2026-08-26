@@ -59,11 +59,11 @@
         <div class="card-body p-0">
             @forelse($siswaList as $index => $siswa)
             @php $currentStatus = $kehadiran[$siswa->id] ?? 'hadir'; @endphp
-            <div class="d-flex align-items-center justify-content-between gap-2 p-3 border-bottom" style="min-height: 60px;">
-                <div class="flex-fill text-truncate">
-                    <div class="fw-semibold text-dark small text-truncate">{{ $index + 1 }}. {{ $siswa->nama }}</div>
+            <div class="d-flex align-items-center gap-2 p-3 border-bottom" style="min-height: 60px;">
+                <div class="flex-fill" style="overflow-x: auto; min-width: 0;">
+                    <div class="fw-semibold text-dark small" style="white-space: nowrap;">{{ $index + 1 }}. {{ $siswa->nama }}</div>
                     @if($siswa->nis)
-                    <div class="text-muted" style="font-size: 0.7rem;">NIS: {{ $siswa->nis }}</div>
+                    <div class="text-muted" style="font-size: 0.7rem; white-space: nowrap;">NIS: {{ $siswa->nis }}</div>
                     @endif
                 </div>
 

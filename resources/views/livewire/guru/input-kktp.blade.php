@@ -12,7 +12,7 @@
                 <table class="table table-bordered table-striped mb-0 text-center align-middle" style="white-space: nowrap;">
                     <thead class="table-light">
                         <tr>
-                            <th class="text-start" style="min-width: 150px;">Nama Siswa</th>
+                            <th class="text-start" style="min-width: 150px; position: sticky; left: 0; z-index: 2; background-color: #f8f9fa;">Nama Siswa</th>
                             @foreach($tps as $tp)
                                 <th style="min-width: 120px;" title="{{ $tp->deskripsi_tp ?? '' }}">{{ $tp->kode_tp }}</th>
                             @endforeach
@@ -21,7 +21,7 @@
                     <tbody>
                         @forelse($siswaHadir as $siswa)
                             <tr>
-                                <td class="text-start">{{ $siswa->nama }}</td>
+                                <td class="text-start" style="position: sticky; left: 0; z-index: 1; background-color: #fff;">{{ $siswa->nama }}</td>
                                 @foreach($tps as $tp)
                                     <td>
                                         @php

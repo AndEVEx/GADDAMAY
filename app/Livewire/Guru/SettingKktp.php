@@ -204,9 +204,29 @@ class SettingKktp extends Component
         $mapels = $this->getMapels();
         
         // If selectedMapelId is set, fetch TPs
-        $tps = $this->selectedMapelId
-            ? TujuanPembelajaran::where('mapel_id', $this->selectedMapelId)->orderBy('order_sequence')->get()
-            : collect();
+        $tps = collect();
+        if ($this->selectedMapelId) {
+            $userId = auth()->id();
+            $query = TujuanPembelajaran::where('mapel_id', $this->selectedMapelId);
+
+            $hasTeacherTps = TujuanPembelajaran::where('mapel_id', $this->selectedMapelId)
+                ->where('ketua_mgmp_id', $userId)
+                ->exists();
+
+            if ($hasTeacherTps) {
+                $query->where(function ($q) use ($userId) {
+                    $q->where('ketua_mgmp_id', $userId)
+                      ->orWhereNull('ketua_mgmp_id');
+                });
+            }
+
+            $tps = $query->orderBy('order_sequence')->get();
+
+            // Deduplicate: If there are exact duplicate TPs, display only 1
+            $tps = $tps->unique(function ($tp) {
+                return strtolower(trim(preg_replace('/\s+/', ' ', $tp->deskripsi_tp)));
+            })->values();
+        }
 
         $currentMapel = $this->selectedMapelId ? MataPelajaran::find($this->selectedMapelId) : null;
 

@@ -103,6 +103,22 @@
         </div>
     </div>
 
+    {{-- Link ke KKTP --}}
+    <div class="card mb-3 animate-fade-in-up border shadow-sm" style="border-radius: 12px;">
+        <a href="{{ route('guru.kktp', $agenda->id) }}" class="card-body d-flex align-items-center justify-content-between text-decoration-none" wire:navigate>
+            <div class="d-flex align-items-center gap-2">
+                <div class="p-2 rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="bi bi-list-check fs-4"></i>
+                </div>
+                <div>
+                    <div class="fw-bold text-dark">KKTP Siswa</div>
+                    <div class="text-muted small">Lihat / Edit Kriteria Ketercapaian TP</div>
+                </div>
+            </div>
+            <i class="bi bi-chevron-right text-muted fs-5"></i>
+        </a>
+    </div>
+
     {{-- Refleksi & Prompter Card --}}
     <div class="card mb-3 animate-fade-in-up border shadow-sm" style="border-radius: 12px;">
         <div class="card-header bg-light fw-bold text-dark">

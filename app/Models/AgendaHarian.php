@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class AgendaHarian extends Model
 {
@@ -126,5 +127,59 @@ class AgendaHarian extends Model
     public function isTokenTerverifikasi(): bool
     {
         return $this->status === 'token_terverifikasi';
+    }
+
+    /**
+     * Auto-close agendas whose scheduled period has ended.
+     */
+    public static function autoCloseExpiredAgendas(?string $rombelId = null, ?string $tanggal = null): int
+    {
+        $tanggal = $tanggal ?? Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $timeNow = Carbon::now('Asia/Jakarta')->format('H:i');
+
+        $officialPeriods = [
+            0  => ['mulai' => '06:25', 'selesai' => '06:45'],
+            1  => ['mulai' => '06:45', 'selesai' => '07:30'],
+            2  => ['mulai' => '07:30', 'selesai' => '08:15'],
+            3  => ['mulai' => '08:15', 'selesai' => '09:00'],
+            4  => ['mulai' => '09:00', 'selesai' => '09:45'],
+            5  => ['mulai' => '09:45', 'selesai' => '10:00'],
+            6  => ['mulai' => '10:00', 'selesai' => '10:45'],
+            7  => ['mulai' => '10:45', 'selesai' => '11:30'],
+            8  => ['mulai' => '11:30', 'selesai' => '12:15'],
+            9  => ['mulai' => '12:15', 'selesai' => '12:45'],
+            10 => ['mulai' => '12:45', 'selesai' => '13:30'],
+            11 => ['mulai' => '13:30', 'selesai' => '14:15'],
+            12 => ['mulai' => '14:15', 'selesai' => '15:00'],
+        ];
+
+        $query = self::whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan'])
+            ->where('tanggal', $tanggal)
+            ->with('jadwalPelajaran');
+
+        if ($rombelId) {
+            $query->whereHas('jadwalPelajaran', fn($q) => $q->where('rombel_id', $rombelId));
+        }
+
+        $activeAgendas = $query->get();
+        $closedCount = 0;
+
+        foreach ($activeAgendas as $agenda) {
+            $jadwal = $agenda->jadwalPelajaran;
+            if (!$jadwal) continue;
+
+            $endJamKey = (int) $jadwal->jam_ke_selesai;
+            $endTimeStr = $officialPeriods[$endJamKey]['selesai'] ?? '15:00';
+
+            if ($timeNow >= $endTimeStr) {
+                $agenda->update([
+                    'status' => 'selesai',
+                    'waktu_selesai' => $agenda->waktu_selesai ?? Carbon::now('Asia/Jakarta'),
+                ]);
+                $closedCount++;
+            }
+        }
+
+        return $closedCount;
     }
 }

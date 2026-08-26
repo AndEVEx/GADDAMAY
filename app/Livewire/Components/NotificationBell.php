@@ -4,15 +4,18 @@ namespace App\Livewire\Components;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class NotificationBell extends Component
 {
     public int $unreadCount = 0;
     public bool $isNavbar = false;
+    public ?string $lastCheckedAt = null;
 
     public function mount(bool $isNavbar = false)
     {
         $this->isNavbar = $isNavbar;
+        $this->lastCheckedAt = now()->toIso8601String();
         $this->loadCount();
     }
 
@@ -20,6 +23,23 @@ class NotificationBell extends Component
     {
         if (Auth::check()) {
             $this->unreadCount = Auth::user()->unreadNotifications()->count();
+
+            // Check for new notifications since last check (for banner)
+            if ($this->lastCheckedAt) {
+                $newNotifs = Auth::user()->unreadNotifications()
+                    ->where('created_at', '>', Carbon::parse($this->lastCheckedAt))
+                    ->latest()
+                    ->first();
+
+                if ($newNotifs) {
+                    $data = $newNotifs->data ?? [];
+                    $this->dispatch('show-toast',
+                        message: ($data['title'] ?? 'Notifikasi Baru') . ': ' . ($data['message'] ?? ''),
+                        type: 'info'
+                    );
+                }
+            }
+            $this->lastCheckedAt = now()->toIso8601String();
         }
     }
 

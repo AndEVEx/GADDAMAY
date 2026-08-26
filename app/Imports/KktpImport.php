@@ -206,17 +206,35 @@ class KktpImport
             $deskripsi = $data['deskripsi_tp'] ?? $data['tp'];
             $order = (int) ($data['order_sequence'] ?? ($index + 1));
 
-            TujuanPembelajaran::updateOrCreate(
-                [
+            // Check if exact matching TP already exists for this mapel and guru (or any guru for this mapel)
+            $existing = TujuanPembelajaran::where('mapel_id', $mapelId)
+                ->where(function ($q) use ($kodeTP, $deskripsi) {
+                    $q->where('kode_tp', $kodeTP)
+                      ->orWhere('deskripsi_tp', $deskripsi);
+                })
+                ->where(function ($q) use ($guruId) {
+                    if ($guruId) {
+                        $q->where('ketua_mgmp_id', $guruId)->orWhereNull('ketua_mgmp_id');
+                    }
+                })
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'kode_tp' => $kodeTP,
+                    'deskripsi_tp' => $deskripsi,
+                    'order_sequence' => $order,
+                    'ketua_mgmp_id' => $guruId ?: $existing->ketua_mgmp_id,
+                ]);
+            } else {
+                TujuanPembelajaran::create([
                     'mapel_id' => $mapelId,
                     'kode_tp' => $kodeTP,
-                ],
-                [
                     'deskripsi_tp' => $deskripsi,
                     'order_sequence' => $order,
                     'ketua_mgmp_id' => $guruId,
-                ]
-            );
+                ]);
+            }
             $count++;
         }
         return $count;

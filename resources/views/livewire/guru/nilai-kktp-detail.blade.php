@@ -27,8 +27,8 @@
                 <table class="table table-bordered table-striped mb-0" style="white-space: nowrap; min-width: 800px;">
                     <thead class="table-light align-middle">
                         <tr>
-                            <th class="text-center" style="width: 50px;">No</th>
-                            <th>Nama Siswa</th>
+                            <th class="text-center" style="width: 50px; position: sticky; left: 0; z-index: 3; background-color: #f8f9fa;">No</th>
+                            <th style="position: sticky; left: 50px; z-index: 3; background-color: #f8f9fa;">Nama Siswa</th>
                             @foreach($tps as $tp)
                                 <th class="text-center" style="min-width: 140px;">
                                     <div title="{{ $tp->deskripsi_tp }}" style="cursor: help;" class="mb-2">
@@ -46,8 +46,8 @@
                     <tbody class="align-middle">
                         @forelse($siswaList as $index => $siswa)
                             <tr>
-                                <td class="text-center">{{ $loop->iteration }}</td>
-                                <td class="fw-bold">{{ $siswa->nama }}</td>
+                                <td class="text-center" style="position: sticky; left: 0; z-index: 1; background-color: #fff;">{{ $loop->iteration }}</td>
+                                <td class="fw-bold" style="position: sticky; left: 50px; z-index: 1; background-color: #fff;">{{ $siswa->nama }}</td>
                                 @foreach($tps as $tp)
                                     <td class="text-center p-2">
                                         @php

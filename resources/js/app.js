@@ -216,6 +216,7 @@ window.WatermarkCamera = {
             // 3. Load School Logo Image with Async Promise Wait
             const logoImg = new Image();
             logoImg.crossOrigin = 'anonymous';
+            logoImg.fetchPriority = 'high';
 
             await new Promise((resolveLogo) => {
                 let resolved = false;
@@ -235,7 +236,7 @@ window.WatermarkCamera = {
                 };
                 logoImg.src = '/icons/logo-sekolah.png';
                 if (logoImg.complete && logoImg.naturalWidth > 0) onDone();
-                setTimeout(onDone, 800);
+                setTimeout(onDone, 2000);
             });
 
             const logoSize = Math.max(54, bannerHeight * 0.55);

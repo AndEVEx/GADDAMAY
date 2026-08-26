@@ -156,9 +156,12 @@ class ManajemenTP extends Component
 
     public function render()
     {
-        $mapelList = MataPelajaran::orderBy('nama_mapel')->get();
         $tpList = $this->selectedMapel
-            ? TujuanPembelajaran::where('mapel_id', $this->selectedMapel)->orderBy('order_sequence')->get()
+            ? TujuanPembelajaran::where('mapel_id', $this->selectedMapel)
+                ->orderBy('order_sequence')
+                ->get()
+                ->unique(fn($tp) => strtolower(trim(preg_replace('/\s+/', ' ', $tp->deskripsi_tp))))
+                ->values()
             : collect();
 
         return view('livewire.ketua-mgmp.manajemen-t-p', [

@@ -21,6 +21,29 @@ class NilaiKktpDetail extends Component
     public MataPelajaran $mapel;
     public array $nilaiData = []; // [siswa_id][tp_id] => 'tercapai' | 'belum_tercapai'
 
+    public function getTpsProperty()
+    {
+        $userId = auth()->id();
+        $query = TujuanPembelajaran::where('mapel_id', $this->mapel->id);
+
+        $hasTeacherTps = TujuanPembelajaran::where('mapel_id', $this->mapel->id)
+            ->where('ketua_mgmp_id', $userId)
+            ->exists();
+
+        if ($hasTeacherTps) {
+            $query->where(function ($q) use ($userId) {
+                $q->where('ketua_mgmp_id', $userId)
+                  ->orWhereNull('ketua_mgmp_id');
+            });
+        }
+
+        $tps = $query->orderBy('order_sequence')->get();
+
+        return $tps->unique(function ($tp) {
+            return strtolower(trim(preg_replace('/\s+/', ' ', $tp->deskripsi_tp)));
+        })->values();
+    }
+
     public function mount(Rombel $rombel, MataPelajaran $mapel)
     {
         $this->rombel = $rombel;
@@ -28,7 +51,7 @@ class NilaiKktpDetail extends Component
 
         // Load existing NilaiKktp records
         $siswaList = Siswa::where('rombel_id', $rombel->id)->orderBy('nama')->get();
-        $tps = TujuanPembelajaran::where('mapel_id', $mapel->id)->orderBy('order_sequence')->get();
+        $tps = $this->tps;
 
         $existingNilai = NilaiKktp::where('rombel_id', $rombel->id)
             ->whereIn('tp_id', $tps->pluck('id'))
@@ -97,7 +120,7 @@ class NilaiKktpDetail extends Component
     public function exportExcel()
     {
         $siswaList = Siswa::where('rombel_id', $this->rombel->id)->orderBy('nama')->get();
-        $tps = TujuanPembelajaran::where('mapel_id', $this->mapel->id)->orderBy('order_sequence')->get();
+        $tps = $this->tps;
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -164,7 +187,7 @@ class NilaiKktpDetail extends Component
     public function exportPdf()
     {
         $siswaList = Siswa::where('rombel_id', $this->rombel->id)->orderBy('nama')->get();
-        $tps = TujuanPembelajaran::where('mapel_id', $this->mapel->id)->orderBy('order_sequence')->get();
+        $tps = $this->tps;
 
         $headers = [
             ['name' => 'No', 'width' => '5%', 'align' => 'center'],
@@ -230,7 +253,7 @@ class NilaiKktpDetail extends Component
     public function render()
     {
         $siswaList = Siswa::where('rombel_id', $this->rombel->id)->orderBy('nama')->get();
-        $tps = TujuanPembelajaran::where('mapel_id', $this->mapel->id)->orderBy('order_sequence')->get();
+        $tps = $this->tps;
 
         return view('livewire.guru.nilai-kktp-detail', [
             'siswaList' => $siswaList,

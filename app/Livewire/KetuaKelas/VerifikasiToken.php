@@ -27,9 +27,13 @@ class VerifikasiToken extends Component
         // 1. Determine student's class (rombel)
         $this->studentRombel = $this->resolveStudentRombel($user);
 
-        // 2. Find existing verified or active agenda for THIS CLASS ONLY today
+        // Auto-close any expired past-due agendas for this class or today
+        AgendaHarian::autoCloseExpiredAgendas($this->studentRombel?->id, $today);
+
+        // 2. Find existing active agenda for THIS CLASS ONLY today that still needs photo
         $query = AgendaHarian::whereIn('status', ['token_terverifikasi', 'berjalan'])
             ->where('tanggal', $today)
+            ->whereNull('foto_bukti_path')
             ->with(['jadwalPelajaran.rombel', 'jadwalPelajaran.mataPelajaran', 'guru']);
 
         if ($this->studentRombel) {
@@ -52,6 +56,9 @@ class VerifikasiToken extends Component
         if (!$this->studentRombel) {
             $this->studentRombel = $this->resolveStudentRombel($user);
         }
+
+        // Auto-close any expired past-due agendas first
+        AgendaHarian::autoCloseExpiredAgendas($this->studentRombel?->id, $today);
 
         // Build query for matching 6-digit token handshake for THIS CLASS ONLY
         $query = AgendaHarian::where('token_handshake', $this->token)
@@ -82,6 +89,18 @@ class VerifikasiToken extends Component
                 $this->errorMessage = 'Token OTP tidak valid, belum dibuat oleh guru, atau sudah kadaluarsa.';
             }
             return;
+        }
+
+        // Auto-close any previous active agendas for this class from earlier hours
+        if ($this->studentRombel) {
+            AgendaHarian::where('id', '!=', $this->agenda->id)
+                ->where('tanggal', $today)
+                ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan'])
+                ->whereHas('jadwalPelajaran', fn($q) => $q->where('rombel_id', $this->studentRombel->id))
+                ->update([
+                    'status' => 'selesai',
+                    'waktu_selesai' => Carbon::now('Asia/Jakarta'),
+                ]);
         }
 
         // Update status to token_terverifikasi

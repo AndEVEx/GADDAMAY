@@ -40,9 +40,27 @@ class IsiMateri extends Component
 
         if (!$mapelId) return collect();
 
-        $allTp = TujuanPembelajaran::where('mapel_id', $mapelId)
-            ->orderBy('order_sequence')
-            ->get();
+        $userId = auth()->id();
+        $query = TujuanPembelajaran::where('mapel_id', $mapelId);
+
+        // Check if teacher has specific TPs for this mapel
+        $hasTeacherTps = TujuanPembelajaran::where('mapel_id', $mapelId)
+            ->where('ketua_mgmp_id', $userId)
+            ->exists();
+
+        if ($hasTeacherTps) {
+            $query->where(function ($q) use ($userId) {
+                $q->where('ketua_mgmp_id', $userId)
+                  ->orWhereNull('ketua_mgmp_id');
+            });
+        }
+
+        $allTp = $query->orderBy('order_sequence')->get();
+
+        // Deduplicate: If there are exact duplicate TPs (same deskripsi), display only 1
+        $allTp = $allTp->unique(function ($tp) {
+            return strtolower(trim(preg_replace('/\s+/', ' ', $tp->deskripsi_tp)));
+        })->values();
 
         // Get TP IDs already taught in this rombel for this mapel
         $taughtTpIds = AgendaHarian::where('guru_id', auth()->id())
