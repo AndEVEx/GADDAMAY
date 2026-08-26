@@ -45,6 +45,9 @@
         <button wire:click="create" class="btn btn-primary" style="min-height: 48px;">
             <i class="bi bi-plus-circle me-1"></i> Tambah Jadwal
         </button>
+        <button wire:click="openSwapModal" class="btn btn-warning text-dark fw-bold" style="min-height: 48px;">
+            <i class="bi bi-arrow-left-right me-1"></i> Tukar Jadwal Blok / Antar Kelas
+        </button>
         <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
             <i class="bi bi-file-earmark-excel me-2"></i>Export Excel (.xlsx)
         </button>
@@ -52,6 +55,74 @@
             <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF (Kop Surat)
         </button>
     </div>
+
+    {{-- Swap Schedule Modal / Card --}}
+    @if($showSwapModal)
+    <div class="card mb-4 border-warning shadow animate-fade-in-up" style="border-radius: 14px;">
+        <div class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center" style="border-radius: 14px 14px 0 0;">
+            <h5 class="fw-bold mb-0"><i class="bi bi-arrow-left-right me-2"></i>Tukar Jadwal Pelajaran (Sistem Blok Rolling)</h5>
+            <button type="button" wire:click="closeSwapModal" class="btn-close"></button>
+        </div>
+        <div class="card-body p-4">
+            {{-- Quick Swap 1-Click for Vocational Blocks --}}
+            <div class="p-3 mb-4 rounded-3 border bg-light">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <h6 class="fw-bold text-primary mb-1">
+                            <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Tukar Otomatis Jadwal Blok Jurusan (TP, APHPi, NKPI)
+                        </h6>
+                        <p class="text-muted small mb-0">
+                            Menukar seluruh jadwal pelajaran antara <strong>Rombel 1</strong> dan <strong>Rombel 2</strong> untuk jurusan <strong>TP (Pemesinan)</strong>, <strong>APHPi</strong>, dan <strong>NKPI</strong> pada semua tingkat (Tingkat X, XI, XII).
+                        </p>
+                    </div>
+                    <button wire:click="swapBlockVocational" wire:confirm="Yakin ingin menukar jadwal blok jurusan TP, APHPi, dan NKPI (Rombel 1 ↔ Rombel 2) untuk semua tingkat?" class="btn btn-warning text-dark fw-bold px-3 py-2 text-nowrap" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="swapBlockVocational"><i class="bi bi-arrow-repeat me-1"></i>Tukar Blok Semua Tingkat</span>
+                        <span wire:loading wire:target="swapBlockVocational"><span class="spinner-border spinner-border-sm me-1"></span>Memproses...</span>
+                    </button>
+                </div>
+            </div>
+
+            <hr>
+
+            {{-- Custom Swap Form --}}
+            <h6 class="fw-bold mb-3"><i class="bi bi-sliders me-2"></i>Tukar Jadwal Antar 2 Kelas (Custom)</h6>
+            <form wire:submit="swapCustomRombel">
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold">Pilih Kelas / Rombel A</label>
+                        <select wire:model="swapRombelA" class="form-select @error('swapRombelA') is-invalid @enderror" style="min-height: 48px;">
+                            <option value="">-- Pilih Rombel A --</option>
+                            @foreach($rombels as $r)
+                                <option value="{{ $r->id }}">{{ $r->nama_kelas }} (Tingkat {{ $r->tingkat_label }})</option>
+                            @endforeach
+                        </select>
+                        @error('swapRombelA') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                    <div class="col-md-2 text-center d-none d-md-block pb-2">
+                        <i class="bi bi-arrow-left-right fs-3 text-warning"></i>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold">Pilih Kelas / Rombel B</label>
+                        <select wire:model="swapRombelB" class="form-select @error('swapRombelB') is-invalid @enderror" style="min-height: 48px;">
+                            <option value="">-- Pilih Rombel B --</option>
+                            @foreach($rombels as $r)
+                                <option value="{{ $r->id }}">{{ $r->nama_kelas }} (Tingkat {{ $r->tingkat_label }})</option>
+                            @endforeach
+                        </select>
+                        @error('swapRombelB') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" wire:click="closeSwapModal" class="btn btn-secondary px-3" style="min-height: 44px;">Batal</button>
+                    <button type="submit" wire:confirm="Yakin ingin menukar seluruh jadwal pelajaran antara kedua kelas yang dipilih?" class="btn btn-primary px-4 fw-bold" style="min-height: 44px;">
+                        <i class="bi bi-arrow-left-right me-1"></i> Eksekusi Tukar Jadwal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
 
     {{-- Form Modal / Card --}}
     @if($showForm)

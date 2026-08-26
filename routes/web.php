@@ -64,6 +64,22 @@ use App\Livewire\Auth\GantiPassword;
 Route::get('/login', Login::class)->name('login')->middleware('guest');
 
 Route::post('/logout', function () {
+    $userId = auth()->id();
+    if ($userId) {
+        \App\Models\AuditLog::create([
+            'user_id' => $userId,
+            'action' => 'logout',
+            'auditable_type' => \App\Models\User::class,
+            'auditable_id' => $userId,
+            'new_values' => [
+                'name' => auth()->user()?->name,
+                'role' => auth()->user()?->role,
+                'logged_out_at' => \Carbon\Carbon::now('Asia/Jakarta')->toDateTimeString(),
+            ],
+            'ip_address' => request()->ip(),
+        ]);
+        \Illuminate\Support\Facades\Cache::forget('user_online_' . $userId);
+    }
     auth()->logout();
     session()->invalidate();
     session()->regenerateToken();

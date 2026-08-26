@@ -24,8 +24,41 @@ class Login extends Component
 
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             session()->regenerate();
+            $user = Auth::user();
 
-            return match (Auth::user()->role) {
+            // Record login event in AuditLog
+            \App\Models\AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'login',
+                'auditable_type' => \App\Models\User::class,
+                'auditable_id' => $user->id,
+                'new_values' => [
+                    'name' => $user->name,
+                    'role' => $user->role,
+                    'user_agent' => request()->userAgent(),
+                    'logged_in_at' => \Carbon\Carbon::now('Asia/Jakarta')->toDateTimeString(),
+                ],
+                'ip_address' => request()->ip(),
+            ]);
+
+            // Track online status in cache
+            \Illuminate\Support\Facades\Cache::put('user_online_' . $user->id, [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'last_seen_at' => \Carbon\Carbon::now('Asia/Jakarta')->toDateTimeString(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ], now()->addMinutes(10));
+
+            $onlineUserIds = \Illuminate\Support\Facades\Cache::get('online_user_ids', []);
+            if (!in_array($user->id, $onlineUserIds)) {
+                $onlineUserIds[] = $user->id;
+                \Illuminate\Support\Facades\Cache::put('online_user_ids', $onlineUserIds, now()->addMinutes(30));
+            }
+
+            return match ($user->role) {
                 'admin' => redirect()->route('admin.dashboard'),
                 'kepsek', 'waka' => redirect()->route('monitoring.dashboard'),
                 'ketua_mgmp' => redirect()->route('guru.dashboard'),

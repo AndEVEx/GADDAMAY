@@ -42,6 +42,54 @@ class ManajemenJadwal extends Component
     public string $deleteId = '';
     public string $deleteTitle = '';
 
+    public bool $showSwapModal = false;
+    public string $swapRombelA = '';
+    public string $swapRombelB = '';
+
+    public function openSwapModal()
+    {
+        $this->showSwapModal = true;
+    }
+
+    public function closeSwapModal()
+    {
+        $this->showSwapModal = false;
+    }
+
+    public function swapBlockVocational()
+    {
+        $res = \App\Services\JadwalSwapService::swapAllVocationalBlockSchedules();
+
+        if ($res['success']) {
+            $this->dispatch('show-toast', message: $res['message'], type: 'success');
+        } else {
+            $this->dispatch('show-toast', message: $res['message'], type: 'warning');
+        }
+        $this->showSwapModal = false;
+    }
+
+    public function swapCustomRombel()
+    {
+        $this->validate([
+            'swapRombelA' => 'required|exists:rombel,id',
+            'swapRombelB' => 'required|exists:rombel,id|different:swapRombelA',
+        ], [
+            'swapRombelA.required' => 'Pilih Rombel A terlebih dahulu.',
+            'swapRombelB.required' => 'Pilih Rombel B terlebih dahulu.',
+            'swapRombelB.different' => 'Rombel A dan Rombel B harus berbeda.',
+        ]);
+
+        $res = \App\Services\JadwalSwapService::swapRombelSchedules($this->swapRombelA, $this->swapRombelB);
+
+        if ($res['success']) {
+            $this->dispatch('show-toast', message: $res['message'], type: 'success');
+            $this->showSwapModal = false;
+            $this->reset(['swapRombelA', 'swapRombelB']);
+        } else {
+            $this->dispatch('show-toast', message: $res['message'], type: 'error');
+        }
+    }
+
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterHari() { $this->resetPage(); }
     public function updatingFilterRombel() { $this->resetPage(); }
