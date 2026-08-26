@@ -27,7 +27,7 @@ class AuditLogService
         return static::log('create', $model, null, $model->toArray());
     }
 
-    public static function logUpdate(Model $model, array $oldValues): AuditLog
+    public static function logUpdate(Model $model, ?array $oldValues = null): AuditLog
     {
         $changedValues = [];
         foreach ($model->getChanges() as $key => $value) {

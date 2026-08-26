@@ -59,7 +59,7 @@ class ManajemenUser extends Component
     {
         $rules = [
             'nama' => 'required|min:3',
-            'email' => 'required|email|unique:user,email,' . ($this->editing ? $this->editId : 'NULL') . ',id',
+            'email' => 'required|email|unique:users,email' . ($this->editing ? ",{$this->editId}" : ''),
             'role' => 'required|in:admin,guru,kepsek,waka,ketua_mgmp,ketua_kelas',
         ];
 

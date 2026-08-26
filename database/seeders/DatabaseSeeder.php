@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             XmlJadwalSeeder::class,
             SiswaSeeder::class,
             MotivasiPantunSeeder::class,
+            LpkUserSeeder::class,
         ]);
     }
 }
