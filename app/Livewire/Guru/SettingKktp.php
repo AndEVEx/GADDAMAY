@@ -18,6 +18,7 @@ class SettingKktp extends Component
     use WithFileUploads;
 
     public ?string $selectedMapelId = null;
+    public ?int $selectedTingkat = null;
     public bool $showAllMapels = false;
     public string $newKodeTP = '';
     public string $newDeskripsiTP = '';
@@ -81,6 +82,7 @@ class SettingKktp extends Component
 
         TujuanPembelajaran::create([
             'mapel_id' => $this->selectedMapelId,
+            'tingkat' => $this->selectedTingkat,
             'kode_tp' => $this->newKodeTP,
             'deskripsi_tp' => $this->newDeskripsiTP,
             'order_sequence' => $maxOrder + 1,
@@ -164,6 +166,18 @@ class SettingKktp extends Component
                 );
                 $this->selectedMapelId = $newMapel->id;
             }
+
+            // Auto-detect tingkat from metadata
+            if (!empty($importer->metadata['tingkat'])) {
+                $tingkatStr = strtolower(trim($importer->metadata['tingkat']));
+                if (str_contains($tingkatStr, 'xii') || str_contains($tingkatStr, '12')) {
+                    $this->selectedTingkat = 12;
+                } elseif (str_contains($tingkatStr, 'xi') || str_contains($tingkatStr, '11')) {
+                    $this->selectedTingkat = 11;
+                } elseif (str_contains($tingkatStr, 'x') || str_contains($tingkatStr, '10')) {
+                    $this->selectedTingkat = 10;
+                }
+            }
         } else {
             $this->dispatch('show-toast', message: 'Gagal membaca file: ' . $importer->error, type: 'danger');
         }
@@ -193,7 +207,7 @@ class SettingKktp extends Component
 
         $importer = new KktpImport();
         $importer->tpData = $this->importPreview;
-        $count = $importer->import($this->selectedMapelId, auth()->id());
+        $count = $importer->import($this->selectedMapelId, auth()->id(), $this->selectedTingkat);
 
         $this->reset(['importFile', 'importPreview', 'importMetadata', 'importParsed', 'showImport']);
         $this->dispatch('show-toast', message: "Berhasil mengimport {$count} Tujuan Pembelajaran!", type: 'success');
@@ -208,6 +222,13 @@ class SettingKktp extends Component
         if ($this->selectedMapelId) {
             $userId = auth()->id();
             $query = TujuanPembelajaran::where('mapel_id', $this->selectedMapelId);
+
+            if ($this->selectedTingkat) {
+                $query->where(function ($q) {
+                    $q->where('tingkat', $this->selectedTingkat)
+                      ->orWhereNull('tingkat'); // backward compat: show TPs without tingkat too
+                });
+            }
 
             $hasTeacherTps = TujuanPembelajaran::where('mapel_id', $this->selectedMapelId)
                 ->where('ketua_mgmp_id', $userId)

@@ -24,15 +24,20 @@
                 </div>
 
                 {{-- Password --}}
-                <div class="mb-3">
+                <div class="mb-3" x-data="{ show: false }">
                     <label for="password" class="form-label">
                         <i class="bi bi-lock me-1"></i>Password
                     </label>
-                    <input type="password" id="password" class="form-control @error('password') is-invalid @enderror"
-                           wire:model="password" placeholder="Masukkan password">
-                    @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <div class="input-group">
+                        <input :type="show ? 'text' : 'password'" id="password" class="form-control @error('password') is-invalid @enderror"
+                               wire:model="password" placeholder="Masukkan password">
+                        <button type="button" class="btn btn-outline-secondary d-flex align-items-center" @click="show = !show" tabindex="-1" style="min-width: 48px; min-height: 48px;">
+                            <i class="bi" :class="show ? 'bi-eye-slash' : 'bi-eye'"></i>
+                        </button>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 {{-- Remember --}}

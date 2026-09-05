@@ -108,6 +108,20 @@ class VerifikasiToken extends Component
             'status' => 'token_terverifikasi',
         ]);
 
+        // Also verify sibling agendas (same block, same token)
+        if ($this->agenda->jadwalPelajaran?->mapel_id) {
+            $jp = $this->agenda->jadwalPelajaran;
+            AgendaHarian::where('tanggal', $today)
+                ->where('token_handshake', $this->token)
+                ->where('status', 'menunggu_token')
+                ->where('id', '!=', $this->agenda->id)
+                ->whereHas('jadwalPelajaran', fn($q) => $q
+                    ->where('rombel_id', $jp->rombel_id)
+                    ->where('mapel_id', $jp->mapel_id)
+                )
+                ->update(['status' => 'token_terverifikasi']);
+        }
+
         $this->dispatch('show-toast', message: 'Verifikasi berhasil! Mengalihkan ke ambil foto...', type: 'success');
 
         return redirect()->route('ketua.foto', $this->agenda->id);
@@ -120,32 +134,46 @@ class VerifikasiToken extends Component
     {
         if (!$user) return null;
 
-        // Direct foreign key
+        // 1. Direct foreign key (fastest, most reliable)
         if (!empty($user->rombel_id)) {
             $rombel = Rombel::find($user->rombel_id);
             if ($rombel) return $rombel;
         }
 
-        // Fallback 1: Match by name ("Ketua Kelas [nama_kelas]")
         $rombels = Rombel::all();
-        $userNameLower = strtolower($user->name ?? '');
+        $userNameLower = strtolower(trim($user->name ?? ''));
+        $userEmailLower = strtolower(trim($user->email ?? ''));
 
-        foreach ($rombels as $r) {
-            $kelasLower = strtolower($r->nama_kelas);
-            if (!empty($kelasLower) && str_contains($userNameLower, $kelasLower)) {
-                // Auto-save resolved rombel_id for future fast lookups
+        // 2. Exact full-name match: Find rombel whose nama_kelas appears EXACTLY in the user's name
+        //    Sort by nama_kelas length DESC to match the most specific one first.
+        //    e.g. "XI NKPI 2" (9 chars) should match before "NKPI" (4 chars) or "XI NKPI" (7 chars)
+        $sortedRombels = $rombels->sortByDesc(fn($r) => strlen($r->nama_kelas));
+
+        foreach ($sortedRombels as $r) {
+            $kelasLower = strtolower(trim($r->nama_kelas));
+            if (empty($kelasLower)) continue;
+
+            // Check if the FULL kelas name appears as a whole word/phrase in the user name
+            // Use word boundary check to prevent partial matches
+            if (str_contains($userNameLower, $kelasLower)) {
                 $user->update(['rombel_id' => $r->id]);
                 return $r;
             }
         }
 
-        // Fallback 2: Match by email slug ("ketua.[slug]@smkn2indramayu.sch.id")
-        $userEmailLower = strtolower($user->email ?? '');
-        foreach ($rombels as $r) {
-            $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $r->nama_kelas));
-            if (!empty($slug) && str_contains($userEmailLower, "ketua.{$slug}@")) {
-                $user->update(['rombel_id' => $r->id]);
-                return $r;
+        // 3. Email slug match: e.g. "ketua.xiinkpi2@smkn2..." matches "XII NKPI 2"
+        foreach ($sortedRombels as $r) {
+            // Generate multiple slug variants for matching
+            $namaKelas = $r->nama_kelas;
+            $slug1 = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaKelas)); // "xiinkpi2"
+            $slug2 = strtolower(str_replace(' ', '', $namaKelas)); // "xiinkpi2" (same usually)
+            $slug3 = strtolower(str_replace(' ', '.', $namaKelas)); // "xii.nkpi.2"
+
+            foreach ([$slug1, $slug2, $slug3] as $slug) {
+                if (!empty($slug) && str_contains($userEmailLower, $slug)) {
+                    $user->update(['rombel_id' => $r->id]);
+                    return $r;
+                }
             }
         }
 

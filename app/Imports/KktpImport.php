@@ -196,7 +196,7 @@ class KktpImport
     /**
      * Import parsed TP data into the database for a given MataPelajaran ID.
      */
-    public function import(string $mapelId, ?string $guruId = null): int
+    public function import(string $mapelId, ?string $guruId = null, ?int $tingkat = null): int
     {
         $count = 0;
         foreach ($this->tpData as $index => $data) {
@@ -224,11 +224,13 @@ class KktpImport
                     'kode_tp' => $kodeTP,
                     'deskripsi_tp' => $deskripsi,
                     'order_sequence' => $order,
+                    'tingkat' => $tingkat ?? $existing->tingkat,
                     'ketua_mgmp_id' => $guruId ?: $existing->ketua_mgmp_id,
                 ]);
             } else {
                 TujuanPembelajaran::create([
                     'mapel_id' => $mapelId,
+                    'tingkat' => $tingkat,
                     'kode_tp' => $kodeTP,
                     'deskripsi_tp' => $deskripsi,
                     'order_sequence' => $order,

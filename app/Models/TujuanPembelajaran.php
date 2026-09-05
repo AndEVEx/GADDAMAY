@@ -21,6 +21,7 @@ class TujuanPembelajaran extends Model
      */
     protected $fillable = [
         'mapel_id',
+        'tingkat',
         'kode_tp',
         'deskripsi_tp',
         'order_sequence',

@@ -20,6 +20,7 @@ class DashboardMonitoring extends Component
     public int $maxJam = 12;
     public ?int $currentJam = null;
     public ?int $selectedJam = null;
+    public string $search = '';
 
     public function mount()
     {
@@ -160,7 +161,7 @@ class DashboardMonitoring extends Component
             if (in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit'])) {
                 return [
                     'rombel' => $rombel,
-                    'status' => 'oranye',
+                    'status' => 'ungu',
                     'label' => 'Guru ' . $agenda->status_kehadiran_guru,
                     'jadwal' => $jadwal,
                     'agenda' => $agenda,
@@ -180,21 +181,46 @@ class DashboardMonitoring extends Component
             $hasFoto = !empty($agenda->foto_bukti_path);
             $handshakeDone = in_array($agenda->status, ['berjalan', 'selesai']);
 
-            if ($handshakeDone && $hasFoto) {
-                return [
-                    'rombel' => $rombel,
-                    'status' => 'hijau',
-                    'label' => 'Lengkap',
-                    'jadwal' => $jadwal,
-                    'agenda' => $agenda,
+            if ($handshakeDone) {
+                // Calculate if handshake was on time (≤45 min from scheduled start)
+                $officialPeriods = [
+                    0  => ['mulai' => '06:25', 'selesai' => '06:45'], // Jam 0: Apel Pagi / Upacara
+                    1  => ['mulai' => '06:45', 'selesai' => '07:30'], // Jam 1
+                    2  => ['mulai' => '07:30', 'selesai' => '08:15'], // Jam 2
+                    3  => ['mulai' => '08:15', 'selesai' => '09:00'], // Jam 3
+                    4  => ['mulai' => '09:00', 'selesai' => '09:45'], // Jam 4
+                    5  => ['mulai' => '09:45', 'selesai' => '10:00'], // Jam 5: Istirahat 1
+                    6  => ['mulai' => '10:00', 'selesai' => '10:45'], // Jam 6
+                    7  => ['mulai' => '10:45', 'selesai' => '11:30'], // Jam 7
+                    8  => ['mulai' => '11:30', 'selesai' => '12:15'], // Jam 8
+                    9  => ['mulai' => '12:15', 'selesai' => '12:45'], // Jam 9: Istirahat 2 / Ishoma
+                    10 => ['mulai' => '12:45', 'selesai' => '13:30'], // Jam 10
+                    11 => ['mulai' => '13:30', 'selesai' => '14:15'], // Jam 11
+                    12 => ['mulai' => '14:15', 'selesai' => '15:00'], // Jam 12
                 ];
-            }
+                $scheduledStart = $officialPeriods[$this->selectedJam]['mulai'] ?? '06:45';
+                $onTime = true;
+                if ($agenda->waktu_mulai) {
+                    $scheduledCarbon = Carbon::parse($scheduledStart, 'Asia/Jakarta');
+                    $diffMinutes = $scheduledCarbon->diffInMinutes($agenda->waktu_mulai, false);
+                    $onTime = $diffMinutes <= 45;
+                }
 
-            if ($handshakeDone && !$hasFoto) {
+                if ($onTime && $hasFoto) {
+                    return [
+                        'rombel' => $rombel,
+                        'status' => 'hijau',
+                        'label' => 'Lengkap',
+                        'jadwal' => $jadwal,
+                        'agenda' => $agenda,
+                    ];
+                }
+
+                $label = !$hasFoto ? 'Belum foto' : 'Terlambat';
                 return [
                     'rombel' => $rombel,
                     'status' => 'kuning',
-                    'label' => 'Belum foto',
+                    'label' => $label,
                     'jadwal' => $jadwal,
                     'agenda' => $agenda,
                 ];
@@ -208,6 +234,25 @@ class DashboardMonitoring extends Component
                 'agenda' => $agenda,
             ];
         });
+
+        // Filter by search query (nama kelas or nama guru)
+        if (!empty($this->search)) {
+            $searchLower = strtolower($this->search);
+            $data = $data->filter(function ($item) use ($searchLower) {
+                $matchKelas = str_contains(strtolower($item['rombel']->nama_kelas ?? ''), $searchLower);
+                $matchGuru = false;
+                if (!empty($item['agenda'])) {
+                    $matchGuru = str_contains(strtolower($item['agenda']->guru?->name ?? ''), $searchLower);
+                } elseif (!empty($item['jadwal'])) {
+                    $guruNames = $item['jadwal']->jadwalGuru?->pluck('guru.name')->join(', ') ?? '';
+                    $matchGuru = str_contains(strtolower($guruNames), $searchLower);
+                }
+                $matchMapel = !empty($item['jadwal']) && str_contains(strtolower($item['jadwal']->mataPelajaran?->nama_mapel ?? ''), $searchLower);
+                return $matchKelas || $matchGuru || $matchMapel;
+            })->values();
+        }
+
+        return $data;
     }
 
     public function render()

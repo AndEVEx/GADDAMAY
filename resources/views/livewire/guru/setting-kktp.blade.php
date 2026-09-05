@@ -72,6 +72,33 @@
     </div>
 
     @if($selectedMapelId)
+        {{-- Tingkat Selector --}}
+        <div class="card card-custom animate-fade-in-up mb-3">
+            <div class="card-body p-3">
+                <label class="form-label text-muted small fw-bold mb-2">
+                    <i class="bi bi-layers me-1"></i> Pilih Tingkat / Jenjang Kelas
+                </label>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" wire:click="$set('selectedTingkat', null)" 
+                            class="btn {{ is_null($selectedTingkat) ? 'btn-primary' : 'btn-outline-primary' }} btn-touch px-3">
+                        Semua Tingkat
+                    </button>
+                    @foreach([10 => 'X', 11 => 'XI', 12 => 'XII'] as $val => $label)
+                        <button type="button" wire:click="$set('selectedTingkat', {{ $val }})" 
+                                class="btn {{ $selectedTingkat === $val ? 'btn-primary' : 'btn-outline-primary' }} btn-touch px-4">
+                            Tingkat {{ $label }}
+                        </button>
+                    @endforeach
+                </div>
+                @if($selectedTingkat)
+                    <div class="mt-2 small text-muted">
+                        <i class="bi bi-info-circle me-1"></i> Menampilkan paket KKTP untuk {{ $currentMapel?->nama_mapel }} — Tingkat {{ match($selectedTingkat) { 10 => 'X', 11 => 'XI', 12 => 'XII', default => $selectedTingkat } }}
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Import Section -->
         <!-- Import Section -->
         @if($showImport)
             <div class="card card-custom bg-light animate-fade-in-up mb-3 border border-success">

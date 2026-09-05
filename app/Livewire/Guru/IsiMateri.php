@@ -43,6 +43,15 @@ class IsiMateri extends Component
         $userId = auth()->id();
         $query = TujuanPembelajaran::where('mapel_id', $mapelId);
 
+        // Filter by rombel tingkat
+        $rombel = $this->agenda->jadwalPelajaran?->rombel;
+        if ($rombel && $rombel->tingkat) {
+            $query->where(function ($q) use ($rombel) {
+                $q->where('tingkat', $rombel->tingkat)
+                  ->orWhereNull('tingkat'); // backward compat: show TPs without tingkat
+            });
+        }
+
         // Check if teacher has specific TPs for this mapel
         $hasTeacherTps = TujuanPembelajaran::where('mapel_id', $mapelId)
             ->where('ketua_mgmp_id', $userId)

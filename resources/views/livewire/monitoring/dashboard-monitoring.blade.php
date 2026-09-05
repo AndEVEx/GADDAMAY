@@ -124,8 +124,8 @@
             </div>
         </div>
         <div class="col-6">
-            <div class="card text-center py-3 shadow-sm border-start border-4" style="border-color: #ea580c !important;">
-                <div class="fw-extrabold fs-3 mb-0" style="color: #ea580c; line-height: 1.1;">{{ $summary['oranye'] ?? 0 }}</div>
+            <div class="card text-center py-3 shadow-sm border-start border-4" style="border-color: #7c3aed !important;">
+                <div class="fw-extrabold fs-3 mb-0" style="color: #7c3aed; line-height: 1.1;">{{ $summary['ungu'] ?? 0 }}</div>
                 <div class="fw-semibold small text-muted">Izin</div>
             </div>
         </div>
@@ -142,6 +142,14 @@
                 <div class="fw-extrabold fs-3 text-danger mb-0" style="line-height: 1.1;">{{ $summary['merah'] ?? 0 }}</div>
                 <div class="fw-semibold small text-muted">Belum Mulai</div>
             </div>
+        </div>
+    </div>
+
+    {{-- Search Filter --}}
+    <div class="mb-3 animate-fade-in-up">
+        <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="search" wire:model.live.debounce.300ms="search" class="form-control border-start-0" placeholder="Cari kelas, guru, atau mata pelajaran..." style="min-height: 48px;">
         </div>
     </div>
 

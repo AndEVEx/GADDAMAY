@@ -141,18 +141,28 @@ self.addEventListener('push', function(event) {
 self.addEventListener('notificationclick', function(event) {
     event.notification.close();
 
-    const targetUrl = event.notification?.data?.url || '/guru/dashboard';
+    // Use root URL '/' as safe fallback - it will redirect to the correct dashboard based on role
+    const notifUrl = event.notification?.data?.url || '/';
+    // Always use origin-based absolute URL to avoid path issues in standalone PWA
+    const targetUrl = new URL(notifUrl, self.location.origin).href;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+            // Try to focus an existing window first
             for (let i = 0; i < clientList.length; i++) {
                 let client = clientList[i];
-                if (client.url.includes(targetUrl) && 'focus' in client) {
-                    return client.focus();
+                if ('focus' in client) {
+                    // If we find any open window, navigate it to the target URL
+                    return client.focus().then(function(focusedClient) {
+                        if (focusedClient && 'navigate' in focusedClient) {
+                            return focusedClient.navigate(targetUrl);
+                        }
+                    });
                 }
             }
+            // No existing window found - open root URL (safest, ensures auth session loads)
             if (clients.openWindow) {
-                return clients.openWindow(targetUrl);
+                return clients.openWindow('/');
             }
         })
     );

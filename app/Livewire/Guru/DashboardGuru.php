@@ -187,7 +187,7 @@ class DashboardGuru extends Component
                 ?? ($jamMap->get($endJamKey)?->waktu_selesai ?? '15:00');
 
             $timeArrived = false;
-            $isLate = false;
+            $isPeriodOver = false;
             $displayStartStr = '06:45';
 
             try {
@@ -195,17 +195,15 @@ class DashboardGuru extends Component
                 $displayStartStr = $mulaiCarbon->format('H:i');
 
                 $startTimeStr = $mulaiCarbon->format('H:i');
-                // Tolerance: 60 minutes on Wednesday (Rabu, 3) & Friday (Jumat, 5) due to morning literacy / special activities; 30 minutes on other days
-                $toleranceMinutes = in_array($this->hariIni, [3, 5]) ? 60 : 30;
-                $lateLimitStr = $mulaiCarbon->copy()->addMinutes($toleranceMinutes)->format('H:i');
 
                 if ($timeNow >= $startTimeStr) {
                     $timeArrived = true;
                 }
 
-                // If current time > start_time + tolerance minutes and no agenda started yet
-                if ($timeNow > $lateLimitStr && !$agenda && !$user->canOverride()) {
-                    $isLate = true;
+                // Check if still within teaching period (no lockout — guru can always start during their period)
+                $selesaiStr = $officialPeriods[$endJamKey]['selesai'] ?? ($jamMap->get($endJamKey)?->waktu_selesai ?? '15:00');
+                if ($timeNow > substr($selesaiStr, 0, 5) && !$agenda) {
+                    $isPeriodOver = true;
                 }
             } catch (\Exception $e) {
                 $timeArrived = true;
@@ -226,10 +224,25 @@ class DashboardGuru extends Component
 
             $block['waktu_mulai_str'] = $displayStartStr;
             $block['time_arrived'] = $timeArrived;
-            $block['is_late'] = $isLate;
+            $block['is_period_over'] = $isPeriodOver;
             $block['agenda'] = $agenda;
+            
+            // Calculate handshake timing for card color (new rule)
+            $block['handshake_on_time'] = null; // null = no handshake yet
+            if ($agenda && in_array($agenda->status, ['berjalan', 'selesai', 'token_terverifikasi'])) {
+                $scheduledStart = $officialPeriods[$startJamKey]['mulai'] ?? '06:45';
+                $scheduledCarbon = Carbon::parse($scheduledStart, 'Asia/Jakarta');
+                $actualStart = $agenda->waktu_mulai;
+                if ($actualStart) {
+                    $diffMinutes = $scheduledCarbon->diffInMinutes($actualStart, false);
+                    $block['handshake_on_time'] = $diffMinutes <= 45; // true = ≤45min, false = >45min
+                }
+            }
+            $block['has_foto'] = !empty($agenda?->foto_bukti_path);
+            $block['otp_time'] = $agenda?->waktu_mulai?->setTimezone('Asia/Jakarta')?->format('H:i');
+
             $block['status_label'] = $this->getStatusLabel($agenda);
-            $block['can_start'] = $this->canStart($block, $agenda, $timeArrived, $isLate);
+            $block['can_start'] = $this->canStart($block, $agenda, $timeArrived, $isPeriodOver);
 
             return (object) $block;
         });
@@ -252,7 +265,7 @@ class DashboardGuru extends Component
         if (in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar'])) {
             return [
                 'text' => 'Guru ' . ucfirst($agenda->status_kehadiran_guru),
-                'class' => 'status-kuning',
+                'class' => 'status-ungu',
                 'icon' => 'bi-info-circle-fill'
             ];
         }
@@ -267,13 +280,13 @@ class DashboardGuru extends Component
         };
     }
 
-    private function canStart(array $block, ?AgendaHarian $agenda, bool $timeArrived, bool $isLate): bool
+    private function canStart(array $block, ?AgendaHarian $agenda, bool $timeArrived, bool $isPeriodOver): bool
     {
         $user = auth()->user();
         if ($this->todayHoliday && !$user->canOverride()) return false;
         if ($block['is_kegiatan_khusus']) return false;
         if ($agenda && in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar'])) return false;
-        if ($isLate && !$agenda) return false;
+        if ($isPeriodOver && !$agenda) return false; // only block if period is completely over
         if (!$timeArrived && !$agenda) return false;
         if (!$agenda) return true;
         if ($agenda->status === 'dibatalkan') return true;

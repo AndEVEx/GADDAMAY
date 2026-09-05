@@ -25,11 +25,38 @@ class MulaiKelas extends Component
         // Auto-close past-due expired agendas
         AgendaHarian::autoCloseExpiredAgendas($jadwal->rombel_id, $today);
 
-        // Check if agenda already exists for today
+        // Check if agenda already exists for this jadwal today
         $this->agenda = AgendaHarian::where('jadwal_pelajaran_id', $jadwal->id)
             ->where('guru_id', auth()->id())
             ->where('tanggal', $today)
             ->first();
+
+        // If no agenda for this jadwal, check if there's one for a sibling jadwal
+        // (same rombel + same mapel + same day = merged teaching block)
+        if (!$this->agenda && $jadwal->mapel_id) {
+            $siblingJadwals = JadwalPelajaran::where('hari', $jadwal->hari)
+                ->where('rombel_id', $jadwal->rombel_id)
+                ->where('mapel_id', $jadwal->mapel_id)
+                ->where('id', '!=', $jadwal->id)
+                ->pluck('id');
+
+            if ($siblingJadwals->isNotEmpty()) {
+                $siblingAgenda = AgendaHarian::whereIn('jadwal_pelajaran_id', $siblingJadwals)
+                    ->where('guru_id', auth()->id())
+                    ->where('tanggal', $today)
+                    ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan'])
+                    ->first();
+
+                if ($siblingAgenda) {
+                    // Redirect to the existing sibling agenda's flow
+                    if (in_array($siblingAgenda->status, ['token_terverifikasi', 'berjalan'])) {
+                        return redirect()->route('guru.materi', $siblingAgenda->id);
+                    }
+                    // For menunggu_token, redirect to the sibling's mulai page
+                    return redirect()->route('guru.mulai', $siblingAgenda->jadwal_pelajaran_id);
+                }
+            }
+        }
 
         if ($this->agenda) {
             $this->token = $this->agenda->token_handshake ?? '';
@@ -58,6 +85,31 @@ class MulaiKelas extends Component
         );
 
         $this->token = $this->agenda->token_handshake;
+
+        // Auto-create linked agendas for sibling jadwals (same block split by breaks)
+        if ($this->jadwal->mapel_id) {
+            $siblingJadwals = JadwalPelajaran::where('hari', $this->jadwal->hari)
+                ->where('rombel_id', $this->jadwal->rombel_id)
+                ->where('mapel_id', $this->jadwal->mapel_id)
+                ->where('id', '!=', $this->jadwal->id)
+                ->get();
+
+            foreach ($siblingJadwals as $sibling) {
+                AgendaHarian::updateOrCreate(
+                    [
+                        'jadwal_pelajaran_id' => $sibling->id,
+                        'guru_id' => auth()->id(),
+                        'tanggal' => $tanggal,
+                    ],
+                    [
+                        'token_handshake' => $this->agenda->token_handshake,
+                        'waktu_mulai' => $this->agenda->waktu_mulai,
+                        'status' => 'menunggu_token',
+                        'status_kehadiran_guru' => 'hadir',
+                    ]
+                );
+            }
+        }
 
         $this->dispatch('show-toast', message: 'Token OTP berhasil dibuat!', type: 'success');
     }

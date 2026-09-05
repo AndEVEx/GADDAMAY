@@ -26,6 +26,15 @@ class NilaiKktpDetail extends Component
         $userId = auth()->id();
         $query = TujuanPembelajaran::where('mapel_id', $this->mapel->id);
 
+        // Filter by rombel tingkat
+        $tingkat = $this->rombel->tingkat;
+        if ($tingkat) {
+            $query->where(function ($q) use ($tingkat) {
+                $q->where('tingkat', $tingkat)
+                  ->orWhereNull('tingkat'); // backward compat
+            });
+        }
+
         $hasTeacherTps = TujuanPembelajaran::where('mapel_id', $this->mapel->id)
             ->where('ketua_mgmp_id', $userId)
             ->exists();

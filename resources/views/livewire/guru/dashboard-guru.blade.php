@@ -78,22 +78,33 @@
                     {{-- Jam & Status Icon Box Container --}}
                     <div class="d-flex align-items-center gap-2 flex-fill min-w-0" style="overflow: hidden;">
                         @php
-                            $boxBg = match($jadwal->agenda?->status) {
-                                'selesai' => 'bg-success bg-opacity-10 text-success',
-                                'berjalan' => 'bg-primary bg-opacity-10 text-primary',
-                                'menunggu_token', 'token_terverifikasi' => 'bg-warning bg-opacity-10 text-warning',
-                                default => 'bg-light text-muted border',
-                            };
-                            $statusIcon = match($jadwal->agenda?->status) {
-                                'selesai' => 'bi-check-circle-fill',
-                                'berjalan' => 'bi-play-circle-fill',
-                                'menunggu_token' => 'bi-hourglass-split',
-                                'token_terverifikasi' => 'bi-shield-check',
-                                default => 'bi-clock',
-                            };
+                            $boxBg = 'bg-light text-muted border';
+                            $statusIcon = 'bi-clock';
+                            
+                            if (!empty($jadwal->agenda)) {
+                                $agendaStatus = $jadwal->agenda->status;
+                                $isIzin = in_array($jadwal->agenda->status_kehadiran_guru ?? '', ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar']);
+                                
+                                if ($isIzin) {
+                                    $boxBg = 'text-white';
+                                    $statusIcon = 'bi-info-circle-fill';
+                                } elseif (in_array($agendaStatus, ['berjalan', 'selesai'])) {
+                                    if (!empty($jadwal->handshake_on_time) && !empty($jadwal->has_foto)) {
+                                        // ≤45min AND has foto = GREEN
+                                        $boxBg = 'bg-success bg-opacity-10 text-success';
+                                    } else {
+                                        // >45min OR no foto yet = YELLOW
+                                        $boxBg = 'bg-warning bg-opacity-10 text-warning';
+                                    }
+                                    $statusIcon = $agendaStatus === 'berjalan' ? 'bi-play-circle-fill' : 'bi-check-circle-fill';
+                                } elseif (in_array($agendaStatus, ['menunggu_token', 'token_terverifikasi'])) {
+                                    $boxBg = 'bg-warning bg-opacity-10 text-warning';
+                                    $statusIcon = $agendaStatus === 'menunggu_token' ? 'bi-hourglass-split' : 'bi-shield-check';
+                                }
+                            }
                         @endphp
 
-                        <div class="rounded-3 p-2 text-center flex-shrink-0 {{ $boxBg }}" style="min-width: 62px;">
+                        <div class="rounded-3 p-2 text-center flex-shrink-0 {{ $boxBg }}" style="min-width: 62px; {{ $isIzin ?? false ? 'background-color: rgba(124, 58, 237, 0.1); color: #7c3aed !important;' : '' }}">
                             <i class="bi {{ $statusIcon }} fs-5 d-block mb-1"></i>
                             <div class="fw-bold" style="font-size: 0.78rem;">Jam {{ $jadwal->jam_ke_mulai }}</div>
                             @if($jadwal->jam_ke_mulai !== $jadwal->jam_ke_selesai)
@@ -119,6 +130,17 @@
                             @if(!empty($jadwal->keterangan))
                                 <span class="badge bg-light text-muted border mt-1 text-truncate d-inline-block" style="font-size: 0.7rem; max-width: 100%;">{{ $jadwal->keterangan }}</span>
                             @endif
+
+                            @if(!empty($jadwal->otp_time) && empty($jadwal->is_kegiatan_khusus))
+                                <div class="text-muted small mt-1" style="font-size: 0.72rem;">
+                                    <i class="bi bi-stopwatch text-primary me-1"></i>Handshake: {{ $jadwal->otp_time }} WIB
+                                    @if($jadwal->handshake_on_time === true)
+                                        <span class="badge bg-success bg-opacity-10 text-success ms-1" style="font-size: 0.6rem;">Tepat Waktu</span>
+                                    @elseif($jadwal->handshake_on_time === false)
+                                        <span class="badge bg-warning bg-opacity-10 text-warning ms-1" style="font-size: 0.6rem;">Terlambat (>45 mnt)</span>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -143,9 +165,9 @@
                     <a href="{{ route('guru.mulai', $jadwal->primary_id ?? $jadwal->id) }}" class="btn btn-primary btn-sm w-100 py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
                         <i class="bi bi-play-fill me-1 fs-6"></i> Mulai Kelas
                     </a>
-                @elseif(!empty($jadwal->is_late) && empty($jadwal->agenda) && empty($jadwal->is_kegiatan_khusus))
-                    <button disabled class="btn btn-danger text-white btn-sm w-100 py-2 fw-semibold border-0" style="border-radius: 8px; cursor: not-allowed;" title="Batas waktu mulai kelas 30 menit terlewat">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Anda Telat
+                @elseif(!empty($jadwal->is_period_over) && empty($jadwal->agenda) && empty($jadwal->is_kegiatan_khusus))
+                    <button disabled class="btn btn-secondary text-white btn-sm w-100 py-2 fw-semibold border-0" style="border-radius: 8px; cursor: not-allowed;">
+                        <i class="bi bi-clock-history me-1"></i> Jam Pelajaran Sudah Selesai
                     </button>
                 @elseif(empty($jadwal->agenda) && empty($jadwal->is_kegiatan_khusus))
                     <button disabled class="btn btn-light text-muted btn-sm w-100 py-2 fw-medium border" style="border-radius: 8px; cursor: not-allowed;" title="Waktu mengajar belum tiba">
