@@ -180,15 +180,34 @@
                         </a>
                     @elseif($jadwal->agenda->status === 'token_terverifikasi')
                         <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-primary btn-sm w-100 py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
-                            <i class="bi bi-pencil-square me-1"></i> Isi Materi
+                            <i class="bi bi-pencil-square me-1"></i> Langkah 1: Isi Materi & TP
                         </a>
                     @elseif($jadwal->agenda->status === 'berjalan')
+                        @php
+                            $hasMateri = !empty($jadwal->agenda->materi_diajarkan);
+                            $hasFotoGuru = !empty($jadwal->agenda->foto_guru_path);
+                            $hasKehadiran = $jadwal->agenda->kehadiranMurid()->exists();
+                        @endphp
                         <div class="d-flex flex-wrap gap-2">
-                            <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
-                                <i class="bi bi-pencil-square me-1"></i> Isi Materi / Edit
-                            </a>
-                            <a href="{{ route('guru.stopwatch', $jadwal->agenda->id) }}" class="btn btn-success btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
-                                <i class="bi bi-stopwatch me-1"></i> Stopwatch
+                            @if(!$hasMateri)
+                                <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
+                                    <i class="bi bi-pencil-square me-1"></i> Langkah 1: Isi Materi & TP
+                                </a>
+                            @elseif(!$hasFotoGuru)
+                                <a href="{{ route('guru.foto-guru', $jadwal->agenda->id) }}" class="btn btn-success btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
+                                    <i class="bi bi-camera me-1"></i> Langkah 2: Foto Guru & Kelas
+                                </a>
+                            @elseif(!$hasKehadiran)
+                                <a href="{{ route('guru.kehadiran', $jadwal->agenda->id) }}" class="btn btn-warning text-dark btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
+                                    <i class="bi bi-person-check me-1"></i> Langkah 3: Presensi Siswa
+                                </a>
+                            @else
+                                <a href="{{ route('guru.stopwatch', $jadwal->agenda->id) }}" class="btn btn-success btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
+                                    <i class="bi bi-stopwatch me-1"></i> Stopwatch & KKTP
+                                </a>
+                            @endif
+                            <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-outline-secondary btn-sm py-2" style="border-radius: 8px;" wire:navigate title="Edit Materi / TP">
+                                <i class="bi bi-pencil"></i>
                             </a>
                         </div>
                     @elseif($jadwal->agenda->status === 'selesai')

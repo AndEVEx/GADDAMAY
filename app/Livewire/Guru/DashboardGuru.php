@@ -210,17 +210,7 @@ class DashboardGuru extends Component
                 $displayStartStr = substr($waktuMulaiRaw, 0, 5);
             }
 
-            // Task 2: Auto-close completed class if scheduled period has ended
-            if ($agenda && in_array($agenda->status, ['menunggu_token', 'token_terverifikasi', 'berjalan'])) {
-                $selesaiStr = substr($waktuSelesaiRaw, 0, 5);
-                if ($timeNow >= $selesaiStr) {
-                    $agenda->update([
-                        'status' => 'selesai',
-                        'waktu_selesai' => Carbon::now('Asia/Jakarta'),
-                    ]);
-                    $agenda->refresh();
-                }
-            }
+            // Note: Do not prematurely auto-close active class today so teacher can complete materi, foto, presensi, and kktp
 
             $block['waktu_mulai_str'] = $displayStartStr;
             $block['time_arrived'] = $timeArrived;

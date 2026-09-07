@@ -71,14 +71,16 @@
                 </div>
             </div>
         </div>
-    @elseif($agenda->status === 'berjalan')
+    @elseif($agenda->status === 'berjalan' || $agenda->status === 'token_terverifikasi')
         <div class="card">
             <div class="card-body text-center py-4">
                 <div class="status-badge status-hijau mx-auto mb-3">
                     <i class="bi bi-check-circle-fill"></i> Token Terverifikasi!
                 </div>
-                <a href="{{ route('guru.stopwatch', $agenda->id) }}" class="btn btn-success btn-lg" wire:navigate>
-                    <i class="bi bi-stopwatch me-2"></i>Lanjut ke Stopwatch
+                <h5 class="fw-bold mb-2 text-dark">Ketua Kelas Berhasil Memverifikasi Token</h5>
+                <p class="text-muted small mb-3">Silakan lanjutkan untuk mengisi materi pembelajaran dan tujuan pembelajaran (TP).</p>
+                <a href="{{ route('guru.materi', $agenda->id) }}" class="btn btn-primary btn-lg" wire:navigate>
+                    <i class="bi bi-pencil-square me-2"></i>Lanjut ke Isi Materi & TP
                 </a>
             </div>
         </div>

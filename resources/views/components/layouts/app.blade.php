@@ -93,53 +93,77 @@
                 @php $role = Auth::user()->role; @endphp
 
                 @if($role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" wire:navigate>
+                    {{-- 1. Monitoring & Realtime --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-2 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-graph-up-arrow"></i> Monitoring & Realtime
+                    </div>
+                    <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-speedometer2 me-2"></i>Dashboard Admin
                     </a>
-                    <a href="{{ route('admin.jadwal') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.jadwal') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-calendar3 me-2"></i>Manajemen Jadwal
+                    <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-broadcast me-2 text-danger"></i>Monitoring Realtime
                     </a>
-                    <a href="{{ route('admin.import') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.import') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-file-earmark-code me-2"></i>Import Jadwal (XML)
-                    </a>
-                    <a href="{{ route('admin.guru') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.guru') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-people-fill me-2"></i>Manajemen Guru
-                    </a>
-                    <a href="{{ route('admin.users') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.users') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-person-fill-lock me-2"></i>Manajemen User
-                    </a>
-                    <a href="{{ route('admin.kelas') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.kelas') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-door-open-fill me-2"></i>Manajemen Kelas
-                    </a>
-                    <a href="{{ route('admin.siswa') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.siswa') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-person-badge-fill me-2"></i>Manajemen Siswa
-                    </a>
-                    <a href="{{ route('admin.mapel') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.mapel') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-book-fill me-2"></i>Manajemen Mapel
-                    </a>
-                    <a href="{{ route('admin.import-kktp') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.import-kktp') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-file-earmark-excel me-2"></i>Import KKTP (Excel)
-                    </a>
-                    <a href="{{ route('admin.motivasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.motivasi') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-chat-quote-fill me-2"></i>Motivasi & Pantun
-                    </a>
-                    <a href="{{ route('admin.hari-libur') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.hari-libur') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-calendar-check-fill me-2 text-danger"></i>Kelola Hari Libur
-                    </a>
-                    <a href="{{ route('admin.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-patch-check-fill me-2 text-warning"></i>Verifikasi Izin Guru
-                    </a>
-                    <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-graph-up-arrow me-2"></i>Monitoring Realtime
-                    </a>
-                    <a href="{{ route('monitoring.harian') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.harian') ? 'active' : '' }}" wire:navigate>
+                    <a href="{{ route('monitoring.harian') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('monitoring.harian') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-calendar2-day me-2 text-primary"></i>Monitoring Harian
                     </a>
-                    <a href="{{ route('monitoring.mingguan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.mingguan') ? 'active' : '' }}" wire:navigate>
+                    <a href="{{ route('monitoring.mingguan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('monitoring.mingguan') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-calendar-range me-2 text-info"></i>Monitoring Mingguan
                     </a>
-                    <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-bar-chart-line me-2"></i>Progress KKTP (Analytic)
+                    <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-bar-chart-line me-2 text-success"></i>Progress KKTP (Analytic)
+                    </a>
+
+                    {{-- 2. Penjadwalan KBM --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-calendar-check"></i> Penjadwalan KBM
+                    </div>
+                    <a href="{{ route('admin.jadwal') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.jadwal') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar3 me-2 text-primary"></i>Manajemen Jadwal
+                    </a>
+                    <a href="{{ route('admin.import') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.import') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-file-earmark-code me-2 text-warning"></i>Import Jadwal (XML)
+                    </a>
+                    <a href="{{ route('admin.hari-libur') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.hari-libur') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-x me-2 text-danger"></i>Kelola Hari Libur
+                    </a>
+
+                    {{-- 3. Kelas & Siswa --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-mortarboard-fill"></i> Manajemen Kelas & Siswa
+                    </div>
+                    <a href="{{ route('admin.kelas') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.kelas') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-door-open-fill me-2 text-secondary"></i>Manajemen Kelas
+                    </a>
+                    <a href="{{ route('admin.siswa') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.siswa') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-person-badge-fill me-2 text-primary"></i>Manajemen Siswa
+                    </a>
+                    <a href="{{ route('admin.mapel') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.mapel') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-book-fill me-2 text-success"></i>Manajemen Mapel
+                    </a>
+
+                    {{-- 4. Kurikulum & KKTP --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-journal-bookmark-fill"></i> Kurikulum & KKTP
+                    </div>
+                    <a href="{{ route('admin.import-kktp') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.import-kktp') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-file-earmark-excel me-2 text-success"></i>Import KKTP (Excel)
+                    </a>
+                    <a href="{{ route('admin.motivasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.motivasi') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-chat-quote-fill me-2 text-info"></i>Motivasi & Pantun
+                    </a>
+
+                    {{-- 5. Pengguna & Izin --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-person-gear"></i> Pengguna & Layanan
+                    </div>
+                    <a href="{{ route('admin.guru') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.guru') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-people-fill me-2 text-primary"></i>Manajemen Guru
+                    </a>
+                    <a href="{{ route('admin.users') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.users') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-person-fill-lock me-2 text-dark"></i>Manajemen User
+                    </a>
+                    <a href="{{ route('admin.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-patch-check-fill me-2 text-warning"></i>Verifikasi Izin Guru
                     </a>
                 @elseif(in_array($role, ['guru', 'ketua_mgmp']))
                     <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>

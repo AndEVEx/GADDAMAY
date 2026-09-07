@@ -29,36 +29,127 @@
     </div>
 
     {{-- Search & Filter --}}
-    <div class="card mb-3 animate-fade-in-up">
+    <div class="card mb-3 animate-fade-in-up shadow-sm" style="border-radius: 12px;">
         <div class="card-body p-3">
             <div class="row g-2">
-                <div class="col-8">
-                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control" placeholder="Cari nama atau NIS..." style="min-height: 48px;">
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="search" wire:model.live.debounce.300ms="search" class="form-control border-start-0" placeholder="Cari nama atau NIS siswa..." style="min-height: 48px;">
+                    </div>
                 </div>
-                <div class="col-4">
-                    <select wire:model.live="filterRombel" class="form-select" style="min-height: 48px;">
-                        <option value="">Semua Kelas</option>
+                <div class="col-md-5">
+                    <select wire:model.live="filterRombel" class="form-select fw-semibold" style="min-height: 48px;">
+                        <option value="">-- Tampilkan Semua Kelas (Total: {{ $rombels->sum('siswa_count') }} Siswa) --</option>
                         @foreach($rombels as $rombel)
-                            <option value="{{ $rombel->id }}">{{ $rombel->nama_kelas }}</option>
+                            <option value="{{ $rombel->id }}">{{ $rombel->nama_kelas }} ({{ $rombel->siswa_count }} Siswa)</option>
                         @endforeach
                     </select>
                 </div>
             </div>
+
+            @if($selectedRombel)
+            <div class="alert alert-info py-2 px-3 mt-3 mb-0 d-flex align-items-center justify-content-between flex-wrap gap-2" style="border-radius: 8px;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-door-open-fill fs-5 text-primary"></i>
+                    <div>
+                        <span class="fw-bold">Kelas: {{ $selectedRombel->nama_kelas }}</span>
+                        <span class="badge bg-primary ms-1">{{ $selectedRombel->siswa_count }} Siswa</span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <button wire:click="openSwapModal" class="btn btn-warning btn-sm text-dark fw-bold">
+                        <i class="bi bi-arrow-left-right me-1"></i> Tukar Siswa Kelas Ini
+                    </button>
+                    <button wire:click="$set('filterRombel', '')" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-x-circle me-1"></i> Reset Filter
+                    </button>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 
     {{-- Action Buttons --}}
-    <div class="d-flex gap-2 mb-3 flex-wrap">
-        <button wire:click="create" class="btn btn-primary" style="min-height: 48px;">
-            <i class="bi bi-plus-circle me-1"></i> Tambah Siswa
-        </button>
-        <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
-            <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
-        </button>
-        <button wire:click="exportPdf" class="btn btn-outline-danger" style="min-height: 48px;">
-            <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF (Kop Surat)
-        </button>
+    <div class="d-flex gap-2 mb-3 flex-wrap align-items-center justify-content-between">
+        <div class="d-flex gap-2 flex-wrap">
+            <button wire:click="create" class="btn btn-primary" style="min-height: 48px;">
+                <i class="bi bi-plus-circle me-1"></i> Tambah Siswa
+            </button>
+            <button wire:click="openSwapModal" class="btn btn-warning text-dark fw-bold" style="min-height: 48px;">
+                <i class="bi bi-arrow-left-right me-1"></i> Tukar Siswa Antar Rombel
+            </button>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
+                <i class="bi bi-file-earmark-excel me-2"></i>Export Excel
+            </button>
+            <button wire:click="exportPdf" class="btn btn-outline-danger" style="min-height: 48px;">
+                <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF (Kop Surat)
+            </button>
+        </div>
     </div>
+
+    {{-- Modal Swap Siswa Antar Rombel --}}
+    @if($showSwapModal)
+    <div class="card mb-3 border-warning shadow animate-fade-in-up" style="border-radius: 12px;">
+        <div class="card-header bg-warning text-dark d-flex align-items-center justify-content-between">
+            <h6 class="mb-0 fw-bold"><i class="bi bi-arrow-left-right me-2"></i>Tukar Seluruh Data Siswa Antar Dua Rombel</h6>
+            <button type="button" wire:click="closeSwapModal" class="btn-close"></button>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-light border small mb-3">
+                <i class="bi bi-info-circle-fill text-primary me-1"></i>
+                Fitur ini berguna ketika jadwal pelajaran sudah benar, namun seluruh daftar muridnya tertukar antara dua kelas (misal tertukar antara <strong>Rombel 1</strong> dan <strong>Rombel 2</strong>). Seluruh siswa di Kelas A akan dipindahkan ke Kelas B, dan sebaliknya, secara atomic & aman.
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Pilih Kelas A</label>
+                    <select wire:model.live="swapRombelA" class="form-select @error('swapRombelA') is-invalid @enderror" style="min-height: 48px;">
+                        <option value="">-- Pilih Rombel A --</option>
+                        @foreach($rombels as $r)
+                            <option value="{{ $r->id }}">{{ $r->nama_kelas }} ({{ $r->siswa_count }} Siswa)</option>
+                        @endforeach
+                    </select>
+                    @error('swapRombelA') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Pilih Kelas B (Tujuan Tukar)</label>
+                    <select wire:model.live="swapRombelB" class="form-select @error('swapRombelB') is-invalid @enderror" style="min-height: 48px;">
+                        <option value="">-- Pilih Rombel B --</option>
+                        @foreach($rombels as $r)
+                            <option value="{{ $r->id }}">{{ $r->nama_kelas }} ({{ $r->siswa_count }} Siswa)</option>
+                        @endforeach
+                    </select>
+                    @error('swapRombelB') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+            </div>
+
+            @if($swapRombelA && $swapRombelB && $swapRombelA !== $swapRombelB)
+                @php
+                    $rA = $rombels->firstWhere('id', $swapRombelA);
+                    $rB = $rombels->firstWhere('id', $swapRombelB);
+                @endphp
+                @if($rA && $rB)
+                <div class="alert alert-warning py-2 mb-3 small d-flex align-items-center justify-content-between">
+                    <span>
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        Akan menukar: <strong>{{ $rA->nama_kelas }}</strong> ({{ $rA->siswa_count }} siswa) $\leftrightarrow$ <strong>{{ $rB->nama_kelas }}</strong> ({{ $rB->siswa_count }} siswa).
+                    </span>
+                </div>
+                @endif
+            @endif
+
+            <div class="d-flex gap-2">
+                <button type="button" wire:click="swapSiswaRombel" wire:confirm="Yakin ingin menukar seluruh siswa antara kedua kelas yang dipilih?" class="btn btn-warning text-dark fw-bold flex-fill" style="min-height: 48px;" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="swapSiswaRombel"><i class="bi bi-arrow-left-right me-1"></i> Eksekusi Tukar Siswa</span>
+                    <span wire:loading wire:target="swapSiswaRombel"><span class="spinner-border spinner-border-sm me-1"></span>Memproses penukaran...</span>
+                </button>
+                <button type="button" wire:click="closeSwapModal" class="btn btn-outline-secondary" style="min-height: 48px;">Batal</button>
+            </div>
+        </div>
+    </div>
+    @endif
 
     {{-- Form Modal / Card --}}
     @if($showForm)

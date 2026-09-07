@@ -91,10 +91,11 @@ class VerifikasiToken extends Component
             return;
         }
 
-        // Auto-close any previous active agendas for this class from earlier hours
+        // Auto-close any previous active agendas for this class from earlier hours (exclude same token / same block)
         if ($this->studentRombel) {
             AgendaHarian::where('id', '!=', $this->agenda->id)
                 ->where('tanggal', $today)
+                ->where('token_handshake', '!=', $this->token)
                 ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan'])
                 ->whereHas('jadwalPelajaran', fn($q) => $q->where('rombel_id', $this->studentRombel->id))
                 ->update([

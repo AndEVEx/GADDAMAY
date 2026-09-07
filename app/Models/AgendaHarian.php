@@ -153,9 +153,16 @@ class AgendaHarian extends Model
             12 => ['mulai' => '14:15', 'selesai' => '15:00'],
         ];
 
-        $query = self::whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan'])
-            ->where('tanggal', $tanggal)
-            ->with('jadwalPelajaran');
+        $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $query = self::where(function ($q) use ($today) {
+            // Sesi hari ini yang belum pernah dimulai sama sekali (hanya menunggu token)
+            $q->where('tanggal', $today)
+              ->where('status', 'menunggu_token');
+        })->orWhere(function ($q) use ($today) {
+            // Sesi dari hari-hari sebelumnya yang terlupakan
+            $q->where('tanggal', '<', $today)
+              ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan']);
+        })->with('jadwalPelajaran');
 
         if ($rombelId) {
             $query->whereHas('jadwalPelajaran', fn($q) => $q->where('rombel_id', $rombelId));
@@ -168,16 +175,20 @@ class AgendaHarian extends Model
             $jadwal = $agenda->jadwalPelajaran;
             if (!$jadwal) continue;
 
-            $endJamKey = (int) $jadwal->jam_ke_selesai;
-            $endTimeStr = $officialPeriods[$endJamKey]['selesai'] ?? '15:00';
-
-            if ($timeNow >= $endTimeStr) {
-                $agenda->update([
-                    'status' => 'selesai',
-                    'waktu_selesai' => $agenda->waktu_selesai ?? Carbon::now('Asia/Jakarta'),
-                ]);
-                $closedCount++;
+            // For today's unstarted tokens, only close if period has completely passed
+            if ($agenda->tanggal === $today) {
+                $endJamKey = (int) $jadwal->jam_ke_selesai;
+                $endTimeStr = $officialPeriods[$endJamKey]['selesai'] ?? '15:00';
+                if ($timeNow < $endTimeStr) {
+                    continue; // Skip, still in progress
+                }
             }
+
+            $agenda->update([
+                'status' => 'selesai',
+                'waktu_selesai' => $agenda->waktu_selesai ?? Carbon::now('Asia/Jakarta'),
+            ]);
+            $closedCount++;
         }
 
         return $closedCount;

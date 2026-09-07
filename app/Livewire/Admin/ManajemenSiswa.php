@@ -35,8 +35,86 @@ class ManajemenSiswa extends Component
     public string $deleteId = '';
     public string $deleteName = '';
 
+    // Swap Siswa Antar Rombel
+    public bool $showSwapModal = false;
+    public string $swapRombelA = '';
+    public string $swapRombelB = '';
+
     public function updatingSearch() { $this->resetPage(); }
     public function updatingFilterRombel() { $this->resetPage(); }
+
+    public function openSwapModal()
+    {
+        $this->swapRombelA = $this->filterRombel ?: '';
+        $this->swapRombelB = '';
+        $this->showSwapModal = true;
+    }
+
+    public function closeSwapModal()
+    {
+        $this->showSwapModal = false;
+        $this->reset(['swapRombelA', 'swapRombelB']);
+    }
+
+    public function swapSiswaRombel()
+    {
+        $this->validate([
+            'swapRombelA' => 'required|exists:rombel,id|different:swapRombelB',
+            'swapRombelB' => 'required|exists:rombel,id',
+        ], [
+            'swapRombelA.different' => 'Kelas A dan Kelas B harus berbeda!',
+            'swapRombelA.required' => 'Pilih Kelas A terlebih dahulu!',
+            'swapRombelB.required' => 'Pilih Kelas B yang menjadi tujuan tukar!',
+        ]);
+
+        $rombelA = Rombel::findOrFail($this->swapRombelA);
+        $rombelB = Rombel::findOrFail($this->swapRombelB);
+
+        $countA = Siswa::where('rombel_id', $rombelA->id)->count();
+        $countB = Siswa::where('rombel_id', $rombelB->id)->count();
+
+        if ($countA === 0 && $countB === 0) {
+            $this->dispatch('show-toast', message: 'Kedua kelas tidak memiliki siswa untuk ditukar.', type: 'warning');
+            return;
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($rombelA, $rombelB, $countA, $countB) {
+            \Illuminate\Support\Facades\DB::statement("
+                UPDATE siswa 
+                SET rombel_id = CASE 
+                    WHEN rombel_id = ? THEN ? 
+                    WHEN rombel_id = ? THEN ? 
+                    ELSE rombel_id 
+                END,
+                updated_at = NOW()
+                WHERE rombel_id IN (?, ?)
+            ", [
+                $rombelA->id, $rombelB->id,
+                $rombelB->id, $rombelA->id,
+                $rombelA->id, $rombelB->id
+            ]);
+
+            if (auth()->check()) {
+                \App\Models\AuditLog::create([
+                    'user_id' => auth()->id(),
+                    'action' => 'swap_siswa_rombel',
+                    'auditable_type' => Rombel::class,
+                    'auditable_id' => $rombelA->id,
+                    'new_values' => [
+                        'rombel_a' => $rombelA->nama_kelas,
+                        'rombel_b' => $rombelB->nama_kelas,
+                        'total_siswa_a' => $countA,
+                        'total_siswa_b' => $countB,
+                        'timestamp' => \Carbon\Carbon::now('Asia/Jakarta')->toDateTimeString(),
+                    ],
+                    'ip_address' => request()->ip(),
+                ]);
+            }
+        });
+
+        $this->showSwapModal = false;
+        $this->dispatch('show-toast', message: "Berhasil menukar siswa antara {$rombelA->nama_kelas} ({$countA} siswa) dan {$rombelB->nama_kelas} ({$countB} siswa)!", type: 'success');
+    }
 
     public function create()
     {
@@ -248,7 +326,7 @@ class ManajemenSiswa extends Component
 
     public function render()
     {
-        $rombels = Rombel::orderBy('tingkat')->orderBy('nama_kelas')->get();
+        $rombels = Rombel::withCount('siswa')->orderBy('tingkat')->orderBy('nama_kelas')->get();
 
         $siswas = Siswa::with('rombel')
             ->when($this->search, function($q) {
@@ -259,9 +337,12 @@ class ManajemenSiswa extends Component
             ->orderBy('nama')
             ->paginate(20);
 
+        $selectedRombel = $this->filterRombel ? Rombel::find($this->filterRombel) : null;
+
         return view('livewire.admin.manajemen-siswa', [
             'siswas' => $siswas,
             'rombels' => $rombels,
+            'selectedRombel' => $selectedRombel,
         ]);
     }
 }
