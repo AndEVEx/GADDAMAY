@@ -131,44 +131,52 @@ class AgendaHarian extends Model
 
     /**
      * Auto-close agendas whose scheduled period has ended.
+     * Handshake HARUS dilaksanakan selama jam pelajaran terkait berlangsung.
+     * Jika jam pelajaran telah usai, agenda yang masih menunggu token otomatis dibatalkan/kadaluarsa.
      */
     public static function autoCloseExpiredAgendas(?string $rombelId = null, ?string $tanggal = null): int
     {
         $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
         $now = Carbon::now('Asia/Jakarta');
+        $timeNow = $now->format('H:i');
 
-        // Only auto-close past days (yesterday or older)
-        // OR today IF after 16:00 (school hours over)
         $query = self::where(function ($q) use ($today) {
             // Sesi dari hari-hari sebelumnya yang terlupakan
             $q->where('tanggal', '<', $today)
               ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan']);
+        })->orWhere(function ($q) use ($today) {
+            // Sesi hari ini yang masih aktif
+            $q->where('tanggal', $today)
+              ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan']);
         });
-
-        // After 16:00, clean up any today's abandoned/unfinished sessions
-        if ($now->hour >= 16) {
-            $query->orWhere(function ($q) use ($today) {
-                $q->where('tanggal', $today)
-                  ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan']);
-            });
-        }
 
         if ($rombelId) {
             $query->whereHas('jadwalPelajaran', fn($q) => $q->where('rombel_id', $rombelId));
         }
 
-        $activeAgendas = $query->with('jadwalPelajaran')->get();
+        $activeAgendas = $query->with(['jadwalPelajaran.mataPelajaran', 'jadwalPelajaran.rombel', 'jadwalPelajaran.jadwalGuru'])->get();
         $closedCount = 0;
 
         foreach ($activeAgendas as $agenda) {
-            // If it never even got verified (just waiting for token), mark dibatalkan
-            $finalStatus = $agenda->status === 'menunggu_token' ? 'dibatalkan' : 'selesai';
+            $isPastDay = $agenda->tanggal < $today;
+            $periodEnded = false;
 
-            $agenda->update([
-                'status' => $finalStatus,
-                'waktu_selesai' => $agenda->waktu_selesai ?? Carbon::now('Asia/Jakarta'),
-            ]);
-            $closedCount++;
+            if ($isPastDay) {
+                $periodEnded = true;
+            } elseif ($agenda->jadwalPelajaran) {
+                $periodEnded = $agenda->jadwalPelajaran->hasPeriodEnded($timeNow);
+            }
+
+            if ($periodEnded) {
+                // If it was never verified during the teaching period, it expired -> dibatalkan
+                $finalStatus = $agenda->status === 'menunggu_token' ? 'dibatalkan' : 'selesai';
+
+                $agenda->update([
+                    'status' => $finalStatus,
+                    'waktu_selesai' => $agenda->waktu_selesai ?? Carbon::now('Asia/Jakarta'),
+                ]);
+                $closedCount++;
+            }
         }
 
         return $closedCount;

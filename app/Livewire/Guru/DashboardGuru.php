@@ -139,6 +139,9 @@ class DashboardGuru extends Component
         // Sort all merged blocks by jam_ke_mulai
         $allMerged = $mergedJadwals->sortBy('jam_ke_mulai')->values();
 
+        // Auto-close any expired agendas whose periods have ended
+        AgendaHarian::autoCloseExpiredAgendas(null, $this->tanggal);
+
         // 4. Batch load all agenda harian for today across all merged schedule IDs in 1 query
         $allScheduleIds = $allMerged->flatMap(fn($block) => $block['all_ids'])->toArray();
 
@@ -210,9 +213,9 @@ class DashboardGuru extends Component
                     $timeArrived = true;
                 }
 
-                // Check if still within teaching period (no lockout — guru can always start during their period)
+                // Check if still within teaching period: handshake HARUS dilakukan selama jam pelajaran berlangsung
                 $selesaiStr = $officialPeriods[$endJamKey]['selesai'] ?? ($jamMap->get($endJamKey)?->waktu_selesai ?? '15:00');
-                if ($timeNow > substr($selesaiStr, 0, 5) && !$agenda) {
+                if ($timeNow > substr($selesaiStr, 0, 5)) {
                     $isPeriodOver = true;
                 }
             } catch (\Exception $e) {
@@ -286,10 +289,12 @@ class DashboardGuru extends Component
         if ($this->todayHoliday && !$user->canOverride()) return false;
         if ($block['is_kegiatan_khusus']) return false;
         if ($agenda && in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar'])) return false;
-        if ($isPeriodOver && !$agenda) return false; // only block if period is completely over
+
+        // Handshake HARUS dilaksanakan selama jam pelajaran terkait berlangsung
+        if ($isPeriodOver) return false;
         if (!$timeArrived && !$agenda) return false;
         if (!$agenda) return true;
-        if ($agenda->status === 'dibatalkan') return true;
+        if ($agenda->status === 'dibatalkan' && !$isPeriodOver) return true;
 
         return false;
     }

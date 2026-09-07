@@ -50,6 +50,19 @@ class MulaiKelas extends Component
             }
         }
 
+        // Auto-close any expired agendas whose periods have ended
+        AgendaHarian::autoCloseExpiredAgendas(null, $today);
+
+        $timeNow = Carbon::now('Asia/Jakarta')->format('H:i');
+        if ($this->jadwal->hasPeriodEnded($timeNow)) {
+            // If class was not handshaked during its period, deny access
+            if (!$this->agenda || $this->agenda->status === 'menunggu_token') {
+                $range = $this->jadwal->getEffectiveTimeRange();
+                session()->flash('error', "Jam pelajaran telah berakhir pada pukul {$range['waktu_selesai']}. Handshake hanya dapat dilaksanakan selama jam pelajaran berlangsung.");
+                return redirect()->route('guru.dashboard');
+            }
+        }
+
         if ($this->agenda) {
             // If already verified or running, automatically forward to the next step!
             if ($this->agenda->status === 'token_terverifikasi') {
@@ -73,6 +86,19 @@ class MulaiKelas extends Component
 
     public function generateToken()
     {
+        $timeNow = Carbon::now('Asia/Jakarta')->format('H:i');
+        $range = $this->jadwal->getEffectiveTimeRange();
+
+        if ($timeNow < $range['waktu_mulai']) {
+            $this->dispatch('show-toast', message: "Jam pelajaran belum dimulai (mulai pukul {$range['waktu_mulai']}).", type: 'warning');
+            return;
+        }
+
+        if ($this->jadwal->hasPeriodEnded($timeNow)) {
+            $this->dispatch('show-toast', message: "Jam pelajaran telah berakhir pada pukul {$range['waktu_selesai']}. Handshake tidak dapat dilaksanakan.", type: 'danger');
+            return;
+        }
+
         $tanggal = Carbon::today('Asia/Jakarta')->format('Y-m-d');
 
         $this->agenda = AgendaHarian::updateOrCreate(

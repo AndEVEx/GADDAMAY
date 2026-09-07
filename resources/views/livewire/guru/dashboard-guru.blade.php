@@ -165,7 +165,7 @@
                     <a href="{{ route('guru.mulai', $jadwal->primary_id ?? $jadwal->id) }}" class="btn btn-primary btn-sm w-100 py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
                         <i class="bi bi-play-fill me-1 fs-6"></i> Mulai Kelas
                     </a>
-                @elseif(!empty($jadwal->is_period_over) && empty($jadwal->agenda) && empty($jadwal->is_kegiatan_khusus))
+                @elseif(!empty($jadwal->is_period_over) && (empty($jadwal->agenda) || $jadwal->agenda->status === 'menunggu_token' || $jadwal->agenda->status === 'dibatalkan') && empty($jadwal->is_kegiatan_khusus))
                     <button disabled class="btn btn-secondary text-white btn-sm w-100 py-2 fw-semibold border-0" style="border-radius: 8px; cursor: not-allowed;">
                         <i class="bi bi-clock-history me-1"></i> Jam Pelajaran Sudah Selesai
                     </button>

@@ -92,6 +92,15 @@ class VerifikasiToken extends Component
             return;
         }
 
+        $now = Carbon::now('Asia/Jakarta');
+        $timeNow = $now->format('H:i');
+
+        if ($this->agenda->jadwalPelajaran?->hasPeriodEnded($timeNow)) {
+            $range = $this->agenda->jadwalPelajaran->getEffectiveTimeRange();
+            $this->errorMessage = "Jam pelajaran ini telah berakhir pada pukul {$range['waktu_selesai']}. Handshake hanya dapat dilaksanakan selama jam pelajaran terkait berlangsung.";
+            return;
+        }
+
         // Auto-close any previous active agendas for this class from earlier hours (exclude same token / same block)
         if ($this->studentRombel) {
             AgendaHarian::where('id', '!=', $this->agenda->id)
