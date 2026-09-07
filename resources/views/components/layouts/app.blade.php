@@ -194,6 +194,23 @@
                         <i class="bi bi-calendar-x me-2 text-warning"></i>Pengajuan Izin Guru
                     </a>
 
+                    {{-- Kelompok Menu "Performa Saya" --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-speedometer"></i> Performa Saya
+                    </div>
+                    <a href="{{ route('guru.performa.jadwal-mingguan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.performa.jadwal-mingguan') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-week me-2 text-primary"></i>Jam Mengajar Mingguan
+                    </a>
+                    <a href="{{ route('guru.performa.siswa-diajar') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.performa.siswa-diajar') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-people me-2 text-info"></i>Daftar Siswa Diajar
+                    </a>
+                    <a href="{{ route('guru.performa.kehadiran-bulanan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.performa.kehadiran-bulanan') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-clock-history me-2 text-warning"></i>Realisasi Jam Bulanan
+                    </a>
+                    <a href="{{ route('guru.performa.export-iki') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.performa.export-iki*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>Export IKI (PDF)
+                    </a>
+
                     @if($role === 'ketua_mgmp')
                         <a href="{{ route('mgmp.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.dashboard') ? 'active' : '' }}" wire:navigate>
                             <i class="bi bi-diagram-3-fill me-2"></i>Dashboard MGMP

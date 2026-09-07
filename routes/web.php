@@ -47,6 +47,11 @@ use App\Livewire\Guru\SettingKktp;
 use App\Livewire\Guru\NilaiKktpIndex;
 use App\Livewire\Guru\NilaiKktpDetail;
 use App\Livewire\Guru\PengajuanIzin;
+use App\Livewire\Guru\Performa\JadwalMingguan;
+use App\Livewire\Guru\Performa\SiswaDiajar;
+use App\Livewire\Guru\Performa\KehadiranBulanan;
+use App\Livewire\Guru\Performa\ExportIki;
+use App\Http\Controllers\Guru\IkiExportController;
 use App\Livewire\Waka\VerifikasiIzin;
 
 // ============================================================
@@ -146,6 +151,15 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
 
     // Pengajuan Izin Guru
     Route::get('/izin', PengajuanIzin::class)->name('guru.izin');
+
+    // Kelompok Menu "Performa Saya"
+    Route::prefix('performa')->group(function () {
+        Route::get('/jadwal-mingguan', JadwalMingguan::class)->name('guru.performa.jadwal-mingguan');
+        Route::get('/siswa-diajar', SiswaDiajar::class)->name('guru.performa.siswa-diajar');
+        Route::get('/kehadiran-bulanan', KehadiranBulanan::class)->name('guru.performa.kehadiran-bulanan');
+        Route::get('/export-iki', ExportIki::class)->name('guru.performa.export-iki');
+        Route::get('/export-iki/pdf', [IkiExportController::class, 'exportPdf'])->name('guru.performa.export-iki.pdf');
+    });
 
     // These require time restriction
     Route::middleware('time-restriction')->group(function () {
