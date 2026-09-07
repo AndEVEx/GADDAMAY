@@ -13,6 +13,13 @@
         </div>
     </div>
 
+    @if(!$studentRombel)
+    <div class="alert alert-warning animate-fade-in-up mb-3" style="border-radius: 12px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>Perhatian:</strong> Akun Anda belum terhubung dengan data kelas/rombel di sistem. Silakan hubungi Administrator untuk mengatur kelas pada akun Anda di menu Manajemen User.
+    </div>
+    @endif
+
     @if($agenda && in_array($agenda->status, ['token_terverifikasi', 'berjalan']))
     {{-- Status Card for Already Verified Agenda --}}
     <div class="card mb-3 animate-fade-in-up border-success">

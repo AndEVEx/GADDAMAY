@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use App\Models\User;
+use App\Models\Rombel;
 use App\Services\AuditLogService;
 use Illuminate\Support\Facades\Hash;
 
@@ -29,6 +30,7 @@ class ManajemenUser extends Component
     public string $email = '';
     public string $password = '';
     public string $role = 'guru';
+    public ?string $rombel_id = null;
     public bool $confirmDelete = false;
     public string $deleteId = '';
     public string $deleteName = '';
@@ -51,6 +53,7 @@ class ManajemenUser extends Component
         $this->email = $user->email;
         $this->password = '';
         $this->role = $user->role;
+        $this->rombel_id = $user->rombel_id;
         $this->editing = true;
         $this->showForm = true;
     }
@@ -61,6 +64,7 @@ class ManajemenUser extends Component
             'nama' => 'required|min:3',
             'email' => 'required|email|unique:users,email' . ($this->editing ? ",{$this->editId}" : ''),
             'role' => 'required|in:admin,guru,kepsek,waka,ketua_mgmp,ketua_kelas',
+            'rombel_id' => 'nullable|exists:rombel,id',
         ];
 
         if (!$this->editing) {
@@ -69,9 +73,16 @@ class ManajemenUser extends Component
 
         $this->validate($rules);
 
+        $selectedRombelId = ($this->role === 'ketua_kelas') ? ($this->rombel_id ?: null) : null;
+
         if ($this->editing) {
             $user = User::findOrFail($this->editId);
-            $data = ['name' => $this->nama, 'email' => $this->email, 'role' => $this->role];
+            $data = [
+                'name' => $this->nama,
+                'email' => $this->email,
+                'role' => $this->role,
+                'rombel_id' => $selectedRombelId,
+            ];
             if (!empty($this->password)) {
                 $data['password'] = Hash::make($this->password);
             }
@@ -84,6 +95,7 @@ class ManajemenUser extends Component
                 'email' => $this->email,
                 'password' => Hash::make($this->password),
                 'role' => $this->role,
+                'rombel_id' => $selectedRombelId,
             ]);
             AuditLogService::logCreate($user);
             $this->dispatch('show-toast', message: 'User berhasil ditambahkan!', type: 'success');
@@ -119,7 +131,7 @@ class ManajemenUser extends Component
 
     private function resetForm()
     {
-        $this->reset(['nama', 'email', 'password', 'role', 'editId', 'editing']);
+        $this->reset(['nama', 'email', 'password', 'role', 'rombel_id', 'editId', 'editing']);
     }
 
     public function downloadTemplate()
@@ -260,7 +272,8 @@ class ManajemenUser extends Component
 
     public function render()
     {
-        $users = User::when($this->search, function($q) {
+        $users = User::with('rombel')
+            ->when($this->search, function($q) {
                 $q->where('name', 'like', "%{$this->search}%")
                   ->orWhere('email', 'like', "%{$this->search}%");
             })
@@ -268,6 +281,11 @@ class ManajemenUser extends Component
             ->orderBy('name')
             ->paginate(20);
 
-        return view('livewire.admin.manajemen-user', ['users' => $users]);
+        $rombels = Rombel::orderBy('tingkat')->orderBy('nama_kelas')->get();
+
+        return view('livewire.admin.manajemen-user', [
+            'users' => $users,
+            'rombels' => $rombels,
+        ]);
     }
 }

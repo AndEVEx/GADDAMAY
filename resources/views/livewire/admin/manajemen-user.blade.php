@@ -87,7 +87,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label font-weight-bold">Role Hak Akses</label>
-                    <select wire:model="role" class="form-select @error('role') is-invalid @enderror" style="min-height: 48px;">
+                    <select wire:model.live="role" class="form-select @error('role') is-invalid @enderror" style="min-height: 48px;">
                         <option value="guru">Guru</option>
                         <option value="admin">Admin</option>
                         <option value="kepsek">Kepala Sekolah</option>
@@ -97,6 +97,21 @@
                     </select>
                     @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
+
+                @if($role === 'ketua_kelas')
+                <div class="mb-3 animate-fade-in-up">
+                    <label class="form-label font-weight-bold text-primary"><i class="bi bi-mortarboard me-1"></i> Kelas / Rombel Siswa</label>
+                    <select wire:model="rombel_id" class="form-select @error('rombel_id') is-invalid @enderror" style="min-height: 48px;">
+                        <option value="">-- Pilih Kelas / Rombel --</option>
+                        @foreach($rombels as $r)
+                            <option value="{{ $r->id }}">{{ $r->nama_kelas }} (Tingkat {{ $r->tingkat }})</option>
+                        @endforeach
+                    </select>
+                    <div class="form-text">Akun Ketua Kelas ini akan langsung dan terhubung pasti ke kelas yang dipilih.</div>
+                    @error('rombel_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                @endif
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary flex-fill" style="min-height: 48px;"><i class="bi bi-check me-1"></i> Simpan</button>
                     <button type="button" wire:click="$set('showForm', false)" class="btn btn-outline-secondary" style="min-height: 48px;">Batal</button>
@@ -125,7 +140,14 @@
             <div class="d-flex align-items-center gap-3 p-3 border-bottom">
                 <div class="flex-fill">
                     <div class="fw-bold fs-6">{{ $user->name }}</div>
-                    <div class="text-muted small">{{ $user->email }}</div>
+                    <div class="text-muted small">
+                        {{ $user->email }}
+                        @if($user->role === 'ketua_kelas')
+                            <span class="ms-2 badge {{ $user->rombel ? 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25' : 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25' }}">
+                                <i class="bi bi-mortarboard me-1"></i>{{ $user->rombel?->nama_kelas ?? 'Belum Ditautkan ke Kelas' }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
                 <span class="badge bg-{{ match($user->role) { 'admin' => 'danger', 'kepsek' => 'primary', 'waka' => 'info', 'ketua_mgmp' => 'success', 'guru' => 'secondary', 'ketua_kelas' => 'warning' } }} bg-opacity-10 text-{{ match($user->role) { 'admin' => 'danger', 'kepsek' => 'primary', 'waka' => 'info', 'ketua_mgmp' => 'success', 'guru' => 'secondary', 'ketua_kelas' => 'warning' } }}">
                     {{ ucfirst(str_replace('_', ' ', $user->role)) }}

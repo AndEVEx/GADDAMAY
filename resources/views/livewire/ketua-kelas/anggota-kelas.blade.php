@@ -25,9 +25,9 @@
         <div class="card border-warning shadow-sm animate-fade-in-up" style="border-radius: 12px;">
             <div class="card-body text-center py-5">
                 <i class="bi bi-exclamation-triangle-fill text-warning fs-1 mb-3 d-block"></i>
-                <h5 class="fw-bold text-dark">Kelas Belum Teridentifikasi</h5>
+                <h5 class="fw-bold text-dark">Kelas Belum Ditautkan</h5>
                 <p class="text-muted small mb-3">
-                    Akun Anda belum terhubung secara otomatis dengan data rombel kelas di sistem. Silakan hubungi Administrator atau Waka Kurikulum.
+                    Akun Anda belum ditautkan dengan data rombel kelas di sistem. Silakan hubungi Administrator untuk mengatur kelas pada akun Anda di menu Manajemen User.
                 </p>
                 <a href="{{ route('ketua.verifikasi') }}" class="btn btn-primary" wire:navigate>
                     <i class="bi bi-qr-code-scan me-1"></i> Ke Halaman Verifikasi OTP

@@ -18,55 +18,8 @@ class AnggotaKelas extends Component
     public function mount()
     {
         $user = auth()->user();
-        $this->studentRombel = $this->resolveStudentRombel($user);
-    }
-
-    /**
-     * Resolve the student's Rombel model from user record or user name/email
-     */
-    private function resolveStudentRombel($user): ?Rombel
-    {
-        if (!$user) return null;
-
-        // 1. Direct foreign key
-        if (!empty($user->rombel_id)) {
-            $rombel = Rombel::find($user->rombel_id);
-            if ($rombel) return $rombel;
-        }
-
-        $rombels = Rombel::all();
-        $userNameLower = strtolower(trim($user->name ?? ''));
-        $userEmailLower = strtolower(trim($user->email ?? ''));
-
-        // 2. Exact full-name match with longest nama_kelas first
-        $sortedRombels = $rombels->sortByDesc(fn($r) => strlen($r->nama_kelas));
-
-        foreach ($sortedRombels as $r) {
-            $kelasLower = strtolower(trim($r->nama_kelas));
-            if (empty($kelasLower)) continue;
-
-            if (str_contains($userNameLower, $kelasLower)) {
-                $user->update(['rombel_id' => $r->id]);
-                return $r;
-            }
-        }
-
-        // 3. Email slug match
-        foreach ($sortedRombels as $r) {
-            $namaKelas = $r->nama_kelas;
-            $slug1 = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $namaKelas));
-            $slug2 = strtolower(str_replace(' ', '', $namaKelas));
-            $slug3 = strtolower(str_replace(' ', '.', $namaKelas));
-
-            foreach ([$slug1, $slug2, $slug3] as $slug) {
-                if (!empty($slug) && str_contains($userEmailLower, $slug)) {
-                    $user->update(['rombel_id' => $r->id]);
-                    return $r;
-                }
-            }
-        }
-
-        return null;
+        // Direct explicit foreign key connection - NO fragile auto-guessing
+        $this->studentRombel = $user?->rombel;
     }
 
     public function render()
