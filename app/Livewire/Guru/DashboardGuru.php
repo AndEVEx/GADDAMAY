@@ -174,7 +174,17 @@ class DashboardGuru extends Component
 
         // Attach agenda & status label for each block and generate teaching notifications
         return $allMerged->map(function ($block) use ($agendas, $user, $jamMap, $timeNow, $officialPeriods) {
-            $agenda = $agendas->first(fn($a) => in_array($a->jadwal_pelajaran_id, $block['all_ids']));
+            $blockAgendas = $agendas->filter(fn($a) => in_array($a->jadwal_pelajaran_id, $block['all_ids']));
+            $agenda = $blockAgendas->sortBy(function ($a) {
+                return match ($a->status) {
+                    'token_terverifikasi' => 1,
+                    'berjalan' => 2,
+                    'menunggu_token' => 3,
+                    'selesai' => 4,
+                    'dibatalkan' => 5,
+                    default => 6,
+                };
+            })->first();
 
             $startJamKey = (int) $block['jam_ke_mulai'];
             $endJamKey = (int) $block['jam_ke_selesai'];

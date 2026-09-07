@@ -102,6 +102,23 @@ class IsiMateri extends Component
         $this->agenda->update(['materi_diajarkan' => $this->materi]);
         $this->agenda->tujuanPembelajaran()->sync($this->selectedTp);
 
+        // Sync to sibling agendas in same block if any
+        if ($this->agenda->jadwalPelajaran?->mapel_id) {
+            $jp = $this->agenda->jadwalPelajaran;
+            $siblings = AgendaHarian::where('tanggal', $this->agenda->tanggal)
+                ->where('guru_id', $this->agenda->guru_id)
+                ->where('id', '!=', $this->agenda->id)
+                ->whereHas('jadwalPelajaran', fn($q) => $q
+                    ->where('rombel_id', $jp->rombel_id)
+                    ->where('mapel_id', $jp->mapel_id)
+                )->get();
+
+            foreach ($siblings as $sib) {
+                $sib->update(['materi_diajarkan' => $this->materi]);
+                $sib->tujuanPembelajaran()->sync($this->selectedTp);
+            }
+        }
+
         $this->dispatch('show-toast', message: 'Materi & TP tersimpan! Silakan ambil foto suasana kelas/murid.', type: 'success');
 
         return redirect()->route('guru.foto-guru', $this->agenda->id);

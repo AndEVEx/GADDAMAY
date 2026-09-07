@@ -211,13 +211,38 @@
                             </a>
                         </div>
                     @elseif($jadwal->agenda->status === 'selesai')
+                        @php
+                            $hasMateri = !empty($jadwal->agenda->materi_diajarkan);
+                            $hasFotoGuru = !empty($jadwal->agenda->foto_guru_path);
+                            $hasKehadiran = $jadwal->agenda->kehadiranMurid()->exists();
+                            $isComplete = $hasMateri && $hasFotoGuru && $hasKehadiran;
+                        @endphp
                         <div class="d-flex flex-wrap gap-2">
                             <a href="{{ route('guru.detail-agenda', $jadwal->agenda->id) }}" class="btn btn-outline-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
                                 <i class="bi bi-eye me-1"></i> Detail Agenda
                             </a>
-                            <a href="{{ route('guru.kehadiran', $jadwal->agenda->id) }}" class="btn btn-outline-secondary btn-sm py-2 fw-semibold" style="border-radius: 8px;" wire:navigate title="Presensi Siswa">
-                                <i class="bi bi-person-check me-1"></i> Presensi
-                            </a>
+                            @if(!$isComplete)
+                                @if(!$hasMateri)
+                                    <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-warning btn-sm py-2 fw-semibold text-dark" style="border-radius: 8px;" wire:navigate title="Materi Belum Terisi">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> Lengkapi Materi
+                                    </a>
+                                @elseif(!$hasFotoGuru)
+                                    <a href="{{ route('guru.foto-guru', $jadwal->agenda->id) }}" class="btn btn-warning btn-sm py-2 fw-semibold text-dark" style="border-radius: 8px;" wire:navigate title="Foto Belum Diambil">
+                                        <i class="bi bi-camera me-1"></i> Ambil Foto
+                                    </a>
+                                @elseif(!$hasKehadiran)
+                                    <a href="{{ route('guru.kehadiran', $jadwal->agenda->id) }}" class="btn btn-warning btn-sm py-2 fw-semibold text-dark" style="border-radius: 8px;" wire:navigate title="Presensi Belum Terisi">
+                                        <i class="bi bi-person-check me-1"></i> Isi Presensi
+                                    </a>
+                                @endif
+                            @else
+                                <a href="{{ route('guru.kehadiran', $jadwal->agenda->id) }}" class="btn btn-outline-secondary btn-sm py-2 fw-semibold" style="border-radius: 8px;" wire:navigate title="Presensi Siswa">
+                                    <i class="bi bi-person-check me-1"></i> Presensi
+                                </a>
+                                <a href="{{ route('guru.materi', $jadwal->agenda->id) }}" class="btn btn-outline-secondary btn-sm py-2" style="border-radius: 8px;" wire:navigate title="Edit Materi / TP">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            @endif
                         </div>
                     @endif
                 @endif

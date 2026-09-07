@@ -123,7 +123,7 @@ class DashboardMonitoring extends Component
             ->get()
             ->keyBy('jadwal_pelajaran_id');
 
-        return $rombels->map(function ($rombel) use ($allJadwals, $allAgendas) {
+        $data = $rombels->map(function ($rombel) use ($allJadwals, $allAgendas) {
             $jadwal = $allJadwals->get($rombel->id);
 
             if (!$jadwal) {

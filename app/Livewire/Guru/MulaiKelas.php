@@ -22,9 +22,6 @@ class MulaiKelas extends Component
         $this->jadwal = $jadwal->load(['rombel', 'mataPelajaran', 'jadwalGuru.guru']);
         $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
 
-        // Auto-close past-due expired agendas
-        AgendaHarian::autoCloseExpiredAgendas($jadwal->rombel_id, $today);
-
         // Check if agenda already exists for this jadwal today
         $this->agenda = AgendaHarian::where('jadwal_pelajaran_id', $jadwal->id)
             ->where('guru_id', auth()->id())
@@ -44,21 +41,32 @@ class MulaiKelas extends Component
                 $siblingAgenda = AgendaHarian::whereIn('jadwal_pelajaran_id', $siblingJadwals)
                     ->where('guru_id', auth()->id())
                     ->where('tanggal', $today)
-                    ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan'])
+                    ->latest()
                     ->first();
 
                 if ($siblingAgenda) {
-                    // Redirect to the existing sibling agenda's flow
-                    if (in_array($siblingAgenda->status, ['token_terverifikasi', 'berjalan'])) {
-                        return redirect()->route('guru.materi', $siblingAgenda->id);
-                    }
-                    // For menunggu_token, redirect to the sibling's mulai page
-                    return redirect()->route('guru.mulai', $siblingAgenda->jadwal_pelajaran_id);
+                    $this->agenda = $siblingAgenda;
                 }
             }
         }
 
         if ($this->agenda) {
+            // If already verified or running, automatically forward to the next step!
+            if ($this->agenda->status === 'token_terverifikasi') {
+                return redirect()->route('guru.materi', $this->agenda->id);
+            }
+            if ($this->agenda->status === 'berjalan') {
+                if (empty($this->agenda->materi_diajarkan)) {
+                    return redirect()->route('guru.materi', $this->agenda->id);
+                }
+                if (empty($this->agenda->foto_guru_path)) {
+                    return redirect()->route('guru.foto-guru', $this->agenda->id);
+                }
+                if (!$this->agenda->kehadiranMurid()->exists()) {
+                    return redirect()->route('guru.kehadiran', $this->agenda->id);
+                }
+                return redirect()->route('guru.stopwatch', $this->agenda->id);
+            }
             $this->token = $this->agenda->token_handshake ?? '';
         }
     }
@@ -66,9 +74,6 @@ class MulaiKelas extends Component
     public function generateToken()
     {
         $tanggal = Carbon::today('Asia/Jakarta')->format('Y-m-d');
-
-        // Auto-close past-due expired agendas for this class first
-        AgendaHarian::autoCloseExpiredAgendas($this->jadwal->rombel_id, $tanggal);
 
         $this->agenda = AgendaHarian::updateOrCreate(
             [

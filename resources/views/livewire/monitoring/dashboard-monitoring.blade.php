@@ -150,12 +150,17 @@
         <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
             <input type="search" wire:model.live.debounce.300ms="search" class="form-control border-start-0" placeholder="Cari kelas, guru, atau mata pelajaran..." style="min-height: 48px;">
+            @if(!empty($search))
+                <button type="button" wire:click="$set('search', '')" class="btn btn-outline-secondary border-start-0 border-end" title="Hapus pencarian">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            @endif
         </div>
     </div>
 
     {{-- Rombel Grid --}}
     <div class="row g-2">
-        @foreach($monitoringData as $item)
+        @forelse($monitoringData as $item)
         <div class="col-6 col-md-4 col-lg-3">
             <div class="monitoring-card card-{{ $item['status'] }} text-center p-3 d-flex flex-column align-items-center justify-content-center h-100 shadow-sm" style="border-radius: 12px;">
                 
@@ -216,8 +221,20 @@
                     </div>
                 @endif
             </div>
+        @empty
+        <div class="col-12 text-center py-5">
+            <div class="card p-4 border-0 shadow-sm" style="border-radius: 12px; background: #f8fafc;">
+                <i class="bi bi-search fs-1 text-muted mb-2 d-block"></i>
+                <h6 class="fw-bold text-dark mb-1">Tidak Ada Hasil Pencarian</h6>
+                <p class="text-muted small mb-3">Tidak ditemukan kelas, guru, atau mapel yang cocok dengan kata kunci "<strong>{{ $search }}</strong>".</p>
+                <div>
+                    <button type="button" wire:click="$set('search', '')" class="btn btn-primary btn-sm px-3" style="border-radius: 8px;">
+                        <i class="bi bi-arrow-repeat me-1"></i> Reset Pencarian
+                    </button>
+                </div>
+            </div>
         </div>
-        @endforeach
+        @endforelse
     </div>
 
     {{-- Quick Links --}}

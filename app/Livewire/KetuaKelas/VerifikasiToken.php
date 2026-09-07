@@ -61,13 +61,11 @@ class VerifikasiToken extends Component
             return;
         }
 
-        // Auto-close any expired past-due agendas first
-        AgendaHarian::autoCloseExpiredAgendas($this->studentRombel?->id, $today);
-
         // Build query for matching 6-digit token handshake for THIS CLASS ONLY
+        // Allow matching if status is waiting, already verified, or running
         $query = AgendaHarian::where('token_handshake', $this->token)
-            ->where('status', 'menunggu_token')
-            ->where('tanggal', $today);
+            ->where('tanggal', $today)
+            ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan']);
 
         if ($this->studentRombel) {
             $query->whereHas('jadwalPelajaran', function ($q) {
@@ -80,7 +78,6 @@ class VerifikasiToken extends Component
         if (!$this->agenda) {
             // Check if token exists for ANOTHER class to provide helpful diagnostic error
             $otherClassAgenda = AgendaHarian::where('token_handshake', $this->token)
-                ->where('status', 'menunggu_token')
                 ->where('tanggal', $today)
                 ->with('jadwalPelajaran.rombel')
                 ->first();
@@ -90,7 +87,7 @@ class VerifikasiToken extends Component
                 $myKelasName = $this->studentRombel?->nama_kelas ?? 'kelas Anda';
                 $this->errorMessage = "Token ini adalah untuk kelas {$otherKelasName}, bukan untuk kelas Anda ({$myKelasName}). Mohon minta kode token dari Guru yang mengajar di kelas {$myKelasName}.";
             } else {
-                $this->errorMessage = 'Token OTP tidak valid, belum dibuat oleh guru, atau sudah kadaluarsa.';
+                $this->errorMessage = 'Token OTP tidak valid atau belum dibuat oleh guru untuk kelas Anda hari ini.';
             }
             return;
         }
@@ -108,10 +105,12 @@ class VerifikasiToken extends Component
                 ]);
         }
 
-        // Update status to token_terverifikasi
-        $this->agenda->update([
-            'status' => 'token_terverifikasi',
-        ]);
+        // Update status to token_terverifikasi if still waiting
+        if ($this->agenda->status === 'menunggu_token') {
+            $this->agenda->update([
+                'status' => 'token_terverifikasi',
+            ]);
+        }
 
         // Also verify sibling agendas (same block, same token)
         if ($this->agenda->jadwalPelajaran?->mapel_id) {

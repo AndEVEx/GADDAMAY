@@ -51,6 +51,22 @@ class AmbilFoto extends Component
                 'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
             ]);
 
+            // Sync to sibling agendas in same block if any
+            if ($this->agenda->jadwalPelajaran?->mapel_id) {
+                $jp = $this->agenda->jadwalPelajaran;
+                AgendaHarian::where('tanggal', $this->agenda->tanggal)
+                    ->where('id', '!=', $this->agenda->id)
+                    ->where('token_handshake', $this->agenda->token_handshake)
+                    ->whereHas('jadwalPelajaran', fn($q) => $q
+                        ->where('rombel_id', $jp->rombel_id)
+                        ->where('mapel_id', $jp->mapel_id)
+                    )->update([
+                        'foto_bukti_path' => $filename,
+                        'status' => 'berjalan',
+                        'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
+                    ]);
+            }
+
             $this->uploaded = true;
             $this->dispatch('show-toast', message: 'Foto bukti berwatermark berhasil disimpan! Kelas dimulai.', type: 'success');
         } catch (\Exception $e) {
@@ -71,6 +87,22 @@ class AmbilFoto extends Component
             'status' => 'berjalan',
             'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
         ]);
+
+        // Sync to sibling agendas in same block if any
+        if ($this->agenda->jadwalPelajaran?->mapel_id) {
+            $jp = $this->agenda->jadwalPelajaran;
+            AgendaHarian::where('tanggal', $this->agenda->tanggal)
+                ->where('id', '!=', $this->agenda->id)
+                ->where('token_handshake', $this->agenda->token_handshake)
+                ->whereHas('jadwalPelajaran', fn($q) => $q
+                    ->where('rombel_id', $jp->rombel_id)
+                    ->where('mapel_id', $jp->mapel_id)
+                )->update([
+                    'foto_bukti_path' => $path,
+                    'status' => 'berjalan',
+                    'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
+                ]);
+        }
 
         $this->uploaded = true;
         $this->dispatch('show-toast', message: 'Foto bukti berhasil disimpan! Kelas dimulai.', type: 'success');

@@ -49,6 +49,21 @@ class FotoGuru extends Component
                 'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
             ]);
 
+            // Sync to sibling agendas in same block if any
+            if ($this->agenda->jadwalPelajaran?->mapel_id) {
+                $jp = $this->agenda->jadwalPelajaran;
+                AgendaHarian::where('tanggal', $this->agenda->tanggal)
+                    ->where('guru_id', $this->agenda->guru_id)
+                    ->where('id', '!=', $this->agenda->id)
+                    ->whereHas('jadwalPelajaran', fn($q) => $q
+                        ->where('rombel_id', $jp->rombel_id)
+                        ->where('mapel_id', $jp->mapel_id)
+                    )->update([
+                        'foto_guru_path' => $filename,
+                        'status' => 'berjalan',
+                    ]);
+            }
+
             $this->dispatch('show-toast', message: 'Foto Guru & Suasana Kelas tersimpan! Lanjut ke Presensi Siswa.', type: 'success');
             return redirect()->route('guru.kehadiran', $this->agenda->id);
         } catch (\Exception $e) {
@@ -69,6 +84,21 @@ class FotoGuru extends Component
             'status' => 'berjalan',
             'waktu_mulai' => $this->agenda->waktu_mulai ?? Carbon::now('Asia/Jakarta'),
         ]);
+
+        // Sync to sibling agendas in same block if any
+        if ($this->agenda->jadwalPelajaran?->mapel_id) {
+            $jp = $this->agenda->jadwalPelajaran;
+            AgendaHarian::where('tanggal', $this->agenda->tanggal)
+                ->where('guru_id', $this->agenda->guru_id)
+                ->where('id', '!=', $this->agenda->id)
+                ->whereHas('jadwalPelajaran', fn($q) => $q
+                    ->where('rombel_id', $jp->rombel_id)
+                    ->where('mapel_id', $jp->mapel_id)
+                )->update([
+                    'foto_guru_path' => $path,
+                    'status' => 'berjalan',
+                ]);
+        }
 
         $this->dispatch('show-toast', message: 'Foto Guru tersimpan! Lanjut ke Presensi Siswa.', type: 'success');
         return redirect()->route('guru.kehadiran', $this->agenda->id);

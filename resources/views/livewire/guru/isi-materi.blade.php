@@ -55,7 +55,7 @@
 
         {{-- Submit --}}
         <button type="submit" class="btn btn-primary btn-lg w-100" wire:loading.attr="disabled">
-            <span wire:loading.remove><i class="bi bi-arrow-right me-2"></i>Simpan & Lanjut ke Kehadiran</span>
+            <span wire:loading.remove><i class="bi bi-arrow-right me-2"></i>Simpan & Lanjut ke Foto Guru & Kelas</span>
             <span wire:loading><span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...</span>
         </button>
     </form>

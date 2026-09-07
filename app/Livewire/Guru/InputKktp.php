@@ -90,6 +90,44 @@ class InputKktp extends Component
             'refleksi' => $this->refleksi,
         ]);
 
+        // Sync complete status, refleksi, and KKTP to sibling agendas in same block
+        if ($this->agenda->jadwalPelajaran?->mapel_id) {
+            $jp = $this->agenda->jadwalPelajaran;
+            $siblings = AgendaHarian::where('tanggal', $this->agenda->tanggal)
+                ->where('guru_id', $this->agenda->guru_id)
+                ->where('id', '!=', $this->agenda->id)
+                ->whereHas('jadwalPelajaran', fn($q) => $q
+                    ->where('rombel_id', $jp->rombel_id)
+                    ->where('mapel_id', $jp->mapel_id)
+                )->get();
+
+            foreach ($siblings as $sib) {
+                $sib->update([
+                    'status' => 'selesai',
+                    'waktu_selesai' => $this->agenda->waktu_selesai,
+                    'refleksi' => $this->refleksi,
+                ]);
+
+                foreach ($this->kktpData as $siswaId => $tps) {
+                    foreach ($tps as $tpId => $status) {
+                        KktpSiswa::updateOrCreate(
+                            ['agenda_harian_id' => $sib->id, 'siswa_id' => $siswaId, 'tp_id' => $tpId],
+                            ['status' => $status]
+                        );
+                    }
+                }
+
+                foreach ($siswaAbsent as $siswa) {
+                    foreach ($tpsAll as $tp) {
+                        KktpSiswa::updateOrCreate(
+                            ['agenda_harian_id' => $sib->id, 'siswa_id' => $siswa->id, 'tp_id' => $tp->id],
+                            ['status' => 'belum_tercapai']
+                        );
+                    }
+                }
+            }
+        }
+
         $this->dispatch('show-toast', message: 'Pembelajaran selesai! Refleksi & KKTP tersimpan.', type: 'success');
         return redirect()->route('guru.dashboard');
     }

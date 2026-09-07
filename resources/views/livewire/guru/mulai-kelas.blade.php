@@ -50,7 +50,7 @@
             </div>
         </div>
     @elseif($agenda->status === 'menunggu_token')
-        <div class="card" wire:poll.10s="refreshStatus">
+        <div class="card" wire:poll.3s="refreshStatus">
             <div class="card-body text-center py-4">
                 <div class="small text-muted mb-2">Token OTP</div>
                 <div class="otp-display mb-3">{{ $token }}</div>
@@ -82,6 +82,24 @@
                 <a href="{{ route('guru.materi', $agenda->id) }}" class="btn btn-primary btn-lg" wire:navigate>
                     <i class="bi bi-pencil-square me-2"></i>Lanjut ke Isi Materi & TP
                 </a>
+            </div>
+        </div>
+    @elseif($agenda->status === 'selesai')
+        <div class="card">
+            <div class="card-body text-center py-4">
+                <div class="status-badge status-hijau mx-auto mb-3">
+                    <i class="bi bi-check-circle-fill"></i> Sesi Telah Ditutup
+                </div>
+                <h5 class="fw-bold mb-2 text-dark">Agenda Sesi Ini Sudah Selesai</h5>
+                <p class="text-muted small mb-3">Anda dapat melihat rincian agenda atau melengkapi data materi, foto, dan presensi siswa.</p>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <a href="{{ route('guru.detail-agenda', $agenda->id) }}" class="btn btn-primary" wire:navigate>
+                        <i class="bi bi-eye me-1"></i> Lihat Detail Agenda
+                    </a>
+                    <a href="{{ route('guru.materi', $agenda->id) }}" class="btn btn-outline-primary" wire:navigate>
+                        <i class="bi bi-pencil me-1"></i> Edit Materi / Presensi
+                    </a>
+                </div>
             </div>
         </div>
     @endif
