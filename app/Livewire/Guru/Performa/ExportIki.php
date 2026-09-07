@@ -16,7 +16,6 @@ class ExportIki extends Component
     public bool $includeSiswa = true;
     public bool $includeKehadiran = true;
     public string $bulan;
-    public string $penandatangan = 'kepsek'; // 'kepsek' or 'waka'
 
     public function mount()
     {
@@ -30,7 +29,6 @@ class ExportIki extends Component
             'siswa' => $this->includeSiswa ? 1 : 0,
             'kehadiran' => $this->includeKehadiran ? 1 : 0,
             'bulan' => $this->bulan,
-            'penandatangan' => $this->penandatangan,
             'stream' => 0,
         ]);
     }
@@ -42,7 +40,6 @@ class ExportIki extends Component
             'siswa' => $this->includeSiswa ? 1 : 0,
             'kehadiran' => $this->includeKehadiran ? 1 : 0,
             'bulan' => $this->bulan,
-            'penandatangan' => $this->penandatangan,
             'stream' => 1,
         ]);
     }

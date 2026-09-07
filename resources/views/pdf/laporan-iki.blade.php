@@ -306,23 +306,11 @@
         </table>
     @endif
 
-    {{-- LEMBAR PENGESAHAN TANDA TANGAN --}}
+    {{-- LEMBAR TANDA TANGAN GURU --}}
     <table class="ttd-table">
         <tr>
-            <td>
-                Mengetahui,<br>
-                @if($penandatangan === 'waka')
-                    Wakasek Bidang Kurikulum,<br><br><br><br><br>
-                    <strong><u>H. EKO RAHARJO, S.Pd., M.T.</u></strong><br>
-                    NIP. 197405122008011005
-                @else
-                    Kepala SMK Negeri 2 Indramayu,<br><br><br><br><br>
-                    <strong><u>Dra. WIWI YUNIARSIH, M.Pd.</u></strong><br>
-                    Pembina Tk. I / IV b<br>
-                    NIP. 19680614 199412 2 003
-                @endif
-            </td>
-            <td>
+            <td style="width: 50%;"></td>
+            <td style="width: 50%;">
                 Indramayu, {{ $tanggalCetak }}<br>
                 Guru Mata Pelajaran,<br><br><br><br><br>
                 <strong><u>{{ $guru->name }}</u></strong><br>

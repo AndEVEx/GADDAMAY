@@ -84,7 +84,7 @@ class ImportKktp extends Component
         $path = $this->file->getRealPath();
         $importer = new KktpImport();
 
-        if ($importer->parse($path)) {
+        if ($importer->parse($path, auth()->id())) {
             $this->metadata = $importer->metadata;
             $this->tpData = $importer->tpData;
             $this->selectedMapelId = $importer->mapelId;
@@ -116,7 +116,8 @@ class ImportKktp extends Component
         $importer = new KktpImport();
         $importer->tpData = $this->tpData;
 
-        $this->importedCount = $importer->import($this->selectedMapelId, auth()->id());
+        $tingkat = $this->metadata['detected_tingkat'] ?? null;
+        $this->importedCount = $importer->import($this->selectedMapelId, auth()->id(), $tingkat);
         $this->showResult = true;
         $this->parsed = false;
         $this->dispatch('show-toast', message: "Berhasil import {$this->importedCount} Tujuan Pembelajaran!", type: 'success');

@@ -149,7 +149,7 @@ class SettingKktp extends Component
         ]);
 
         $importer = new KktpImport();
-        if ($importer->parse($this->importFile->getRealPath())) {
+        if ($importer->parse($this->importFile->getRealPath(), auth()->id())) {
             $this->importPreview = $importer->tpData;
             $this->importMetadata = $importer->metadata;
             $this->importParsed = true;
@@ -168,15 +168,8 @@ class SettingKktp extends Component
             }
 
             // Auto-detect tingkat from metadata
-            if (!empty($importer->metadata['tingkat'])) {
-                $tingkatStr = strtolower(trim($importer->metadata['tingkat']));
-                if (str_contains($tingkatStr, 'xii') || str_contains($tingkatStr, '12')) {
-                    $this->selectedTingkat = 12;
-                } elseif (str_contains($tingkatStr, 'xi') || str_contains($tingkatStr, '11')) {
-                    $this->selectedTingkat = 11;
-                } elseif (str_contains($tingkatStr, 'x') || str_contains($tingkatStr, '10')) {
-                    $this->selectedTingkat = 10;
-                }
+            if (!empty($importer->metadata['detected_tingkat'])) {
+                $this->selectedTingkat = $importer->metadata['detected_tingkat'];
             }
         } else {
             $this->dispatch('show-toast', message: 'Gagal membaca file: ' . $importer->error, type: 'danger');

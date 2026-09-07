@@ -25,7 +25,6 @@ class IkiExportController extends Controller
         $includeSiswa = (bool) $request->get('siswa', 1);
         $includeKehadiran = (bool) $request->get('kehadiran', 1);
         $bulan = $request->get('bulan', Carbon::now('Asia/Jakarta')->format('Y-m'));
-        $penandatangan = $request->get('penandatangan', 'kepsek');
         $stream = (int) $request->get('stream', 0);
 
         $startOfMonth = Carbon::parse($bulan)->startOfMonth();
@@ -199,7 +198,6 @@ class IkiExportController extends Controller
             'includeKehadiran' => $includeKehadiran,
             'bulan' => $bulan,
             'namaBulan' => $namaBulan,
-            'penandatangan' => $penandatangan,
             'logoBase64' => LogoHelper::getBase64(),
             'tanggalCetak' => Carbon::now('Asia/Jakarta')->translatedFormat('d F Y'),
             // Jadwal

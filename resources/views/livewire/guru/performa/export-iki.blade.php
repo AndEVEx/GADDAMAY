@@ -75,27 +75,6 @@
                 </div>
             @endif
 
-            {{-- Signature Option --}}
-            <div class="mb-4">
-                <label class="form-label fw-bold small text-dark">
-                    <i class="bi bi-pen me-1 text-secondary"></i> Pengesahan Mengetahui:
-                </label>
-                <div class="d-flex gap-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" wire:model.live="penandatangan" value="kepsek" id="ttdKepsek">
-                        <label class="form-check-label" for="ttdKepsek">
-                            Kepala Sekolah
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" wire:model.live="penandatangan" value="waka" id="ttdWaka">
-                        <label class="form-check-label" for="ttdWaka">
-                            Wakasek Bidang Kurikulum
-                        </label>
-                    </div>
-                </div>
-            </div>
-
             {{-- Action Buttons --}}
             <div class="d-flex flex-wrap gap-2 pt-2 border-top">
                 <button wire:click="downloadPdf" class="btn btn-danger flex-fill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2" style="border-radius: 12px; min-height: 48px;" {{ (!$includeJadwal && !$includeSiswa && !$includeKehadiran) ? 'disabled' : '' }}>

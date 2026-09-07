@@ -23,6 +23,7 @@ class ImportKktpGuru extends Component
     public array $metadata = [];
     public array $tpData = [];
     public ?string $selectedMapelId = null;
+    public ?int $selectedTingkat = null;
     public bool $parsed = false;
     public string $error = '';
     public int $importedCount = 0;
@@ -91,10 +92,11 @@ class ImportKktpGuru extends Component
         $path = $this->file->getRealPath();
         $importer = new KktpImport();
 
-        if ($importer->parse($path)) {
+        if ($importer->parse($path, auth()->id())) {
             $this->metadata = $importer->metadata;
             $this->tpData = $importer->tpData;
             $this->selectedMapelId = $importer->mapelId;
+            $this->selectedTingkat = $importer->metadata['detected_tingkat'] ?? null;
             $this->parsed = true;
             $this->error = '';
 
@@ -138,7 +140,7 @@ class ImportKktpGuru extends Component
         $importer = new KktpImport();
         $importer->tpData = $this->tpData;
 
-        $this->importedCount = $importer->import($this->selectedMapelId, auth()->id());
+        $this->importedCount = $importer->import($this->selectedMapelId, auth()->id(), $this->selectedTingkat);
         $this->showResult = true;
         $this->parsed = false;
         $this->dispatch('show-toast', message: "Berhasil mengimport {$this->importedCount} Tujuan Pembelajaran ke akun Anda!", type: 'success');
@@ -146,7 +148,7 @@ class ImportKktpGuru extends Component
 
     public function resetForm()
     {
-        $this->reset(['file', 'metadata', 'tpData', 'selectedMapelId', 'parsed', 'error', 'importedCount', 'showResult']);
+        $this->reset(['file', 'metadata', 'tpData', 'selectedMapelId', 'selectedTingkat', 'parsed', 'error', 'importedCount', 'showResult']);
     }
 
     public function getMapels()

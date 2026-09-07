@@ -128,24 +128,35 @@
                         </div>
                     </div>
 
-                    {{-- Mapel Target Confirmation --}}
+                    {{-- Mapel & Tingkat Target Confirmation --}}
                     <div class="col-12 col-md-6">
                         <div class="p-3 border rounded-3 h-100 border-primary bg-primary bg-opacity-10">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-check2-circle me-1"></i> Target Mata Pelajaran</h6>
+                                <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-check2-circle me-1"></i> Target Mata Pelajaran & Tingkat</h6>
                                 <button type="button" wire:click="toggleAllMapels" class="btn btn-sm btn-link text-decoration-none p-0 text-primary" style="font-size: 0.75rem;">
                                     {{ $showAllMapels ? 'Mapel Saya Saja' : 'Lihat Semua Mapel' }}
                                 </button>
                             </div>
-                            <p class="small text-muted mb-2">Pilih mata pelajaran di database yang akan diisi dengan data KKTP ini:</p>
-                            <select wire:model="selectedMapelId" class="form-select form-select-lg" style="min-height: 48px; border-radius: 10px;">
-                                <option value="">-- Pilih Mata Pelajaran --</option>
-                                @foreach($mapels as $mapel)
-                                    <option value="{{ $mapel->id }}">
-                                        {{ $mapel->nama_mapel }} @if(!empty($mapel->kode_mapel)) ({{ $mapel->kode_mapel }}) @endif
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="mb-2">
+                                <label class="small text-muted mb-1 fw-semibold">Mata Pelajaran:</label>
+                                <select wire:model="selectedMapelId" class="form-select form-select-lg" style="min-height: 44px; border-radius: 10px;">
+                                    <option value="">-- Pilih Mata Pelajaran --</option>
+                                    @foreach($mapels as $mapel)
+                                        <option value="{{ $mapel->id }}">
+                                            {{ $mapel->nama_mapel }} @if(!empty($mapel->kode_mapel)) ({{ $mapel->kode_mapel }}) @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div>
+                                <label class="small text-muted mb-1 fw-semibold">Tingkat / Kelas:</label>
+                                <select wire:model="selectedTingkat" class="form-select" style="min-height: 40px; border-radius: 8px;">
+                                    <option value="">Semua Tingkat / Umum</option>
+                                    <option value="10">Kelas X (Sepuluh)</option>
+                                    <option value="11">Kelas XI (Sebelas)</option>
+                                    <option value="12">Kelas XII (Dua Belas)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
