@@ -69,13 +69,13 @@
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                     <div>
                         <h6 class="fw-bold text-primary mb-1">
-                            <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Tukar Otomatis Jadwal Blok Jurusan (TP, APHPi, NKPI)
+                            <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Tukar Otomatis Jadwal Blok Jurusan (TP, APHPi, NKPI, RPL)
                         </h6>
                         <p class="text-muted small mb-0">
-                            Menukar seluruh jadwal pelajaran antara <strong>Rombel 1</strong> dan <strong>Rombel 2</strong> untuk jurusan <strong>TP (Pemesinan)</strong>, <strong>APHPi</strong>, dan <strong>NKPI</strong> pada semua tingkat (Tingkat X, XI, XII).
+                            Menukar seluruh jadwal pelajaran antara <strong>Rombel 1</strong> dan <strong>Rombel 2</strong> untuk jurusan <strong>TP (Pemesinan)</strong>, <strong>APHPi</strong>, <strong>NKPI</strong>, dan <strong>RPL</strong> pada semua tingkat (Tingkat X, XI, XII).
                         </p>
                     </div>
-                    <button wire:click="swapBlockVocational" wire:confirm="Yakin ingin menukar jadwal blok jurusan TP, APHPi, dan NKPI (Rombel 1 ↔ Rombel 2) untuk semua tingkat?" class="btn btn-warning text-dark fw-bold px-3 py-2 text-nowrap" wire:loading.attr="disabled">
+                    <button wire:click="swapBlockVocational" wire:confirm="Yakin ingin menukar jadwal blok jurusan TP, APHPi, NKPI, dan RPL (Rombel 1 ↔ Rombel 2) untuk semua tingkat?" class="btn btn-warning text-dark fw-bold px-3 py-2 text-nowrap" wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="swapBlockVocational"><i class="bi bi-arrow-repeat me-1"></i>Tukar Blok Semua Tingkat</span>
                         <span wire:loading wire:target="swapBlockVocational"><span class="spinner-border spinner-border-sm me-1"></span>Memproses...</span>
                     </button>

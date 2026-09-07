@@ -40,17 +40,21 @@ class JadwalSwapService
         }
 
         DB::transaction(function () use ($rombelA, $rombelB, $countA, $countB) {
-            // Generate a safe unique placeholder UUID
-            $tempId = (string) Str::uuid();
-
-            // 1. Temporarily move A -> temp
-            JadwalPelajaran::where('rombel_id', $rombelA->id)->update(['rombel_id' => $tempId]);
-
-            // 2. Move B -> A
-            JadwalPelajaran::where('rombel_id', $rombelB->id)->update(['rombel_id' => $rombelA->id]);
-
-            // 3. Move temp -> B
-            JadwalPelajaran::where('rombel_id', $tempId)->update(['rombel_id' => $rombelB->id]);
+            // Atomic swap using SQL CASE without violating foreign key constraints
+            DB::statement("
+                UPDATE jadwal_pelajaran 
+                SET rombel_id = CASE 
+                    WHEN rombel_id = ? THEN ? 
+                    WHEN rombel_id = ? THEN ? 
+                    ELSE rombel_id 
+                END,
+                updated_at = NOW()
+                WHERE rombel_id IN (?, ?)
+            ", [
+                $rombelA->id, $rombelB->id,
+                $rombelB->id, $rombelA->id,
+                $rombelA->id, $rombelB->id
+            ]);
 
             // Clean unstarted / waiting handshake agendas today for these rombels so teachers can handshake fresh
             $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
@@ -86,7 +90,7 @@ class JadwalSwapService
     }
 
     /**
-     * Auto-detect and swap block schedules for TP, APHP/APHPi, and NKPI across all tingkat (10, 11, 12).
+     * Auto-detect and swap block schedules for TP, APHP/APHPi, NKPI, and RPL across all tingkat (10, 11, 12).
      */
     public static function swapAllVocationalBlockSchedules(): array
     {
@@ -94,6 +98,7 @@ class JadwalSwapService
             'TP' => ['TP', 'TPM', 'Pemesinan'],
             'APHP' => ['APHP', 'APHPi', 'Pengolahan'],
             'NKPI' => ['NKPI', 'Nautika'],
+            'RPL' => ['RPL', 'Rekayasa Perangkat Lunak'],
         ];
 
         $tingkats = [10, 11, 12];

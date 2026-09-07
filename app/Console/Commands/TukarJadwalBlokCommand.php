@@ -19,7 +19,7 @@ class TukarJadwalBlokCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Tukar jadwal pelajaran antar rombel (rolling blok teori & produktif untuk jurusan TP, APHP, NKPI)';
+    protected $description = 'Tukar jadwal pelajaran antar rombel (rolling blok teori & produktif untuk jurusan TP, APHP, NKPI, RPL)';
 
     /**
      * Execute the console command.
