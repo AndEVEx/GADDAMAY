@@ -50,9 +50,13 @@
         </a>
         @endif
     @elseif($role === 'ketua_kelas')
-        <a href="{{ route('ketua.verifikasi') }}" class="nav-item {{ request()->routeIs('ketua.*') ? 'active' : '' }}" wire:navigate>
+        <a href="{{ route('ketua.verifikasi') }}" class="nav-item {{ request()->routeIs('ketua.verifikasi*') || request()->routeIs('ketua.foto*') ? 'active' : '' }}" wire:navigate>
             <i class="bi bi-qr-code-scan"></i>
             <span>Verifikasi</span>
+        </a>
+        <a href="{{ route('ketua.anggota') }}" class="nav-item {{ request()->routeIs('ketua.anggota*') ? 'active' : '' }}" wire:navigate>
+            <i class="bi bi-people-fill"></i>
+            <span>Anggota</span>
         </a>
     @endif
 </nav>

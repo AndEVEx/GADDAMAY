@@ -219,8 +219,14 @@
                         <i class="bi bi-patch-check-fill me-2 text-warning"></i>Tabel Manajemen Izin
                     </a>
                 @elseif($role === 'ketua_kelas')
-                    <a href="{{ route('ketua.verifikasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ketua.verifikasi') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-qr-code-scan me-2"></i>Verifikasi Token
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-2 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-mortarboard-fill"></i> Menu Siswa / KM
+                    </div>
+                    <a href="{{ route('ketua.verifikasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ketua.verifikasi*') || request()->routeIs('ketua.foto*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-qr-code-scan me-2 text-primary"></i>Verifikasi Token OTP
+                    </a>
+                    <a href="{{ route('ketua.anggota') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ketua.anggota*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-people-fill me-2 text-success"></i>Anggota Kelas
                     </a>
                 @endif
             </div>
