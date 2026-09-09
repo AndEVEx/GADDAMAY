@@ -1,13 +1,12 @@
 <div wire:poll.60s>
-    {{-- Clean Welcome Header Card (No Blue Background) --}}
-    <div class="card mb-3 border-0 bg-light shadow-sm" style="border-radius: 12px;">
-        <div class="card-body p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-                <h5 class="fw-bold text-dark mb-1">Selamat Datang, {{ auth()->user()->name }}! 👋</h5>
-                <div class="text-muted small">Agenda Digital SMKN 2 Indramayu</div>
-            </div>
-            <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 fw-semibold" style="font-size: 0.85rem; border-radius: 8px;">
-                <i class="bi bi-calendar-event me-1"></i>{{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}
+    {{-- Clean Welcome Header Card (Matches mobile.jpeg) --}}
+    <div class="card mb-3 border-0 bg-white shadow-sm" style="border-radius: 16px;">
+        <div class="card-body p-3">
+            <h4 class="fw-bold text-dark mb-1" style="font-size: 1.25rem;">Selamat Datang, {{ auth()->user()->name }}! 👋</h4>
+            <div class="text-muted mb-2" style="font-size: 0.88rem;">Agenda Digital SMKN 2 Indramayu</div>
+            <div class="d-inline-flex align-items-center gap-2 bg-primary bg-opacity-10 text-primary px-3 py-2 fw-semibold rounded-3" style="font-size: 0.88rem;">
+                <i class="bi bi-calendar-event"></i>
+                <span>{{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}</span>
             </div>
         </div>
     </div>
@@ -33,8 +32,8 @@
     </div>
     @endif
 
-    {{-- Quick Access Shortcut Cards --}}
-    <div class="row g-2 mb-3">
+    {{-- Quick Access Shortcut Cards (Desktop Only - on mobile, navigation is handled cleanly by sidebar & bottom nav) --}}
+    <div class="row g-2 mb-3 d-none d-md-flex">
         <div class="col-6 col-md-3">
             <a href="{{ route('guru.performa.jadwal-mingguan') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
                 <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
@@ -113,22 +112,22 @@
                             }
                         @endphp
 
-                        <div class="rounded-3 p-2 text-center flex-shrink-0 {{ $boxBg }}" style="min-width: 62px; {{ $isIzin ?? false ? 'background-color: rgba(124, 58, 237, 0.1); color: #7c3aed !important;' : '' }}">
-                            <i class="bi {{ $statusIcon }} fs-5 d-block mb-1"></i>
-                            <div class="fw-bold" style="font-size: 0.78rem;">Jam {{ $jadwal->jam_ke_mulai }}</div>
+                        <div class="rounded-3 p-2 text-center flex-shrink-0 {{ $boxBg }}" style="min-width: 68px; {{ $isIzin ?? false ? 'background-color: rgba(124, 58, 237, 0.1); color: #7c3aed !important;' : '' }}">
+                            <i class="bi {{ $statusIcon }} fs-4 d-block mb-1"></i>
+                            <div class="fw-bold" style="font-size: 0.88rem;">Jam {{ $jadwal->jam_ke_mulai }}</div>
                             @if($jadwal->jam_ke_mulai !== $jadwal->jam_ke_selesai)
-                                <div style="font-size: 0.65rem;">s/d {{ $jadwal->jam_ke_selesai }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">s/d {{ $jadwal->jam_ke_selesai }}</div>
                             @endif
                         </div>
 
                         <div class="min-w-0 flex-fill overflow-hidden" style="min-width: 0;">
                             @if(!empty($jadwal->is_kegiatan_khusus))
-                                <span class="badge bg-secondary bg-opacity-15 text-dark px-2 py-1 text-truncate" style="font-size: 0.8rem; max-width: 100%;">{{ $jadwal->kegiatan_khusus }}</span>
+                                <span class="badge bg-secondary bg-opacity-15 text-dark px-2 py-1 text-truncate" style="font-size: 0.85rem; max-width: 100%;">{{ $jadwal->kegiatan_khusus }}</span>
                             @else
-                                <div class="fw-bold text-dark text-truncate" style="font-size: 0.95rem; line-height: 1.2;" title="{{ $jadwal->mataPelajaran?->nama_mapel }}">
+                                <div class="fw-bold text-dark text-truncate" style="font-size: 1.05rem; line-height: 1.25;" title="{{ $jadwal->mataPelajaran?->nama_mapel }}">
                                     {{ $jadwal->mataPelajaran?->nama_mapel ?? '-' }}
                                 </div>
-                                <div class="text-muted small d-flex align-items-center gap-1 flex-wrap mt-1">
+                                <div class="text-muted d-flex align-items-center gap-1 flex-wrap mt-1" style="font-size: 0.9rem;">
                                     <div class="d-flex align-items-center gap-1 text-truncate" style="max-width: 100%;">
                                         <i class="bi bi-door-open text-primary flex-shrink-0"></i>
                                         <span class="fw-semibold text-truncate">{{ $jadwal->rombel?->nama_kelas ?? '-' }}</span>
@@ -137,16 +136,16 @@
                             @endif
 
                             @if(!empty($jadwal->keterangan))
-                                <span class="badge bg-light text-muted border mt-1 text-truncate d-inline-block" style="font-size: 0.7rem; max-width: 100%;">{{ $jadwal->keterangan }}</span>
+                                <span class="badge bg-light text-muted border mt-1 text-truncate d-inline-block" style="font-size: 0.75rem; max-width: 100%;">{{ $jadwal->keterangan }}</span>
                             @endif
 
                             @if(!empty($jadwal->otp_time) && empty($jadwal->is_kegiatan_khusus))
-                                <div class="text-muted small mt-1" style="font-size: 0.72rem;">
+                                <div class="text-muted small mt-1" style="font-size: 0.78rem;">
                                     <i class="bi bi-stopwatch text-primary me-1"></i>Handshake: {{ $jadwal->otp_time }} WIB
                                     @if($jadwal->handshake_on_time === true)
-                                        <span class="badge bg-success bg-opacity-10 text-success ms-1" style="font-size: 0.6rem;">Tepat Waktu</span>
+                                        <span class="badge bg-success bg-opacity-10 text-success ms-1" style="font-size: 0.68rem;">Tepat Waktu</span>
                                     @elseif($jadwal->handshake_on_time === false)
-                                        <span class="badge bg-warning bg-opacity-10 text-warning ms-1" style="font-size: 0.6rem;">Terlambat (>45 mnt)</span>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning ms-1" style="font-size: 0.68rem;">Terlambat (>45 mnt)</span>
                                     @endif
                                 </div>
                             @endif
@@ -155,7 +154,7 @@
 
                     {{-- Status Text Badge (Fixed Right Boundary) --}}
                     <div class="flex-shrink-0 ms-1 text-end">
-                        <span class="status-badge {{ $jadwal->status_label['class'] }} text-nowrap" style="font-size: 0.7rem; padding: 0.25rem 0.55rem;">
+                        <span class="status-badge {{ $jadwal->status_label['class'] }} text-nowrap" style="font-size: 0.8rem; padding: 0.3rem 0.65rem;">
                             {{ $jadwal->status_label['text'] }}
                         </span>
                     </div>

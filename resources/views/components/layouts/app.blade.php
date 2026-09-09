@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1a56db">
     <meta name="description" content="AgenDAmay - Agenda Digital SMKN 2 Indramayu">
     @auth
@@ -42,7 +42,7 @@
     {{-- Top Navigation Bar --}}
     @auth
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
-        <div class="container-fluid px-3 d-flex align-items-center justify-content-between" style="max-width: 1440px;">
+        <div class="container-fluid px-3 d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
                 {{-- Sidebar Trigger Button --}}
                 <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" style="min-height: 38px;">
@@ -306,7 +306,7 @@
     @endif
 
     {{-- Main Content --}}
-    <main class="container-fluid px-2 px-md-3 py-3" style="max-width: 1440px; margin: 0 auto;">
+    <main class="container-fluid px-3 py-3">
         {{ $slot }}
     </main>
 
