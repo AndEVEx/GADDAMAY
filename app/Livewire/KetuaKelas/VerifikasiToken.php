@@ -142,6 +142,81 @@ class VerifikasiToken extends Component
 
     public function render()
     {
-        return view('livewire.ketua-kelas.verifikasi-token');
+        $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $dayOfWeek = Carbon::now('Asia/Jakarta')->dayOfWeekIso;
+
+        $jadwalHariIni = collect();
+
+        if ($this->studentRombel) {
+            $rawJadwal = \App\Models\JadwalPelajaran::where('rombel_id', $this->studentRombel->id)
+                ->where('hari', $dayOfWeek)
+                ->with(['mataPelajaran', 'jadwalGuru.guru', 'agendaHarian' => function ($q) use ($today) {
+                    $q->where('tanggal', $today);
+                }])
+                ->orderBy('jam_ke_mulai')
+                ->get();
+
+            $jadwalHariIni = $rawJadwal->map(function ($j) {
+                $agenda = $j->agendaHarian->first();
+                $range = $j->getEffectiveTimeRange();
+
+                $statusLabel = 'Belum Mulai';
+                $statusBadge = 'bg-secondary bg-opacity-10 text-secondary';
+                $statusIcon = 'bi-clock';
+
+                if ($agenda) {
+                    $agendaStatus = $agenda->status;
+                    $isIzin = in_array($agenda->status_kehadiran_guru ?? '', ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar']);
+
+                    if ($isIzin) {
+                        $statusLabel = 'Guru Izin (' . ucfirst($agenda->status_kehadiran_guru) . ')';
+                        $statusBadge = 'text-white';
+                        $statusIcon = 'bi-info-circle-fill';
+                    } elseif ($agendaStatus === 'selesai') {
+                        $statusLabel = 'Selesai';
+                        $statusBadge = 'bg-success bg-opacity-10 text-success';
+                        $statusIcon = 'bi-check-circle-fill';
+                    } elseif ($agendaStatus === 'berjalan') {
+                        $statusLabel = 'Sedang Berlangsung';
+                        $statusBadge = 'bg-primary bg-opacity-10 text-primary';
+                        $statusIcon = 'bi-play-circle-fill';
+                    } elseif (in_array($agendaStatus, ['menunggu_token', 'token_terverifikasi'])) {
+                        $statusLabel = 'Proses Masuk / OTP';
+                        $statusBadge = 'bg-warning bg-opacity-10 text-warning';
+                        $statusIcon = 'bi-hourglass-split';
+                    }
+                } elseif ($j->isKegiatanKhusus()) {
+                    $statusLabel = 'Kegiatan Khusus';
+                    $statusBadge = 'bg-secondary bg-opacity-10 text-secondary';
+                    $statusIcon = 'bi-flag';
+                } elseif ($j->hasPeriodEnded()) {
+                    $statusLabel = 'Sudah Lewat';
+                    $statusBadge = 'bg-light text-muted border';
+                    $statusIcon = 'bi-slash-circle';
+                }
+
+                return (object) [
+                    'id' => $j->id,
+                    'jam_ke_mulai' => $j->jam_ke_mulai,
+                    'jam_ke_selesai' => $j->jam_ke_selesai,
+                    'jam_display' => $j->jam_ke_mulai === $j->jam_ke_selesai ? 'Jam ' . $j->jam_ke_mulai : 'Jam ' . $j->jam_ke_mulai . ' - ' . $j->jam_ke_selesai,
+                    'waktu_mulai' => $range['waktu_mulai'],
+                    'waktu_selesai' => $range['waktu_selesai'],
+                    'waktu_display' => $range['waktu_mulai'] . ' - ' . $range['waktu_selesai'] . ' WIB',
+                    'mapel_nama' => $j->isKegiatanKhusus() ? $j->kegiatan_khusus : ($j->mataPelajaran?->nama_mapel ?? '-'),
+                    'guru_nama' => $j->jadwalGuru->pluck('guru.name')->filter()->join(', ') ?: '-',
+                    'is_kegiatan_khusus' => $j->isKegiatanKhusus(),
+                    'kegiatan_khusus' => $j->kegiatan_khusus,
+                    'status_label' => $statusLabel,
+                    'status_badge' => $statusBadge,
+                    'status_icon' => $statusIcon,
+                    'agenda' => $agenda,
+                ];
+            });
+        }
+
+        return view('livewire.ketua-kelas.verifikasi-token', [
+            'jadwalHariIni' => $jadwalHariIni,
+        ]);
     }
 }

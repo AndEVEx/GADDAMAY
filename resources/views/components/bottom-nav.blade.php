@@ -54,6 +54,10 @@
             <i class="bi bi-qr-code-scan"></i>
             <span>Verifikasi</span>
         </a>
+        <a href="{{ route('ketua.jadwal') }}" class="nav-item {{ request()->routeIs('ketua.jadwal*') ? 'active' : '' }}" wire:navigate>
+            <i class="bi bi-calendar3"></i>
+            <span>Jadwal</span>
+        </a>
         <a href="{{ route('ketua.anggota') }}" class="nav-item {{ request()->routeIs('ketua.anggota*') ? 'active' : '' }}" wire:navigate>
             <i class="bi bi-people-fill"></i>
             <span>Anggota</span>

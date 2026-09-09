@@ -42,7 +42,7 @@
     {{-- Top Navigation Bar --}}
     @auth
     <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #1a56db, #0d47a1);">
-        <div class="container-fluid px-3 d-flex align-items-center justify-content-between">
+        <div class="container-fluid px-3 d-flex align-items-center justify-content-between" style="max-width: 1440px;">
             <div class="d-flex align-items-center gap-2">
                 {{-- Sidebar Trigger Button --}}
                 <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 px-2 py-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#appSidebar" aria-controls="appSidebar" style="min-height: 38px;">
@@ -52,17 +52,23 @@
 
                 {{-- Brand Link with School Logo --}}
                 <a class="navbar-brand fw-bold d-flex align-items-center gap-2 ms-1" href="/" wire:navigate style="text-decoration: none;">
-                    <div class="bg-white p-1 rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
+                    <div class="bg-white p-1 rounded-3 d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 38px; height: 38px;">
                         <img src="{{ \App\Helpers\LogoHelper::getBase64() }}" alt="Logo" style="width: 30px; height: 30px; object-fit: contain;">
                     </div>
                     <div class="d-flex flex-column text-start">
                         <span class="fw-extrabold text-white" style="font-size: 1.1rem; line-height: 1.1; letter-spacing: 0.3px;">AgenDAmay</span>
-                        <span class="text-white-50" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
+                        <span class="text-white-50 d-none d-md-inline" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
             </div>
 
-                </a>
+            {{-- Right Navbar Desktop Pill --}}
+            <div class="d-none d-md-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-15 py-1 px-3 rounded-pill text-white small shadow-sm">
+                    <i class="bi bi-person-circle fs-6"></i>
+                    <span class="fw-semibold text-truncate" style="max-width: 180px;">{{ Auth::user()->name }}</span>
+                    <span class="badge bg-white text-primary ms-1" style="font-size: 0.65rem;">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
+                </div>
             </div>
         </div>
     </nav>
@@ -242,6 +248,9 @@
                     <a href="{{ route('ketua.verifikasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ketua.verifikasi*') || request()->routeIs('ketua.foto*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-qr-code-scan me-2 text-primary"></i>Verifikasi Token OTP
                     </a>
+                    <a href="{{ route('ketua.jadwal') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ketua.jadwal*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar3 me-2 text-info"></i>Jadwal Pelajaran
+                    </a>
                     <a href="{{ route('ketua.anggota') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ketua.anggota*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-people-fill me-2 text-success"></i>Anggota Kelas
                     </a>
@@ -306,7 +315,7 @@
     @endif
 
     {{-- Main Content --}}
-    <main class="container-fluid px-3 py-3">
+    <main class="container-fluid px-2 px-md-3 py-3" style="max-width: 1440px; margin: 0 auto;">
         {{ $slot }}
     </main>
 

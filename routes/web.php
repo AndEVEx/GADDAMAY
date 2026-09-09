@@ -19,6 +19,7 @@ use App\Livewire\Guru\JurnalPerKelas;
 use App\Livewire\KetuaKelas\VerifikasiToken;
 use App\Livewire\KetuaKelas\AmbilFoto;
 use App\Livewire\KetuaKelas\AnggotaKelas;
+use App\Livewire\KetuaKelas\JadwalKelas;
 use App\Livewire\KetuaMgmp\DashboardKetuaMgmp;
 use App\Livewire\KetuaMgmp\ManajemenTP;
 use App\Livewire\Admin\DashboardAdmin;
@@ -129,6 +130,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'role:ketua_kelas'])->prefix('ketua-kelas')->group(function () {
     Route::get('/verifikasi', VerifikasiToken::class)->name('ketua.verifikasi');
     Route::get('/foto/{agenda}', AmbilFoto::class)->name('ketua.foto');
+    Route::get('/jadwal', JadwalKelas::class)->name('ketua.jadwal');
     Route::get('/anggota-kelas', AnggotaKelas::class)->name('ketua.anggota');
 });
 

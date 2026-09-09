@@ -221,6 +221,7 @@
                     </div>
                 @endif
             </div>
+        </div>
         @empty
         <div class="col-12 text-center py-5">
             <div class="card p-4 border-0 shadow-sm" style="border-radius: 12px; background: #f8fafc;">
