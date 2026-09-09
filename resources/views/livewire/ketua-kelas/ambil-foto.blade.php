@@ -25,7 +25,7 @@
             {{-- Mode Camera Preview --}}
             <div x-show="mode === 'camera'">
                 <div class="position-relative overflow-hidden rounded-3 mb-3 bg-dark shadow-sm" style="min-height: 250px;">
-                    <video x-ref="video" autoplay playsinline class="w-100 h-100" style="max-height: 380px; object-fit: cover;"></video>
+                    <video x-ref="video" autoplay playsinline class="w-100 h-100" style="max-height: 420px; object-fit: contain; background: #000;"></video>
                     
                     <div x-show="cameraLoading" class="position-absolute top-50 start-50 translate-middle text-white text-center">
                         <div class="spinner-border spinner-border-sm me-2"></div>
