@@ -37,38 +37,38 @@
     <div class="row g-2 mb-3">
         <div class="col-6 col-md-3">
             <a href="{{ route('guru.performa.jadwal-mingguan') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 36px; height: 36px;">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
                     <i class="bi bi-calendar-week fs-5"></i>
                 </div>
-                <div class="fw-bold text-dark" style="font-size: 0.76rem;">Jam Mingguan</div>
-                <div class="text-muted" style="font-size: 0.65rem;">Beban Mengajar</div>
+                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Jam Mingguan</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Beban Mengajar</div>
             </a>
         </div>
         <div class="col-6 col-md-3">
             <a href="{{ route('guru.performa.siswa-diajar') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 36px; height: 36px;">
+                <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
                     <i class="bi bi-people fs-5"></i>
                 </div>
-                <div class="fw-bold text-dark" style="font-size: 0.76rem;">Siswa Diajar</div>
-                <div class="text-muted" style="font-size: 0.65rem;">Per Kelas & Mapel</div>
+                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Siswa Diajar</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Per Kelas & Mapel</div>
             </a>
         </div>
         <div class="col-6 col-md-3">
             <a href="{{ route('guru.performa.kehadiran-bulanan') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 36px; height: 36px;">
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
                     <i class="bi bi-clock-history fs-5"></i>
                 </div>
-                <div class="fw-bold text-dark" style="font-size: 0.76rem;">Realisasi Jam</div>
-                <div class="text-muted" style="font-size: 0.65rem;">Kinerja Bulanan</div>
+                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Realisasi Jam</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Kinerja Bulanan</div>
             </a>
         </div>
         <div class="col-6 col-md-3">
             <a href="{{ route('guru.performa.export-iki') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 36px; height: 36px;">
+                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
                     <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
                 </div>
-                <div class="fw-bold text-dark" style="font-size: 0.76rem;">Export IKI</div>
-                <div class="text-muted" style="font-size: 0.65rem;">Cetak Dokumen PDF</div>
+                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Export IKI</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Cetak Dokumen PDF</div>
             </a>
         </div>
     </div>

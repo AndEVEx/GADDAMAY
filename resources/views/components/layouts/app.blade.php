@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#1a56db">
     <meta name="description" content="AgenDAmay - Agenda Digital SMKN 2 Indramayu">
     @auth
@@ -60,15 +60,6 @@
                         <span class="text-white-50 d-none d-md-inline" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
-            </div>
-
-            {{-- Right Navbar Desktop Pill --}}
-            <div class="d-none d-md-flex align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2 bg-white bg-opacity-15 py-1 px-3 rounded-pill text-white small shadow-sm">
-                    <i class="bi bi-person-circle fs-6"></i>
-                    <span class="fw-semibold text-truncate" style="max-width: 180px;">{{ Auth::user()->name }}</span>
-                    <span class="badge bg-white text-primary ms-1" style="font-size: 0.65rem;">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</span>
-                </div>
             </div>
         </div>
     </nav>
