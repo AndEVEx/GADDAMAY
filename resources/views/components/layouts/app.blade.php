@@ -861,14 +861,14 @@
                             </div>
                         </div>
 
-                        {{-- Option 1: Standar iPhone 13 --}}
+                        {{-- Option 1: Standar --}}
                         <div class="card border rounded-3 p-3 text-size-card transition-all" style="cursor: pointer;" data-size="normal" onclick="window.setTextSize('normal')">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-3">
                                     <input class="form-check-input mt-0" type="radio" name="radioTextSize" id="radioSizeNormal" value="normal">
                                     <div>
-                                        <div class="fw-bold text-dark">Standar iPhone 13 <span class="badge bg-primary ms-1">Rekomendasi</span></div>
-                                        <div class="text-muted small">Tampilan pas dan proporsional untuk semua menu</div>
+                                        <div class="fw-bold text-dark">Standar <span class="badge bg-primary ms-1">Rekomendasi</span></div>
+                                        <div class="text-muted small">Tampilan proporsional dan seimbang untuk semua menu</div>
                                     </div>
                                 </div>
                                 <span class="fs-6 fw-semibold text-secondary">A</span>
