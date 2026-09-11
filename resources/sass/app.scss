@@ -41,6 +41,17 @@ $btn-border-radius: 0.625rem;
     --app-card-radius: 1rem;
 }
 
+// 0. Mode Ringkas / Kompak (Viewport Luas & Padat Tombol)
+html[data-text-size="compact"] {
+    --app-font-size-base: 14px;
+    --app-font-size-sm: 0.75rem;    // 12px
+    --app-font-size-xs: 0.6875rem;  // 11px
+    --app-btn-font-size: 0.85rem;   // 13.6px
+    --app-touch-height: 40px;
+    --app-input-height: 40px;
+    font-size: 14px;
+}
+
 // 1. Mode Standar: iPhone 13 Reference Baseline (Rekomendasi)
 html, html[data-text-size="normal"] {
     --app-font-size-base: 16px;

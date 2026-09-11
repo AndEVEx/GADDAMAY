@@ -789,7 +789,7 @@
     // 3. Dynamic Text Size & Display Scaling Controller
     // ============================================================
     window.setTextSize = function(size) {
-        if (!['normal', 'large', 'xlarge'].includes(size)) {
+        if (!['compact', 'normal', 'large', 'xlarge'].includes(size)) {
             size = 'normal';
         }
         localStorage.setItem('agendamay_text_size', size);
@@ -847,6 +847,20 @@
                     </div>
 
                     <div class="d-flex flex-column gap-2" id="textSizeOptions">
+                        {{-- Option 0: Ringkas / Kompak --}}
+                        <div class="card border rounded-3 p-3 text-size-card transition-all" style="cursor: pointer;" data-size="compact" onclick="window.setTextSize('compact')">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input class="form-check-input mt-0" type="radio" name="radioTextSize" id="radioSizeCompact" value="compact">
+                                    <div>
+                                        <div class="fw-bold text-dark">Ringkas / Kompak <span class="badge bg-secondary ms-1">Viewport Luas</span></div>
+                                        <div class="text-muted small">Teks padat, memuat banyak tombol dan tabel dalam satu layar</div>
+                                    </div>
+                                </div>
+                                <span class="fs-6 fw-semibold text-secondary">A-</span>
+                            </div>
+                        </div>
+
                         {{-- Option 1: Standar iPhone 13 --}}
                         <div class="card border rounded-3 p-3 text-size-card transition-all" style="cursor: pointer;" data-size="normal" onclick="window.setTextSize('normal')">
                             <div class="d-flex align-items-center justify-content-between">
