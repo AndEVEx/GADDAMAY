@@ -39,7 +39,7 @@ class KehadiranBulanan extends Component
         $targetPertemuanTotal = 0;
         $targetPerMapelKelas = []; // key: rombel_id_mapel_id => target_jp
 
-        // Inisialisasi counter per rombel+mapel
+        // Inisialisasi counter per rombel+mapel (termasuk pasangan blok)
         foreach ($jadwals as $j) {
             $k = $j->rombel_id . '_' . $j->mapel_id;
             if (!isset($targetPerMapelKelas[$k])) {
@@ -56,6 +56,26 @@ class KehadiranBulanan extends Component
                     'sakit_jp' => 0,
                 ];
             }
+
+            // Inisialisasi juga untuk partner blok jika ada
+            $partner = $j->rombel?->getPartnerBlockRombel();
+            if ($partner) {
+                $pk = $partner->id . '_' . $j->mapel_id;
+                if (!isset($targetPerMapelKelas[$pk])) {
+                    $targetPerMapelKelas[$pk] = [
+                        'rombel_id' => $partner->id,
+                        'rombel_nama' => $partner->nama_kelas,
+                        'mapel_id' => $j->mapel_id,
+                        'mapel_nama' => $j->mataPelajaran?->nama_mapel ?? ($j->kegiatan_khusus ?? 'Kegiatan Khusus'),
+                        'target_jp' => 0,
+                        'target_pertemuan' => 0,
+                        'realisasi_jp' => 0,
+                        'realisasi_pertemuan' => 0,
+                        'izin_jp' => 0,
+                        'sakit_jp' => 0,
+                    ];
+                }
+            }
         }
 
         $currentDate = $startOfMonth->copy();
@@ -67,12 +87,23 @@ class KehadiranBulanan extends Component
                 $isLibur = HariLibur::isHariLibur($currentDate);
                 if (!$isLibur) {
                     $jadwalsToday = $jadwals->where('hari', $dayOfWeek);
+                    $weekNumber = (int) $currentDate->isoWeek;
+                    $isAlternateWeek = ($weekNumber % 2 === 0);
+
                     foreach ($jadwalsToday as $jt) {
                         $jp = max(1, (int)$jt->jam_ke_selesai - (int)$jt->jam_ke_mulai + 1);
                         $targetJpTotal += $jp;
                         $targetPertemuanTotal++;
 
-                        $k = $jt->rombel_id . '_' . $jt->mapel_id;
+                        $targetRombelId = $jt->rombel_id;
+                        $partner = $jt->rombel?->getPartnerBlockRombel();
+
+                        // Pada kelas blok, target di-rolling per minggu ganjil / genap
+                        if ($partner && $isAlternateWeek) {
+                            $targetRombelId = $partner->id;
+                        }
+
+                        $k = $targetRombelId . '_' . $jt->mapel_id;
                         if (isset($targetPerMapelKelas[$k])) {
                             $targetPerMapelKelas[$k]['target_jp'] += $jp;
                             $targetPerMapelKelas[$k]['target_pertemuan']++;

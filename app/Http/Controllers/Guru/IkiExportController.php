@@ -132,6 +132,21 @@ class IkiExportController extends Controller
                     'sakit_jp' => 0,
                 ];
             }
+
+            $partner = $j->rombel?->getPartnerBlockRombel();
+            if ($partner) {
+                $pk = $partner->id . '_' . $j->mapel_id;
+                if (!isset($targetPerMapelKelas[$pk])) {
+                    $targetPerMapelKelas[$pk] = [
+                        'rombel_nama' => $partner->nama_kelas,
+                        'mapel_nama' => $j->mataPelajaran?->nama_mapel ?? ($j->kegiatan_khusus ?? 'Kegiatan Khusus'),
+                        'target_jp' => 0,
+                        'realisasi_jp' => 0,
+                        'izin_jp' => 0,
+                        'sakit_jp' => 0,
+                    ];
+                }
+            }
         }
 
         $currentDate = $startOfMonth->copy();
@@ -140,12 +155,21 @@ class IkiExportController extends Controller
             if ($dayOfWeek <= 5) {
                 if (!HariLibur::isHariLibur($currentDate)) {
                     $jadwalsToday = $jadwals->where('hari', $dayOfWeek);
+                    $weekNumber = (int) $currentDate->isoWeek;
+                    $isAlternateWeek = ($weekNumber % 2 === 0);
+
                     foreach ($jadwalsToday as $jt) {
                         $jp = max(1, (int)$jt->jam_ke_selesai - (int)$jt->jam_ke_mulai + 1);
                         $targetJpTotal += $jp;
                         $targetPertemuanTotal++;
 
-                        $k = $jt->rombel_id . '_' . $jt->mapel_id;
+                        $targetRombelId = $jt->rombel_id;
+                        $partner = $jt->rombel?->getPartnerBlockRombel();
+                        if ($partner && $isAlternateWeek) {
+                            $targetRombelId = $partner->id;
+                        }
+
+                        $k = $targetRombelId . '_' . $jt->mapel_id;
                         if (isset($targetPerMapelKelas[$k])) {
                             $targetPerMapelKelas[$k]['target_jp'] += $jp;
                         }
