@@ -105,13 +105,71 @@ class RekapAbsensiSiswa extends Component
 
         if (!$rombel || !$mapel) return;
 
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $cleanTitle = substr(preg_replace('/[\\\\\/\?\*\[\]:]/', '_', "{$rombel->nama_kelas}-{$mapel->kode_mapel}"), 0, 31);
+        $sheet->setTitle($cleanTitle ?: 'Absensi');
+
+        $this->buildSheetContent($sheet, $rombel, $mapel, $user);
+
+        $filename = 'Rekap_Absensi_' . str_replace(' ', '_', $rombel->nama_kelas) . '_' . str_replace(' ', '_', $mapel->kode_mapel ?? $mapel->nama_mapel) . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportExcelAll()
+    {
+        $classes = $this->getAvailableClasses();
+        $user = auth()->user();
+
+        if ($classes->isEmpty()) {
+            $this->dispatch('show-toast', message: 'Tidak ada kelas yang diampu untuk diexport.', type: 'warning');
+            return;
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheetIndex = 0;
+
+        foreach ($classes as $classItem) {
+            $rombel = Rombel::find($classItem->rombel_id);
+            $mapel = MataPelajaran::find($classItem->mapel_id);
+            if (!$rombel || !$mapel) continue;
+
+            if ($sheetIndex === 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+            } else {
+                $sheet = $spreadsheet->createSheet();
+            }
+
+            $cleanTitle = substr(preg_replace('/[\\\\\/\?\*\[\]:]/', '_', "{$rombel->nama_kelas}-{$mapel->kode_mapel}"), 0, 31);
+            $sheet->setTitle($cleanTitle ?: "Kelas " . ($sheetIndex + 1));
+
+            $this->buildSheetContent($sheet, $rombel, $mapel, $user);
+            $sheetIndex++;
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $filename = 'Rekap_Absensi_Semua_Kelas_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    private function buildSheetContent($sheet, $rombel, $mapel, $user)
+    {
         // Ambil data pertemuan (agenda)
         $agendas = AgendaHarian::where(function ($q) use ($user) {
                 $q->where('guru_id', $user->id)->orWhere('guru_pengganti_id', $user->id);
             })
-            ->whereHas('jadwalPelajaran', function ($q) {
-                $q->where('rombel_id', $this->selectedRombelId)
-                  ->where('mapel_id', $this->selectedMapelId);
+            ->whereHas('jadwalPelajaran', function ($q) use ($rombel, $mapel) {
+                $q->where('rombel_id', $rombel->id)
+                  ->where('mapel_id', $mapel->id);
             })
             ->when($this->selectedBulan !== 'all', fn($q) => $q->where('tanggal', 'like', $this->selectedBulan . '%'))
             ->with('kehadiranMurid')
@@ -121,16 +179,12 @@ class RekapAbsensiSiswa extends Component
 
         $siswaList = Siswa::where('rombel_id', $rombel->id)->orderBy('nama')->get();
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle(substr("Absen " . $rombel->nama_kelas, 0, 31));
-
         // Header Title
         $sheet->setCellValue('A1', 'REKAPITULASI PRESENSI SISWA');
         $sheet->setCellValue('A2', "Mata Pelajaran: {$mapel->nama_mapel} | Kelas: {$rombel->nama_kelas} | Guru: {$user->name}");
         $sheet->setCellValue('A3', 'Periode: ' . ($this->selectedBulan === 'all' ? 'Semua Pertemuan' : Carbon::parse($this->selectedBulan . '-01')->translatedFormat('F Y')));
         
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(13);
         $sheet->getStyle('A2:A3')->getFont()->setSize(10)->setItalic(true);
 
         // Header Row 5
@@ -143,7 +197,7 @@ class RekapAbsensiSiswa extends Component
         $sheet->setCellValue('G5', 'A');
         $sheet->setCellValue('H5', '% Hadir');
 
-        $colIdx = 9; // Column I is index 9
+        $colIdx = 9; // Column I
         foreach ($agendas as $index => $ag) {
             $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
             $tgl = Carbon::parse($ag->tanggal)->format('d/m');
@@ -219,20 +273,13 @@ class RekapAbsensiSiswa extends Component
         }
 
         // Borders
-        $lastRow = $row - 1;
+        $lastRow = max(5, $row - 1);
         $sheet->getStyle("A5:{$lastColLetter}{$lastRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
 
         foreach (['A', 'B', 'D', 'E', 'F', 'G', 'H'] as $c) {
             $sheet->getColumnDimension($c)->setAutoSize(true);
         }
         $sheet->getColumnDimension('C')->setWidth(30);
-
-        $filename = 'Rekap_Absensi_' . str_replace(' ', '_', $rombel->nama_kelas) . '_' . str_replace(' ', '_', $mapel->kode_mapel ?? $mapel->nama_mapel) . '.xlsx';
-        $path = storage_path('app/' . $filename);
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($path);
-
-        return response()->download($path, $filename)->deleteFileAfterSend(true);
     }
 
     public function render()

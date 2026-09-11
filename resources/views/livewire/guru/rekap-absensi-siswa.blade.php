@@ -11,18 +11,27 @@
             </div>
         </div>
 
-        @if($selectedRombel && $selectedMapel && $matrixData->isNotEmpty())
-        <div class="d-flex gap-2">
-            <button wire:click="exportExcel" class="btn btn-success btn-sm d-flex align-items-center gap-2 shadow-sm" style="min-height: 38px; border-radius: 10px;">
+        {{-- Export Action Buttons --}}
+        <div class="d-flex flex-wrap gap-2">
+            @if($availableClasses->isNotEmpty())
+            <button wire:click="exportExcelAll" class="btn btn-outline-success btn-sm d-flex align-items-center gap-2 shadow-sm" style="min-height: 38px; border-radius: 10px;" wire:loading.attr="disabled" title="Download seluruh kelas yang diampu dalam 1 file Excel (multi-sheet)">
+                <span wire:loading.remove wire:target="exportExcelAll"><i class="bi bi-file-earmark-spreadsheet-fill"></i></span>
+                <span wire:loading wire:target="exportExcelAll" class="spinner-border spinner-border-sm"></span>
+                <span class="fw-semibold">Download Semua Kelas (.xlsx)</span>
+            </button>
+            @endif
+
+            @if($selectedRombel && $selectedMapel && $matrixData->isNotEmpty())
+            <button wire:click="exportExcel" class="btn btn-success btn-sm d-flex align-items-center gap-2 shadow-sm" style="min-height: 38px; border-radius: 10px;" wire:loading.attr="disabled" title="Download tabel presensi kelas yang sedang dibuka">
                 <span wire:loading.remove wire:target="exportExcel"><i class="bi bi-file-earmark-excel-fill"></i></span>
                 <span wire:loading wire:target="exportExcel" class="spinner-border spinner-border-sm"></span>
-                <span class="fw-semibold">Export Excel (.xlsx)</span>
+                <span class="fw-semibold">Download Kelas Ini (.xlsx)</span>
             </button>
+            @endif
         </div>
-        @endif
     </div>
 
-    {{-- Class & Subject Selector Tabs --}}
+    {{-- Class & Subject Selector - Structured Grid --}}
     <div class="card border-0 shadow-sm mb-3 bg-white" style="border-radius: 14px;">
         <div class="card-body p-3">
             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -32,34 +41,38 @@
                 <span class="badge bg-primary bg-opacity-10 text-primary">{{ $availableClasses->count() }} Kelas Diampu</span>
             </div>
 
-            <div class="d-flex flex-wrap gap-2">
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2">
                 @forelse($availableClasses as $c)
                 @php
                     $isSelected = ($selectedRombelId === $c->rombel_id && $selectedMapelId === $c->mapel_id);
                 @endphp
-                <button wire:click="selectClass('{{ $c->rombel_id }}', '{{ $c->mapel_id }}')" 
-                        class="btn btn-sm d-flex align-items-center gap-2 px-3 py-2 text-start transition-all {{ $isSelected ? 'btn-primary shadow-sm text-white' : 'btn-outline-secondary bg-light bg-opacity-50 text-dark border-0' }}"
-                        style="border-radius: 10px; font-size: 0.82rem;">
-                    <i class="bi bi-mortarboard-fill {{ $isSelected ? 'text-white' : 'text-primary' }}"></i>
-                    <div>
-                        <div class="fw-bold">{{ $c->rombel_nama }}</div>
-                        <div class="{{ $isSelected ? 'text-white-50' : 'text-muted' }}" style="font-size: 0.72rem;">{{ $c->mapel_nama }}</div>
-                    </div>
-                </button>
+                <div class="col">
+                    <button wire:click="selectClass('{{ $c->rombel_id }}', '{{ $c->mapel_id }}')" 
+                            class="btn btn-sm w-100 h-100 d-flex flex-column justify-content-center p-2 text-start transition-all {{ $isSelected ? 'btn-primary shadow text-white' : 'btn-outline-secondary bg-light bg-opacity-50 text-dark border' }}"
+                            style="border-radius: 12px; min-height: 62px;">
+                        <div class="d-flex align-items-center gap-1 mb-1 w-100">
+                            <i class="bi bi-mortarboard-fill {{ $isSelected ? 'text-white' : 'text-primary' }} flex-shrink-0" style="font-size: 0.9rem;"></i>
+                            <span class="fw-bold text-truncate" style="font-size: 0.82rem;" title="{{ $c->rombel_nama }}">{{ $c->rombel_nama }}</span>
+                        </div>
+                        <span class="text-truncate small w-100 {{ $isSelected ? 'text-white-50' : 'text-muted' }}" style="font-size: 0.7rem;" title="{{ $c->mapel_nama }}">
+                            {{ $c->mapel_nama }}
+                        </span>
+                    </button>
+                </div>
                 @empty
-                <div class="text-muted small py-2">Belum ada jadwal kelas yang diampu.</div>
+                <div class="col-12 text-muted small py-2">Belum ada jadwal kelas yang diampu.</div>
                 @endforelse
             </div>
         </div>
     </div>
 
     @if($selectedRombel && $selectedMapel)
-    {{-- Summary Stats & Filter Controls --}}
+    {{-- Summary Stats --}}
     <div class="row g-2 mb-3">
         <div class="col-6 col-md-4">
             <div class="card border-0 shadow-sm bg-white p-3 h-100" style="border-radius: 12px;">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bi bi-calendar-check fs-5"></i>
                     </div>
                     <div>
@@ -72,7 +85,7 @@
         <div class="col-6 col-md-4">
             <div class="card border-0 shadow-sm bg-white p-3 h-100" style="border-radius: 12px;">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bi bi-people-fill fs-5"></i>
                     </div>
                     <div>
@@ -85,7 +98,7 @@
         <div class="col-12 col-md-4">
             <div class="card border-0 shadow-sm bg-white p-3 h-100" style="border-radius: 12px;">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
                         <i class="bi bi-pie-chart-fill fs-5"></i>
                     </div>
                     <div>
@@ -97,7 +110,7 @@
         </div>
     </div>
 
-    {{-- Filter Bar & Legend --}}
+    {{-- Filter Bar & Clear Legend --}}
     <div class="card border-0 shadow-sm mb-3 bg-white" style="border-radius: 14px;">
         <div class="card-body p-3">
             <div class="row g-2 align-items-center justify-content-between">
@@ -118,20 +131,20 @@
                     @endif
                 </div>
 
-                {{-- Legend --}}
-                <div class="col-12 col-md-6 d-flex flex-wrap align-items-center justify-content-md-end gap-2" style="font-size: 0.78rem;">
-                    <span class="text-muted small fw-semibold">Keterangan:</span>
-                    <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 px-2 py-1">
-                        <strong>H</strong>: Hadir
+                {{-- Prominent Legend Badges --}}
+                <div class="col-12 col-md-6 d-flex flex-wrap align-items-center justify-content-md-end gap-2 pt-1" style="font-size: 0.78rem;">
+                    <span class="text-muted small fw-bold">Keterangan:</span>
+                    <span class="badge bg-success text-white px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-check-circle-fill"></i><strong>H</strong>: Hadir
                     </span>
-                    <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25 px-2 py-1">
-                        <strong>S</strong>: Sakit
+                    <span class="badge bg-info text-dark px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-heart-pulse-fill"></i><strong>S</strong>: Sakit
                     </span>
-                    <span class="badge bg-warning bg-opacity-20 text-dark border border-warning border-opacity-50 px-2 py-1">
-                        <strong>I</strong>: Izin
+                    <span class="badge bg-warning text-dark px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-envelope-paper-fill"></i><strong>I</strong>: Izin
                     </span>
-                    <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-25 px-2 py-1">
-                        <strong>A</strong>: Alpa
+                    <span class="badge bg-danger text-white px-2 py-1 shadow-sm d-inline-flex align-items-center gap-1">
+                        <i class="bi bi-x-circle-fill"></i><strong>A</strong>: Alpa
                     </span>
                 </div>
             </div>
@@ -199,13 +212,13 @@
                         @endphp
                         <td class="p-1">
                             @if($st === 'H')
-                            <span class="badge bg-success text-white fw-bold px-2 py-1" style="font-size: 0.72rem; min-width: 28px;">H</span>
+                            <span class="badge bg-success text-white fw-bold px-2 py-1 shadow-sm" style="font-size: 0.72rem; min-width: 28px;">H</span>
                             @elseif($st === 'S')
-                            <span class="badge bg-info text-dark fw-bold px-2 py-1" style="font-size: 0.72rem; min-width: 28px;">S</span>
+                            <span class="badge bg-info text-dark fw-bold px-2 py-1 shadow-sm" style="font-size: 0.72rem; min-width: 28px;">S</span>
                             @elseif($st === 'I')
-                            <span class="badge bg-warning text-dark fw-bold px-2 py-1" style="font-size: 0.72rem; min-width: 28px;">I</span>
+                            <span class="badge bg-warning text-dark fw-bold px-2 py-1 shadow-sm" style="font-size: 0.72rem; min-width: 28px;">I</span>
                             @elseif($st === 'A')
-                            <span class="badge bg-danger text-white fw-bold px-2 py-1" style="font-size: 0.72rem; min-width: 28px;">A</span>
+                            <span class="badge bg-danger text-white fw-bold px-2 py-1 shadow-sm" style="font-size: 0.72rem; min-width: 28px;">A</span>
                             @else
                             <span class="text-muted" style="font-size: 0.75rem;">-</span>
                             @endif
