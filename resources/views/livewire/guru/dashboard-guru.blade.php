@@ -32,15 +32,15 @@
     </div>
     @endif
 
-    {{-- Quick Access Shortcut Cards (Desktop Only - on mobile, navigation is handled cleanly by sidebar & bottom nav) --}}
-    <div class="row g-2 mb-3 d-none d-md-flex">
+    {{-- Quick Access Shortcut Cards --}}
+    <div class="row g-2 mb-3">
         <div class="col-6 col-md-3">
-            <a href="{{ route('guru.performa.jadwal-mingguan') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
-                    <i class="bi bi-calendar-week fs-5"></i>
+            <a href="{{ route('guru.rekap-absensi') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
+                    <i class="bi bi-person-check-fill fs-5"></i>
                 </div>
-                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Jam Mingguan</div>
-                <div class="text-muted" style="font-size: 0.72rem;">Beban Mengajar</div>
+                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Rekap Absensi</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Matrix H / S / I / A</div>
             </a>
         </div>
         <div class="col-6 col-md-3">
@@ -53,12 +53,12 @@
             </a>
         </div>
         <div class="col-6 col-md-3">
-            <a href="{{ route('guru.performa.kehadiran-bulanan') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
-                    <i class="bi bi-clock-history fs-5"></i>
+            <a href="{{ route('guru.performa.jadwal-mingguan') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
+                    <i class="bi bi-calendar-week fs-5"></i>
                 </div>
-                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Realisasi Jam</div>
-                <div class="text-muted" style="font-size: 0.72rem;">Kinerja Bulanan</div>
+                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Jam Mingguan</div>
+                <div class="text-muted" style="font-size: 0.72rem;">Beban Mengajar</div>
             </a>
         </div>
         <div class="col-6 col-md-3">

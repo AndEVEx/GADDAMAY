@@ -18,18 +18,35 @@ class NilaiKktpIndex extends Component
     {
         $user = auth()->user();
 
-        // Get unique rombel+mapel combinations the guru teaches
+        // Get unique rombel+mapel combinations the guru teaches (including block partners)
         $jadwals = JadwalPelajaran::whereHas('jadwalGuru', fn($q) => $q->where('guru_id', $user->id))
             ->whereNotNull('mapel_id')
             ->whereNotNull('rombel_id')
             ->with(['rombel', 'mataPelajaran'])
-            ->get()
-            ->unique(fn($j) => $j->rombel_id . '_' . $j->mapel_id);
+            ->get();
+
+        $rombelMapelPairs = collect();
+        foreach ($jadwals as $j) {
+            if (!$j->rombel || !$j->mataPelajaran) continue;
+
+            $k = $j->rombel_id . '_' . $j->mapel_id;
+            if (!$rombelMapelPairs->has($k)) {
+                $rombelMapelPairs->put($k, ['rombel' => $j->rombel, 'mapel' => $j->mataPelajaran]);
+            }
+
+            $partner = $j->rombel->getPartnerBlockRombel();
+            if ($partner) {
+                $pk = $partner->id . '_' . $j->mapel_id;
+                if (!$rombelMapelPairs->has($pk)) {
+                    $rombelMapelPairs->put($pk, ['rombel' => $partner, 'mapel' => $j->mataPelajaran]);
+                }
+            }
+        }
 
         // Build card data with stats
-        $kelasData = $jadwals->map(function ($jadwal) {
-            $rombel = $jadwal->rombel;
-            $mapel = $jadwal->mataPelajaran;
+        $kelasData = $rombelMapelPairs->map(function ($pair) {
+            $rombel = $pair['rombel'];
+            $mapel = $pair['mapel'];
             if (!$rombel || !$mapel) return null;
 
             $tpCount = TujuanPembelajaran::where('mapel_id', $mapel->id)->count();

@@ -21,24 +21,44 @@ class SiswaDiajar extends Component
     {
         $user = auth()->user();
 
-        // 1. Ambil semua kombinasi unik rombel_id & mapel_id yang diampu guru
+        // 1. Ambil semua kombinasi unik rombel & mapel yang diampu guru (termasuk pasangan blok)
         $jadwals = JadwalPelajaran::whereHas('jadwalGuru', fn($q) => $q->where('guru_id', $user->id))
             ->whereNotNull('rombel_id')
             ->whereNotNull('mapel_id')
             ->with(['rombel', 'mataPelajaran'])
             ->get();
 
-        // Unique groups by rombel_id + mapel_id
-        $groups = $jadwals->groupBy(fn($j) => $j->rombel_id . '_' . $j->mapel_id);
+        $rombelMapelPairs = collect();
+        foreach ($jadwals as $j) {
+            if (!$j->rombel || !$j->mataPelajaran) continue;
+
+            $key = $j->rombel_id . '_' . $j->mapel_id;
+            if (!$rombelMapelPairs->has($key)) {
+                $rombelMapelPairs->put($key, [
+                    'rombel' => $j->rombel,
+                    'mapel' => $j->mataPelajaran,
+                ]);
+            }
+
+            // Jika kelas blok vokasi (TP, RPL, APHP, NKPI), sertakan juga kelas pasangannya
+            $partner = $j->rombel->getPartnerBlockRombel();
+            if ($partner) {
+                $partnerKey = $partner->id . '_' . $j->mapel_id;
+                if (!$rombelMapelPairs->has($partnerKey)) {
+                    $rombelMapelPairs->put($partnerKey, [
+                        'rombel' => $partner,
+                        'mapel' => $j->mataPelajaran,
+                    ]);
+                }
+            }
+        }
 
         $tables = [];
-        $totalSiswaCount = 0;
         $allUniqueSiswaIds = collect();
 
-        foreach ($groups as $key => $items) {
-            $first = $items->first();
-            $rombel = $first->rombel;
-            $mapel = $first->mataPelajaran;
+        foreach ($rombelMapelPairs as $key => $pair) {
+            $rombel = $pair['rombel'];
+            $mapel = $pair['mapel'];
 
             if (!$rombel || !$mapel) continue;
 
@@ -85,11 +105,12 @@ class SiswaDiajar extends Component
         usort($tables, fn($a, $b) => strcmp($a->rombel_nama . $a->mapel_nama, $b->rombel_nama . $b->mapel_nama));
 
         // Options for dropdown filter
-        $dropdownOptions = $groups->map(function ($items) {
-            $first = $items->first();
+        $dropdownOptions = $rombelMapelPairs->map(function ($pair) {
+            $rombel = $pair['rombel'];
+            $mapel = $pair['mapel'];
             return (object) [
-                'key' => $first->rombel_id . '_' . $first->mapel_id,
-                'label' => ($first->rombel?->nama_kelas ?? '-') . ' — ' . ($first->mataPelajaran?->nama_mapel ?? '-'),
+                'key' => $rombel->id . '_' . $mapel->id,
+                'label' => ($rombel->nama_kelas ?? '-') . ' — ' . ($mapel->nama_mapel ?? '-'),
             ];
         })->values();
 

@@ -52,6 +52,7 @@ use App\Livewire\Guru\Performa\JadwalMingguan;
 use App\Livewire\Guru\Performa\SiswaDiajar;
 use App\Livewire\Guru\Performa\KehadiranBulanan;
 use App\Livewire\Guru\Performa\ExportIki;
+use App\Livewire\Guru\RekapAbsensiSiswa;
 use App\Http\Controllers\Guru\IkiExportController;
 use App\Livewire\Waka\VerifikasiIzin;
 
@@ -153,6 +154,9 @@ Route::middleware(['auth', 'role:guru,ketua_mgmp'])->prefix('guru')->group(funct
 
     // Pengajuan Izin Guru
     Route::get('/izin', PengajuanIzin::class)->name('guru.izin');
+
+    // Rekap Absensi Siswa Matrix
+    Route::get('/rekap-absensi/{rombel?}/{mapel?}', RekapAbsensiSiswa::class)->name('guru.rekap-absensi');
 
     // Kelompok Menu "Performa Saya"
     Route::prefix('performa')->group(function () {

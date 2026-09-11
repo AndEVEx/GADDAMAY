@@ -169,6 +169,9 @@
                     <a href="{{ route('guru.jurnal') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.jurnal*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-journal-text me-2"></i>Jurnal Mengajar
                     </a>
+                    <a href="{{ route('guru.rekap-absensi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.rekap-absensi*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-person-check-fill me-2 text-success"></i>Tabel Rekap Absensi Siswa
+                    </a>
 
                     {{-- Menu KKTP Section --}}
                     <a href="{{ route('guru.kktp-hub') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.kktp-hub') ? 'active' : '' }}" wire:navigate>

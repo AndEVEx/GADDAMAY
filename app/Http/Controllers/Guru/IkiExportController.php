@@ -74,17 +74,31 @@ class IkiExportController extends Controller
         });
         $totalJpSeminggu = $jadwalList->sum('total_jp');
 
-        // 2. DATA SISWA DIAJAR (Grouped by rombel + mapel)
+        // 2. DATA SISWA DIAJAR (Grouped by rombel + mapel, including block partners)
         $siswaTables = [];
         $uniqueSiswaIds = collect();
 
-        $groups = $jadwals->whereNotNull('rombel_id')->whereNotNull('mapel_id')->groupBy(fn($j) => $j->rombel_id . '_' . $j->mapel_id);
-        foreach ($groups as $key => $items) {
-            $first = $items->first();
-            $rombel = $first->rombel;
-            $mapel = $first->mataPelajaran;
+        $rombelMapelPairs = collect();
+        foreach ($jadwals->whereNotNull('rombel_id')->whereNotNull('mapel_id') as $j) {
+            if (!$j->rombel || !$j->mataPelajaran) continue;
 
-            if (!$rombel || !$mapel) continue;
+            $k = $j->rombel_id . '_' . $j->mapel_id;
+            if (!$rombelMapelPairs->has($k)) {
+                $rombelMapelPairs->put($k, ['rombel' => $j->rombel, 'mapel' => $j->mataPelajaran]);
+            }
+
+            $partner = $j->rombel->getPartnerBlockRombel();
+            if ($partner) {
+                $pk = $partner->id . '_' . $j->mapel_id;
+                if (!$rombelMapelPairs->has($pk)) {
+                    $rombelMapelPairs->put($pk, ['rombel' => $partner, 'mapel' => $j->mataPelajaran]);
+                }
+            }
+        }
+
+        foreach ($rombelMapelPairs as $key => $pair) {
+            $rombel = $pair['rombel'];
+            $mapel = $pair['mapel'];
 
             $siswaList = Siswa::where('rombel_id', $rombel->id)->orderBy('nama')->get();
             $uniqueSiswaIds = $uniqueSiswaIds->merge($siswaList->pluck('id'));
