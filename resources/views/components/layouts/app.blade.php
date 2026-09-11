@@ -97,8 +97,11 @@
                     <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-speedometer2 me-2"></i>Dashboard Admin
                     </a>
+                    <a href="{{ route('admin.live-absensi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.live-absensi') || request()->routeIs('monitoring.live-absensi') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-broadcast me-2 text-danger"></i>Live Absensi Siswa
+                    </a>
                     <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-broadcast me-2 text-danger"></i>Monitoring Realtime
+                        <i class="bi bi-display me-2 text-primary"></i>Monitoring Realtime
                     </a>
                     <a href="{{ route('monitoring.harian') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('monitoring.harian') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-calendar2-day me-2 text-primary"></i>Monitoring Harian
@@ -128,6 +131,9 @@
                     <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
                         <i class="bi bi-mortarboard-fill"></i> Manajemen Kelas & Siswa
                     </div>
+                    <a href="{{ route('admin.rekap-absensi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.rekap-absensi') || request()->routeIs('monitoring.rekap-absensi') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-check-fill me-2 text-primary"></i>Rekap Absensi Siswa
+                    </a>
                     <a href="{{ route('admin.kelas') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.kelas') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-door-open-fill me-2 text-secondary"></i>Manajemen Kelas
                     </a>
@@ -220,6 +226,12 @@
                         </a>
                     @endif
                 @elseif(in_array($role, ['kepsek', 'waka']))
+                    <a href="{{ route('monitoring.live-absensi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('*.live-absensi') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-broadcast me-2 text-danger"></i>Live Absensi Siswa
+                    </a>
+                    <a href="{{ route('monitoring.rekap-absensi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('*.rekap-absensi') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-calendar-check-fill me-2 text-primary"></i>Rekap Absensi Siswa
+                    </a>
                     <a href="{{ route('monitoring.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-speedometer2 me-2"></i>Monitoring Realtime
                     </a>
@@ -230,7 +242,7 @@
                         <i class="bi bi-calendar-range me-2 text-info"></i>Monitoring Mingguan
                     </a>
                     <a href="{{ route('monitoring.progress') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.progress') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-bar-chart-line me-2"></i>Progress KKTP (Analytic)
+                        <i class="bi bi-bar-chart-line me-2 text-success"></i>Progress KKTP (Analytic)
                     </a>
                     <a href="{{ route('monitoring.izin-guru') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.izin-guru') || request()->routeIs('waka.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-patch-check-fill me-2 text-warning"></i>Tabel Manajemen Izin

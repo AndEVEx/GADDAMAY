@@ -53,6 +53,8 @@ use App\Livewire\Guru\Performa\SiswaDiajar;
 use App\Livewire\Guru\Performa\KehadiranBulanan;
 use App\Livewire\Guru\Performa\ExportIki;
 use App\Livewire\Guru\RekapAbsensiSiswa;
+use App\Livewire\Admin\LiveAbsensiSiswa;
+use App\Livewire\Admin\RekapAbsensiAdmin;
 use App\Http\Controllers\Guru\IkiExportController;
 use App\Livewire\Waka\VerifikasiIzin;
 
@@ -205,6 +207,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/koreksi', KoreksiAgenda::class)->name('admin.koreksi');
     Route::get('/override/{agenda}', OverrideAgenda::class)->name('admin.override');
     Route::get('/verifikasi-izin', VerifikasiIzin::class)->name('admin.verifikasi-izin');
+    Route::get('/live-absensi', LiveAbsensiSiswa::class)->name('admin.live-absensi');
+    Route::get('/rekap-absensi', RekapAbsensiAdmin::class)->name('admin.rekap-absensi');
 
     // Direct Form Upload Fallbacks (Fail-safe HTTP POST routes)
     Route::post('/direct-import-jadwal', [DirectImportController::class, 'importJadwal'])->name('admin.direct-import-jadwal');
@@ -222,6 +226,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 // ============================================================
 Route::middleware(['auth', 'role:admin,kepsek,waka'])->prefix('monitoring')->group(function () {
     Route::get('/dashboard', DashboardMonitoring::class)->name('monitoring.dashboard');
+    Route::get('/live-absensi', LiveAbsensiSiswa::class)->name('monitoring.live-absensi');
+    Route::get('/rekap-absensi', RekapAbsensiAdmin::class)->name('monitoring.rekap-absensi');
     Route::get('/harian', MonitoringHarian::class)->name('monitoring.harian');
     Route::get('/mingguan', MonitoringMingguan::class)->name('monitoring.mingguan');
     Route::get('/progress-tp', ProgressTp::class)->name('monitoring.progress');
