@@ -16,6 +16,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <script>
+        (function() {
+            var savedSize = localStorage.getItem('agendamay_text_size') || 'normal';
+            document.documentElement.setAttribute('data-text-size', savedSize);
+        })();
+    </script>
     @livewireStyles
 </head>
 <body class="d-flex align-items-center justify-content-center min-vh-100" style="background: linear-gradient(135deg, #1a56db 0%, #0d47a1 50%, #1e3a5f 100%);">

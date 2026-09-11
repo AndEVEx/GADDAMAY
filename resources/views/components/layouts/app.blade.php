@@ -36,6 +36,14 @@
     {{-- Vite Assets (CSS & JS) --}}
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
+    {{-- Immediate Text Size Restore (Zero Flicker) --}}
+    <script>
+        (function() {
+            var savedSize = localStorage.getItem('agendamay_text_size') || 'normal';
+            document.documentElement.setAttribute('data-text-size', savedSize);
+        })();
+    </script>
+
     @livewireStyles
 </head>
 <body>
@@ -60,6 +68,14 @@
                         <span class="text-white-50 d-none d-md-inline" style="font-size: 0.62rem; font-weight: 500; line-height: 1.1; margin-top: 2px;">Menginspirasi Tanpa Henti, Terdata Rapi Setiap Hari</span>
                     </div>
                 </a>
+            </div>
+
+            {{-- Right Nav: Text Size Switcher Trigger --}}
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 px-2 py-1" data-bs-toggle="modal" data-bs-target="#modalTextSize" style="min-height: 38px; border-radius: 8px;" title="Atur Ukuran Teks & Tampilan">
+                    <i class="bi bi-fonts fs-5"></i>
+                    <span class="d-none d-sm-inline fw-semibold small">Ukuran Teks</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -283,6 +299,10 @@
                     </div>
 
                     <div class="list-group list-group-flush">
+                        <button type="button" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2" data-bs-toggle="modal" data-bs-target="#modalTextSize">
+                            <i class="bi bi-fonts text-primary me-2 fs-6"></i>
+                            <span class="small">Ukuran Teks / Tampilan</span>
+                        </button>
                         <button type="button" onclick="window.installPWA()" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2 text-primary fw-semibold pwa-install-btn">
                             <i class="bi bi-download text-primary me-2 fs-6"></i>
                             <span class="small">Install Aplikasi (PWA)</span>
@@ -764,6 +784,119 @@
             }
         });
     })();
+
+    // ============================================================
+    // 3. Dynamic Text Size & Display Scaling Controller
+    // ============================================================
+    window.setTextSize = function(size) {
+        if (!['normal', 'large', 'xlarge'].includes(size)) {
+            size = 'normal';
+        }
+        localStorage.setItem('agendamay_text_size', size);
+        document.documentElement.setAttribute('data-text-size', size);
+        updateTextSizeUI(size);
+    };
+
+    function updateTextSizeUI(size) {
+        size = size || localStorage.getItem('agendamay_text_size') || 'normal';
+        document.querySelectorAll('.text-size-card').forEach(function(card) {
+            var cardSize = card.getAttribute('data-size');
+            var radio = card.querySelector('input[type="radio"]');
+            if (cardSize === size) {
+                card.classList.add('border-primary', 'bg-primary', 'bg-opacity-10', 'shadow-sm');
+                card.classList.remove('border-secondary-subtle', 'bg-white');
+                if (radio) radio.checked = true;
+            } else {
+                card.classList.remove('border-primary', 'bg-primary', 'bg-opacity-10', 'shadow-sm');
+                card.classList.add('border-secondary-subtle', 'bg-white');
+                if (radio) radio.checked = false;
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTextSizeUI();
+    });
+    document.addEventListener('livewire:navigated', function() {
+        updateTextSizeUI();
+    });
     </script>
+
+    {{-- Modal Pengaturan Ukuran Teks / Tampilan --}}
+    <div class="modal fade" id="modalTextSize" tabindex="-1" aria-labelledby="modalTextSizeLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-circle">
+                            <i class="bi bi-fonts fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" id="modalTextSizeLabel">Ukuran Teks & Tampilan</h5>
+                            <p class="text-muted small mb-0">Sesuaikan kenyamanan membaca Anda</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-3 p-md-4">
+                    {{-- Live Preview Box --}}
+                    <div class="card bg-light border-0 rounded-3 p-3 mb-3 text-center">
+                        <div class="text-muted small mb-1">Contoh Pratinjau Teks:</div>
+                        <div class="fw-bold text-dark fs-5 mb-1">Agenda Mengajar SMKN 2</div>
+                        <div class="text-muted small">Mata Pelajaran: Matematika • Jam Ke 1-2</div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-2" id="textSizeOptions">
+                        {{-- Option 1: Standar iPhone 13 --}}
+                        <div class="card border rounded-3 p-3 text-size-card transition-all" style="cursor: pointer;" data-size="normal" onclick="window.setTextSize('normal')">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input class="form-check-input mt-0" type="radio" name="radioTextSize" id="radioSizeNormal" value="normal">
+                                    <div>
+                                        <div class="fw-bold text-dark">Standar iPhone 13 <span class="badge bg-primary ms-1">Rekomendasi</span></div>
+                                        <div class="text-muted small">Tampilan pas dan proporsional untuk semua menu</div>
+                                    </div>
+                                </div>
+                                <span class="fs-6 fw-semibold text-secondary">A</span>
+                            </div>
+                        </div>
+
+                        {{-- Option 2: Besar / Nyaman --}}
+                        <div class="card border rounded-3 p-3 text-size-card transition-all" style="cursor: pointer;" data-size="large" onclick="window.setTextSize('large')">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input class="form-check-input mt-0" type="radio" name="radioTextSize" id="radioSizeLarge" value="large">
+                                    <div>
+                                        <div class="fw-bold text-dark">Besar / Nyaman (+15%)</div>
+                                        <div class="text-muted small">Teks dan tombol lebih besar dan mudah disentuh</div>
+                                    </div>
+                                </div>
+                                <span class="fs-5 fw-semibold text-secondary">A+</span>
+                            </div>
+                        </div>
+
+                        {{-- Option 3: Ekstra Besar --}}
+                        <div class="card border rounded-3 p-3 text-size-card transition-all" style="cursor: pointer;" data-size="xlarge" onclick="window.setTextSize('xlarge')">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <input class="form-check-input mt-0" type="radio" name="radioTextSize" id="radioSizeXLarge" value="xlarge">
+                                    <div>
+                                        <div class="fw-bold text-dark">Ekstra Besar (+30%) <span class="badge bg-warning text-dark ms-1">Ramah Senior</span></div>
+                                        <div class="text-muted small">Ukuran maksimal, sangat jelas dan tegas terbaca</div>
+                                    </div>
+                                </div>
+                                <span class="fs-4 fw-bold text-secondary">A++</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-primary w-100 rounded-3 py-2 fw-semibold" data-bs-dismiss="modal">
+                        Simpan & Terapkan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

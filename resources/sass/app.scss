@@ -28,6 +28,62 @@ $btn-border-radius: 0.625rem;
 @import '~bootstrap/scss/bootstrap';
 
 // ============================================================
+// IPHONE 13 BASELINE & DYNAMIC ACCESSIBILITY TEXT SCALING
+// ============================================================
+
+:root {
+    --app-font-size-base: 16px;
+    --app-font-size-sm: 0.875rem;    // 14px
+    --app-font-size-xs: 0.8125rem;   // 13px
+    --app-btn-font-size: 0.95rem;    // 15.2px
+    --app-touch-height: 48px;
+    --app-input-height: 48px;
+    --app-card-radius: 1rem;
+}
+
+// 1. Mode Standar: iPhone 13 Reference Baseline (Rekomendasi)
+html, html[data-text-size="normal"] {
+    --app-font-size-base: 16px;
+    --app-font-size-sm: 0.875rem;
+    --app-font-size-xs: 0.8125rem;
+    --app-btn-font-size: 0.95rem;
+    --app-touch-height: 48px;
+    --app-input-height: 48px;
+    font-size: 16px;
+}
+
+// 2. Mode Besar: Nyaman (+15% Scaling)
+html[data-text-size="large"] {
+    --app-font-size-base: 18.5px;
+    --app-font-size-sm: 0.95rem;
+    --app-font-size-xs: 0.875rem;
+    --app-btn-font-size: 1.05rem;
+    --app-touch-height: 52px;
+    --app-input-height: 52px;
+    font-size: 18.5px;
+}
+
+// 3. Mode Ekstra Besar: Ramah Guru Senior (+30% Scaling)
+html[data-text-size="xlarge"] {
+    --app-font-size-base: 21px;
+    --app-font-size-sm: 1.05rem;
+    --app-font-size-xs: 0.95rem;
+    --app-btn-font-size: 1.15rem;
+    --app-touch-height: 58px;
+    --app-input-height: 56px;
+    font-size: 21px;
+}
+
+// High Contrast Text Readability (Mudah dibaca guru senior)
+.text-muted {
+    color: #475569 !important; // Slate 600 (High Contrast)
+}
+
+.small, small {
+    font-size: var(--app-font-size-sm) !important;
+}
+
+// ============================================================
 // MOBILE-FIRST GLOBAL STYLES
 // ============================================================
 
@@ -40,6 +96,8 @@ html {
 
 body {
     font-family: $font-family-sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
     background-color: #f0f2f5;
     min-height: 100vh;
     padding-bottom: 80px; // Space for bottom nav
@@ -51,8 +109,8 @@ body {
 // Touch target minimum 48px
 .btn, .nav-link, .form-control, .form-select,
 a[role="button"], [type="button"], [type="submit"] {
-    min-height: 48px;
-    min-width: 48px;
+    min-height: var(--app-touch-height);
+    min-width: 44px;
 }
 
 .btn {
