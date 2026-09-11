@@ -238,12 +238,9 @@ class XmlJadwalSeeder extends Seeder
             $jamMulai = min($group['periods']);
             $jamSelesai = max($group['periods']);
 
-            $classId = $lesson['classids'];
+            $classIds = !empty($lesson['classids']) ? explode(',', $lesson['classids']) : [null];
             $subjectId = $lesson['subjectid'];
             $teacherIds = $lesson['teacherids'];
-
-            // Determine rombel
-            $rombelId = $this->classMap[$classId] ?? null;
 
             // Determine mapel or kegiatan_khusus
             $mapelId = $this->subjectMap[$subjectId] ?? null;
@@ -267,26 +264,31 @@ class XmlJadwalSeeder extends Seeder
                 }
             }
 
-            $jadwal = JadwalPelajaran::create([
-                'hari' => $group['day'],
-                'jam_ke_mulai' => $jamMulai,
-                'jam_ke_selesai' => $jamSelesai,
-                'rombel_id' => $rombelId,
-                'mapel_id' => $mapelId,
-                'keterangan' => $keterangan,
-                'kegiatan_khusus' => $kegiatanKhusus,
-                'asc_lesson_id' => $group['lessonid'],
-            ]);
+            foreach ($classIds as $rawClassId) {
+                $cid = trim((string)$rawClassId);
+                $rombelId = !empty($cid) && isset($this->classMap[$cid]) ? $this->classMap[$cid] : null;
 
-            // Create jadwal_guru pivot entries
-            foreach ($guruIds as $guruId) {
-                JadwalGuru::firstOrCreate([
-                    'jadwal_pelajaran_id' => $jadwal->id,
-                    'guru_id' => $guruId,
+                $jadwal = JadwalPelajaran::create([
+                    'hari' => $group['day'],
+                    'jam_ke_mulai' => $jamMulai,
+                    'jam_ke_selesai' => $jamSelesai,
+                    'rombel_id' => $rombelId,
+                    'mapel_id' => $mapelId,
+                    'keterangan' => $keterangan,
+                    'kegiatan_khusus' => $kegiatanKhusus,
+                    'asc_lesson_id' => $group['lessonid'],
                 ]);
-            }
 
-            $jadwalCount++;
+                // Create jadwal_guru pivot entries
+                foreach ($guruIds as $guruId) {
+                    JadwalGuru::firstOrCreate([
+                        'jadwal_pelajaran_id' => $jadwal->id,
+                        'guru_id' => $guruId,
+                    ]);
+                }
+
+                $jadwalCount++;
+            }
         }
 
         $this->command?->info("Schedule entries created: {$jadwalCount}");

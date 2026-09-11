@@ -22,16 +22,190 @@ class DashboardMonitoring extends Component
     public ?int $selectedJam = null;
     public string $search = '';
 
+    public ?array $modalDetail = null;
+    public bool $showDetailModal = false;
+    public string $rekapBulan = '';
+    public string $searchGuruRekap = '';
+
     public function mount()
     {
         $now = Carbon::now('Asia/Jakarta');
         $this->hariIni = $now->dayOfWeekIso;
         $this->tanggal = $now->format('Y-m-d');
+        $this->rekapBulan = $now->format('Y-m');
 
         // Dynamically get maximum jam_ke from database (defaults to 12)
         $this->maxJam = JamPelajaran::max('jam_ke') ?? 12;
 
         $this->detectLiveJam();
+    }
+
+    public function openDetailModal($rombelId, $jadwalId = null, $agendaId = null)
+    {
+        $rombel = Rombel::find($rombelId);
+        $jadwal = $jadwalId ? JadwalPelajaran::with(['mataPelajaran', 'jadwalGuru.guru'])->find($jadwalId) : null;
+        $agenda = $agendaId ? AgendaHarian::with(['guru', 'kehadiranMurid', 'agendaTp.tujuanPembelajaran'])->find($agendaId) : null;
+
+        if (!$agenda && $jadwal) {
+            $agenda = AgendaHarian::where('jadwal_pelajaran_id', $jadwal->id)
+                ->where('tanggal', $this->tanggal)
+                ->with(['guru', 'kehadiranMurid', 'agendaTp.tujuanPembelajaran'])
+                ->first();
+        }
+
+        // TP list
+        $tps = collect();
+        if ($jadwal && $jadwal->mapel_id) {
+            $tps = \App\Models\TujuanPembelajaran::where('mapel_id', $jadwal->mapel_id)
+                ->orderBy('order_sequence')
+                ->get();
+        }
+
+        // Attendance stats
+        $presensiStats = [
+            'total' => 0,
+            'hadir' => 0,
+            'sakit' => 0,
+            'izin' => 0,
+            'alpa' => 0,
+        ];
+
+        if ($agenda) {
+            $murids = $agenda->kehadiranMurid;
+            $presensiStats['total'] = $murids->count();
+            $presensiStats['hadir'] = $murids->where('status', 'hadir')->count();
+            $presensiStats['sakit'] = $murids->where('status', 'sakit')->count();
+            $presensiStats['izin'] = $murids->where('status', 'izin')->count();
+            $presensiStats['alpa'] = $murids->whereIn('status', ['alpa', 'tanpa_keterangan', 'belum_hadir'])->count();
+        } elseif ($rombel) {
+            $presensiStats['total'] = \App\Models\Siswa::where('rombel_id', $rombel->id)->count();
+        }
+
+        $this->modalDetail = [
+            'rombel' => $rombel,
+            'jadwal' => $jadwal,
+            'agenda' => $agenda,
+            'tps' => $tps,
+            'presensiStats' => $presensiStats,
+            'jamSelected' => $this->selectedJam,
+        ];
+
+        $this->showDetailModal = true;
+    }
+
+    public function closeDetailModal()
+    {
+        $this->showDetailModal = false;
+        $this->modalDetail = null;
+    }
+
+    public function getRekapGuruKehadiranProperty()
+    {
+        $bulanStr = !empty($this->rekapBulan) ? $this->rekapBulan : Carbon::now('Asia/Jakarta')->format('Y-m');
+        $startOfMonth = Carbon::parse($bulanStr)->startOfMonth();
+        $endOfMonth = Carbon::parse($bulanStr)->endOfMonth();
+
+        $gurus = \App\Models\User::whereIn('role', ['guru', 'ketua_mgmp'])
+            ->when($this->searchGuruRekap, function ($q) {
+                $q->where('name', 'like', "%{$this->searchGuruRekap}%")
+                  ->orWhere('email', 'like', "%{$this->searchGuruRekap}%");
+            })
+            ->orderBy('name')
+            ->get();
+
+        return $gurus->map(function ($guru) use ($startOfMonth, $endOfMonth) {
+            // Target JP
+            $jadwals = JadwalPelajaran::whereHas('jadwalGuru', fn($q) => $q->where('guru_id', $guru->id))->get();
+            $targetJp = 0;
+
+            $curDate = $startOfMonth->copy();
+            while ($curDate->lte($endOfMonth)) {
+                $dayOfWeek = $curDate->dayOfWeekIso;
+                if ($dayOfWeek <= 5 && !\App\Models\HariLibur::isHariLibur($curDate)) {
+                    $jadwalsToday = $jadwals->where('hari', $dayOfWeek);
+                    foreach ($jadwalsToday as $jt) {
+                        $targetJp += max(1, (int)$jt->jam_ke_selesai - (int)$jt->jam_ke_mulai + 1);
+                    }
+                }
+                $curDate->addDay();
+            }
+
+            // Realisasi JP
+            $agendas = AgendaHarian::where(fn($q) => $q->where('guru_id', $guru->id)->orWhere('guru_pengganti_id', $guru->id))
+                ->whereBetween('tanggal', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
+                ->with('jadwalPelajaran')
+                ->get();
+
+            $realisasiJp = 0;
+            $izinJp = 0;
+            $sakitJp = 0;
+
+            foreach ($agendas as $ag) {
+                $jp = $ag->jadwalPelajaran ? max(1, (int)$ag->jadwalPelajaran->jam_ke_selesai - (int)$ag->jadwalPelajaran->jam_ke_mulai + 1) : 1;
+                if (in_array($ag->status, ['selesai', 'berjalan', 'token_terverifikasi']) && $ag->status_kehadiran_guru === 'hadir') {
+                    $realisasiJp += $jp;
+                } elseif (in_array($ag->status_kehadiran_guru, ['izin', 'cuti', 'dinas', 'tugas_luar'])) {
+                    $izinJp += $jp;
+                } elseif ($ag->status_kehadiran_guru === 'sakit') {
+                    $sakitJp += $jp;
+                }
+            }
+
+            $pct = $targetJp > 0 ? round(($realisasiJp / $targetJp) * 100, 1) : ($realisasiJp > 0 ? 100 : 0);
+
+            return (object) [
+                'guru' => $guru,
+                'target_jp' => $targetJp,
+                'realisasi_jp' => $realisasiJp,
+                'izin_jp' => $izinJp,
+                'sakit_jp' => $sakitJp,
+                'persentase' => $pct,
+            ];
+        });
+    }
+
+    public function render()
+    {
+        $data = $this->monitoringData;
+        $summary = $data->countBy('status');
+
+        $officialPeriods = [
+            0  => ['mulai' => '06:25', 'selesai' => '06:45', 'label' => 'Apel Pagi / Upacara', 'is_break' => false],
+            1  => ['mulai' => '06:45', 'selesai' => '07:30', 'label' => 'KBM 1', 'is_break' => false],
+            2  => ['mulai' => '07:30', 'selesai' => '08:15', 'label' => 'KBM 2', 'is_break' => false],
+            3  => ['mulai' => '08:15', 'selesai' => '09:00', 'label' => 'KBM 3', 'is_break' => false],
+            4  => ['mulai' => '09:00', 'selesai' => '09:45', 'label' => 'KBM 4', 'is_break' => false],
+            5  => ['mulai' => '09:45', 'selesai' => '10:00', 'label' => 'Istirahat 1', 'is_break' => true],
+            6  => ['mulai' => '10:00', 'selesai' => '10:45', 'label' => 'KBM 5', 'is_break' => false],
+            7  => ['mulai' => '10:45', 'selesai' => '11:30', 'label' => 'KBM 6', 'is_break' => false],
+            8  => ['mulai' => '11:30', 'selesai' => '12:15', 'label' => 'KBM 7', 'is_break' => false],
+            9  => ['mulai' => '12:15', 'selesai' => '12:45', 'label' => 'Istirahat 2 / Ishoma', 'is_break' => true],
+            10 => ['mulai' => '12:45', 'selesai' => '13:30', 'label' => 'KBM 8', 'is_break' => false],
+            11 => ['mulai' => '13:30', 'selesai' => '14:15', 'label' => 'KBM 9', 'is_break' => false],
+            12 => ['mulai' => '14:15', 'selesai' => '15:00', 'label' => 'KBM 10', 'is_break' => false],
+        ];
+
+        $jamPelajaranList = collect($officialPeriods)->map(function ($slot, $jamKe) {
+            return (object) [
+                'jam_ke' => $jamKe,
+                'waktu_mulai' => $slot['mulai'],
+                'waktu_selesai' => $slot['selesai'],
+                'label' => $slot['label'],
+                'is_break' => $slot['is_break'],
+            ];
+        });
+
+        $currentJamObj = $jamPelajaranList->firstWhere('jam_ke', $this->currentJam);
+        $todayHoliday = \App\Models\HariLibur::isHariLibur($this->tanggal);
+
+        return view('livewire.monitoring.dashboard-monitoring', [
+            'monitoringData' => $data,
+            'summary' => $summary,
+            'jamPelajaranList' => $jamPelajaranList,
+            'currentJamObj' => $currentJamObj,
+            'todayHoliday' => $todayHoliday,
+            'rekapGuruKehadiran' => $this->rekapGuruKehadiran,
+        ]);
     }
 
     public function detectLiveJam()
@@ -254,47 +428,5 @@ class DashboardMonitoring extends Component
 
         return $data;
     }
-
-    public function render()
-    {
-        $data = $this->monitoringData;
-        $summary = $data->countBy('status');
-
-        $officialPeriods = [
-            0  => ['mulai' => '06:25', 'selesai' => '06:45', 'label' => 'Apel Pagi / Upacara', 'is_break' => false],
-            1  => ['mulai' => '06:45', 'selesai' => '07:30', 'label' => 'KBM 1', 'is_break' => false],
-            2  => ['mulai' => '07:30', 'selesai' => '08:15', 'label' => 'KBM 2', 'is_break' => false],
-            3  => ['mulai' => '08:15', 'selesai' => '09:00', 'label' => 'KBM 3', 'is_break' => false],
-            4  => ['mulai' => '09:00', 'selesai' => '09:45', 'label' => 'KBM 4', 'is_break' => false],
-            5  => ['mulai' => '09:45', 'selesai' => '10:00', 'label' => 'Istirahat 1', 'is_break' => true],
-            6  => ['mulai' => '10:00', 'selesai' => '10:45', 'label' => 'KBM 5', 'is_break' => false],
-            7  => ['mulai' => '10:45', 'selesai' => '11:30', 'label' => 'KBM 6', 'is_break' => false],
-            8  => ['mulai' => '11:30', 'selesai' => '12:15', 'label' => 'KBM 7', 'is_break' => false],
-            9  => ['mulai' => '12:15', 'selesai' => '12:45', 'label' => 'Istirahat 2 / Ishoma', 'is_break' => true],
-            10 => ['mulai' => '12:45', 'selesai' => '13:30', 'label' => 'KBM 8', 'is_break' => false],
-            11 => ['mulai' => '13:30', 'selesai' => '14:15', 'label' => 'KBM 9', 'is_break' => false],
-            12 => ['mulai' => '14:15', 'selesai' => '15:00', 'label' => 'KBM 10', 'is_break' => false],
-        ];
-
-        $jamPelajaranList = collect($officialPeriods)->map(function ($slot, $jamKe) {
-            return (object) [
-                'jam_ke' => $jamKe,
-                'waktu_mulai' => $slot['mulai'],
-                'waktu_selesai' => $slot['selesai'],
-                'label' => $slot['label'],
-                'is_break' => $slot['is_break'],
-            ];
-        });
-
-        $currentJamObj = $jamPelajaranList->firstWhere('jam_ke', $this->currentJam);
-        $todayHoliday = \App\Models\HariLibur::isHariLibur($this->tanggal);
-
-        return view('livewire.monitoring.dashboard-monitoring', [
-            'monitoringData' => $data,
-            'summary' => $summary,
-            'jamPelajaranList' => $jamPelajaranList,
-            'currentJamObj' => $currentJamObj,
-            'todayHoliday' => $todayHoliday,
-        ]);
-    }
 }
+

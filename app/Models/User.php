@@ -24,6 +24,9 @@ class User extends Authenticatable
         'password',
         'role',
         'rombel_id',
+        'last_login_at',
+        'last_login_ip',
+        'last_login_device',
     ];
 
     /**

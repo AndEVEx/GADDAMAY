@@ -16,6 +16,7 @@ class MulaiKelas extends Component
     public JadwalPelajaran $jadwal;
     public ?AgendaHarian $agenda = null;
     public string $token = '';
+    public string $alasan_terlambat = '';
 
     public function mount(JadwalPelajaran $jadwal)
     {
@@ -64,6 +65,8 @@ class MulaiKelas extends Component
         }
 
         if ($this->agenda) {
+            $this->alasan_terlambat = $this->agenda->alasan_terlambat ?? '';
+
             // If already verified or running, automatically forward to the next step!
             if ($this->agenda->status === 'token_terverifikasi') {
                 return redirect()->route('guru.materi', $this->agenda->id);
@@ -112,6 +115,7 @@ class MulaiKelas extends Component
                 'waktu_mulai' => Carbon::now('Asia/Jakarta'),
                 'status' => 'menunggu_token',
                 'status_kehadiran_guru' => 'hadir',
+                'alasan_terlambat' => !empty(trim($this->alasan_terlambat)) ? trim($this->alasan_terlambat) : null,
             ]
         );
 
@@ -137,12 +141,36 @@ class MulaiKelas extends Component
                         'waktu_mulai' => $this->agenda->waktu_mulai,
                         'status' => 'menunggu_token',
                         'status_kehadiran_guru' => 'hadir',
+                        'alasan_terlambat' => !empty(trim($this->alasan_terlambat)) ? trim($this->alasan_terlambat) : null,
                     ]
                 );
             }
         }
 
         $this->dispatch('show-toast', message: 'Token OTP berhasil dibuat!', type: 'success');
+    }
+
+    public function updatedAlasanTerlambat()
+    {
+        if ($this->agenda) {
+            $val = !empty(trim($this->alasan_terlambat)) ? trim($this->alasan_terlambat) : null;
+            $this->agenda->update(['alasan_terlambat' => $val]);
+
+            // Also update sibling agendas
+            if ($this->jadwal->mapel_id) {
+                $siblingJadwalIds = JadwalPelajaran::where('hari', $this->jadwal->hari)
+                    ->where('rombel_id', $this->jadwal->rombel_id)
+                    ->where('mapel_id', $this->jadwal->mapel_id)
+                    ->where('id', '!=', $this->jadwal->id)
+                    ->pluck('id');
+
+                AgendaHarian::whereIn('jadwal_pelajaran_id', $siblingJadwalIds)
+                    ->where('guru_id', auth()->id())
+                    ->where('tanggal', $this->agenda->tanggal)
+                    ->update(['alasan_terlambat' => $val]);
+            }
+            $this->dispatch('show-toast', message: 'Keterangan alasan disimpan.', type: 'info');
+        }
     }
 
     public function refreshStatus()

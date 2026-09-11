@@ -24,7 +24,12 @@ class Login extends Component
 
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             session()->regenerate();
-            $user = Auth::user();
+            // Update last_login on user model
+            $user->update([
+                'last_login_at' => \Carbon\Carbon::now('Asia/Jakarta'),
+                'last_login_ip' => request()->ip(),
+                'last_login_device' => request()->userAgent(),
+            ]);
 
             // Record login event in AuditLog
             \App\Models\AuditLog::create([

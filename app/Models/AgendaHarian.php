@@ -35,6 +35,7 @@ class AgendaHarian extends Model
         'foto_guru_path',
         'prompter_custom',
         'refleksi',
+        'alasan_terlambat',
         'status_kehadiran_guru',
         'guru_pengganti_id',
         'koreksi_oleh_id',

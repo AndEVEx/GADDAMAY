@@ -162,12 +162,55 @@
         </div>
     </div>
 
-    {{-- Login History Logs Section --}}
+    {{-- Global Data Export Section (Item 4) --}}
+    <div class="card border-0 shadow-sm mb-4 animate-fade-in-up" style="border-radius: 14px; background: linear-gradient(135deg, #1e293b, #0f172a); color: white;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1 text-white d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-arrow-down-fill text-warning"></i>
+                        Export Global Data Sekolah (Excel)
+                    </h5>
+                    <p class="mb-0 text-white-50 small">
+                        Unduh rekapan global seluruh guru, absensi siswa per mapel, dan capaian KKTP kurikulum merdeka.
+                    </p>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="d-flex align-items-center gap-1 bg-white bg-opacity-10 px-3 py-1 rounded-3">
+                        <span class="text-white-50 small">Bulan:</span>
+                        <input type="month" wire:model.live="exportBulan" class="form-control form-control-sm bg-white text-dark border-0 fw-semibold" style="width: 150px;">
+                    </div>
+                </div>
+            </div>
+            <div class="row g-2 mt-3">
+                <div class="col-12 col-md-4">
+                    <button wire:click="exportRekapGuruBulanan" class="btn btn-outline-light w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="border-radius: 10px;" wire:loading.attr="disabled">
+                        <i class="bi bi-person-check-fill text-primary"></i>
+                        <span>Rekap Jam Kehadiran Guru (.xlsx)</span>
+                    </button>
+                </div>
+                <div class="col-12 col-md-4">
+                    <button wire:click="exportRekapPresensiSiswa" class="btn btn-outline-light w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="border-radius: 10px;" wire:loading.attr="disabled">
+                        <i class="bi bi-people-fill text-info"></i>
+                        <span>Rekap Absensi Siswa per Mapel (.xlsx)</span>
+                    </button>
+                </div>
+                <div class="col-12 col-md-4">
+                    <button wire:click="exportRekapKktpGlobal" class="btn btn-outline-light w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="border-radius: 10px;" wire:loading.attr="disabled">
+                        <i class="bi bi-clipboard2-check-fill text-success"></i>
+                        <span>Rekap Capaian KKTP Global (.xlsx)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- User Login Status & Last Login Table (Item 1) --}}
     <div class="card border-0 shadow-sm mb-4 animate-fade-in-up" style="border-radius: 14px;">
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="border-radius: 14px 14px 0 0;">
             <div>
-                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-shield-lock-fill text-primary me-2"></i>Log Riwayat Login Pengguna</h6>
-                <span class="text-muted small">Rekapitulasi aktivitas autentikasi siapa saja yang telah masuk ke sistem</span>
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-people-fill text-primary me-2"></i>Status & Riwayat Login Guru / Pengguna</h6>
+                <span class="text-muted small">Daftar akun pengguna dengan catatan waktu login terakhir (1 baris per pengguna)</span>
             </div>
             <div class="d-flex gap-2 flex-wrap">
                 <div class="input-group input-group-sm" style="width: 220px;">
@@ -176,41 +219,38 @@
                 </div>
                 <select wire:model.live="filterRole" class="form-select form-select-sm" style="width: 140px;">
                     <option value="">Semua Role</option>
-                    <option value="admin">Admin</option>
-                    <option value="guru">Guru</option>
+                    <option value="guru">Guru Saja</option>
                     <option value="ketua_mgmp">Ketua MGMP</option>
                     <option value="waka">Waka</option>
                     <option value="kepsek">Kepsek</option>
+                    <option value="admin">Admin</option>
                     <option value="ketua_kelas">Ketua Kelas</option>
                 </select>
             </div>
         </div>
         <div class="card-body p-0">
-            @if($loginLogs->isEmpty())
+            @if($userLogins->isEmpty())
                 <div class="text-center py-4 text-muted">
-                    <i class="bi bi-journal-text fs-3 d-block mb-1 text-muted opacity-50"></i>
-                    <span class="small">Belum ada catatan log login yang sesuai filter.</span>
+                    <i class="bi bi-people fs-3 d-block mb-1 text-muted opacity-50"></i>
+                    <span class="small">Belum ada data pengguna yang sesuai filter.</span>
                 </div>
             @else
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" style="font-size: 0.88rem;">
                         <thead class="table-light text-muted">
                             <tr>
-                                <th class="ps-3 py-2">Waktu Login (WIB)</th>
-                                <th class="py-2">Nama Pengguna</th>
+                                <th class="ps-3 py-2">Nama Pengguna</th>
                                 <th class="py-2">Role</th>
+                                <th class="py-2">Email</th>
+                                <th class="py-2">Login Terakhir (WIB)</th>
                                 <th class="py-2">IP Address</th>
-                                <th class="py-2 pe-3">Perangkat / User Agent</th>
+                                <th class="py-2 pe-3">Perangkat Terakhir</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($loginLogs as $log)
+                            @foreach($userLogins as $user)
                             @php
-                                $vals = is_array($log->new_values) ? $log->new_values : json_decode($log->new_values ?? '[]', true);
-                                $userName = $log->user?->name ?? ($vals['name'] ?? 'User Dihapus');
-                                $userRole = $log->user?->role ?? ($vals['role'] ?? 'guru');
-                                $userAgent = $vals['user_agent'] ?? '-';
-                                $badgeClass = match($userRole) {
+                                $badgeClass = match($user->role) {
                                     'admin' => 'bg-danger',
                                     'kepsek' => 'bg-primary',
                                     'waka' => 'bg-info text-dark',
@@ -218,35 +258,64 @@
                                     'ketua_kelas' => 'bg-warning text-dark',
                                     default => 'bg-success',
                                 };
+                                $isOnline = !empty(Cache::get('user_online_' . $user->id));
+                                $dev = $user->last_login_device ?? '';
                             @endphp
                             <tr>
-                                <td class="ps-3 py-2 text-nowrap">
-                                    <span class="fw-semibold text-dark d-block">
-                                        {{ $log->created_at->translatedFormat('d M Y, H:i') }}
-                                    </span>
-                                    <span class="text-muted small" style="font-size: 0.75rem;">
-                                        {{ $log->created_at->diffForHumans() }}
-                                    </span>
-                                </td>
-                                <td class="py-2">
-                                    <span class="fw-bold text-dark">{{ $userName }}</span>
-                                    <span class="text-muted d-block small" style="font-size: 0.75rem;">{{ $log->user?->email ?? '-' }}</span>
+                                <td class="ps-3 py-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="position-relative">
+                                            <div class="bg-primary bg-opacity-10 text-primary fw-bold rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; font-size: 0.82rem;">
+                                                {{ strtoupper(substr($user->name, 0, 2)) }}
+                                            </div>
+                                            @if($isOnline)
+                                                <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle" title="Sedang Online"></span>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <span class="fw-bold text-dark d-block">{{ $user->name }}</span>
+                                            @if($isOnline)
+                                                <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.65rem;">Online Sekarang</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="py-2">
                                     <span class="badge {{ $badgeClass }} text-uppercase fw-semibold" style="font-size: 0.72rem;">
-                                        {{ str_replace('_', ' ', $userRole) }}
+                                        {{ str_replace('_', ' ', $user->role) }}
                                     </span>
                                 </td>
-                                <td class="py-2">
-                                    <span class="badge bg-light text-dark border">{{ $log->ip_address ?? '-' }}</span>
-                                </td>
-                                <td class="py-2 pe-3 text-muted small" style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $userAgent }}">
-                                    @if(str_contains($userAgent, 'Mobile') || str_contains($userAgent, 'Android') || str_contains($userAgent, 'iPhone'))
-                                        <i class="bi bi-phone me-1 text-primary"></i>
+                                <td class="py-2 text-muted small">{{ $user->email }}</td>
+                                <td class="py-2 text-nowrap">
+                                    @if($user->last_login_at)
+                                        <span class="fw-semibold text-dark d-block">
+                                            {{ \Carbon\Carbon::parse($user->last_login_at)->translatedFormat('d M Y, H:i') }}
+                                        </span>
+                                        <span class="text-muted small" style="font-size: 0.75rem;">
+                                            {{ \Carbon\Carbon::parse($user->last_login_at)->diffForHumans() }}
+                                        </span>
                                     @else
-                                        <i class="bi bi-laptop me-1 text-secondary"></i>
+                                        <span class="badge bg-light text-muted border">Belum Pernah Login</span>
                                     @endif
-                                    {{ Str::limit($userAgent, 40) }}
+                                </td>
+                                <td class="py-2">
+                                    @if($user->last_login_ip)
+                                        <span class="badge bg-light text-dark border">{{ $user->last_login_ip }}</span>
+                                    @else
+                                        <span class="text-muted small">-</span>
+                                    @endif
+                                </td>
+                                <td class="py-2 pe-3 text-muted small" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $dev }}">
+                                    @if($dev)
+                                        @if(str_contains($dev, 'Mobile') || str_contains($dev, 'Android') || str_contains($dev, 'iPhone'))
+                                            <i class="bi bi-phone me-1 text-primary"></i>
+                                        @else
+                                            <i class="bi bi-laptop me-1 text-secondary"></i>
+                                        @endif
+                                        {{ Str::limit($dev, 35) }}
+                                    @else
+                                        <span class="text-muted small">-</span>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -254,8 +323,8 @@
                     </table>
                 </div>
                 <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <span class="small text-muted">Menampilkan {{ $loginLogs->firstItem() ?? 0 }} - {{ $loginLogs->lastItem() ?? 0 }} dari {{ $loginLogs->total() }} log</span>
-                    <div>{{ $loginLogs->links() }}</div>
+                    <span class="small text-muted">Menampilkan {{ $userLogins->firstItem() ?? 0 }} - {{ $userLogins->lastItem() ?? 0 }} dari {{ $userLogins->total() }} pengguna</span>
+                    <div>{{ $userLogins->links() }}</div>
                 </div>
             @endif
         </div>

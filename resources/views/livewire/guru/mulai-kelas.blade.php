@@ -39,11 +39,26 @@
     {{-- Token Section --}}
     @if(!$agenda || $agenda->status === 'dibatalkan')
         <div class="card">
-            <div class="card-body text-center py-5">
+            <div class="card-body text-center py-4">
                 <i class="bi bi-shield-lock text-primary" style="font-size: 3rem;"></i>
-                <h5 class="fw-bold mt-3">Siap Memulai Kelas?</h5>
-                <p class="text-muted">Klik tombol di bawah untuk generate token OTP. Berikan kode kepada Ketua Kelas untuk verifikasi.</p>
-                <button wire:click="generateToken" class="btn btn-primary btn-lg" wire:loading.attr="disabled">
+                <h5 class="fw-bold mt-2">Siap Memulai Kelas?</h5>
+                <p class="text-muted small">Klik tombol di bawah untuk generate token OTP. Berikan kode kepada Ketua Kelas untuk verifikasi.</p>
+
+                {{-- Keterangan / Alasan Terlambat Input (Item 2) --}}
+                <div class="card border-0 bg-light p-3 mb-3 text-start mx-auto" style="max-width: 500px; border-radius: 10px;">
+                    <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1 mb-1">
+                        <i class="bi bi-chat-left-text text-primary"></i>
+                        Keterangan / Alasan Keterlambatan (Opsional jika telat):
+                    </label>
+                    <input type="text" wire:model="alasan_terlambat" 
+                           class="form-control form-control-sm" 
+                           placeholder="Contoh: Mengikuti rapat dinas / piket pagi...">
+                    <div class="form-text small text-muted" style="font-size: 0.72rem;">
+                        Alasan ini akan tercatat di sistem & card monitoring.
+                    </div>
+                </div>
+
+                <button wire:click="generateToken" class="btn btn-primary btn-lg px-4" wire:loading.attr="disabled">
                     <span wire:loading.remove><i class="bi bi-key-fill me-2"></i>Generate Token OTP</span>
                     <span wire:loading><span class="spinner-border spinner-border-sm me-2"></span>Membuat token...</span>
                 </button>
@@ -52,12 +67,40 @@
     @elseif($agenda->status === 'menunggu_token')
         <div class="card" wire:poll.3s="refreshStatus">
             <div class="card-body text-center py-4">
-                <div class="small text-muted mb-2">Token OTP</div>
-                <div class="otp-display mb-3">{{ $token }}</div>
+                <div class="small text-muted mb-2">Token OTP (Rahasia &bull; Dilarang Screenshot)</div>
+
+                {{-- Anti-Screenshot Protected Token Display (Item 7) --}}
+                <div id="tokenProtectionContainer" class="position-relative mx-auto mb-3" style="max-width: 320px;">
+                    <div id="tokenOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-none bg-dark text-white rounded-3 d-flex flex-column align-items-center justify-content-center p-2 text-center" style="z-index: 10; backdrop-filter: blur(8px);">
+                        <i class="bi bi-shield-slash-fill text-warning fs-3 mb-1"></i>
+                        <span class="fw-bold small">Screenshot Tidak Diizinkan</span>
+                        <span class="text-white-50" style="font-size: 0.68rem;">Token bersifat rahasia & realtime</span>
+                    </div>
+
+                    <div id="tokenDisplayBox" class="otp-display protected-token" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none;">
+                        {{ $token }}
+                    </div>
+                </div>
+
                 <p class="text-muted small mb-3">
-                    <i class="bi bi-info-circle"></i>
-                    Berikan kode ini kepada <strong>Ketua Kelas</strong> untuk verifikasi handshake.
+                    <i class="bi bi-info-circle text-primary me-1"></i>
+                    Berikan kode ini secara langsung kepada <strong>Ketua Kelas</strong> untuk verifikasi handshake.
                 </p>
+
+                {{-- Keterangan / Alasan Terlambat Input saat menunggu token --}}
+                <div class="card border-0 bg-light p-3 mb-3 text-start mx-auto" style="max-width: 500px; border-radius: 10px;">
+                    <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1 mb-1">
+                        <i class="bi bi-chat-left-text text-primary"></i>
+                        Keterangan / Alasan Keterlambatan:
+                    </label>
+                    <input type="text" wire:model.live.debounce.500ms="alasan_terlambat" 
+                           class="form-control form-control-sm" 
+                           placeholder="Contoh: Mengikuti rapat dinas / piket pagi...">
+                    <div class="form-text small text-muted" style="font-size: 0.72rem;">
+                        Tersimpan otomatis dan tampil pada monitoring jika ada keterlambatan.
+                    </div>
+                </div>
+
                 <div class="status-badge status-kuning mx-auto mb-3">
                     <i class="bi bi-hourglass-split"></i> Menunggu verifikasi Ketua Kelas...
                 </div>
@@ -117,4 +160,67 @@
         </button>
         @endif
     </div>
+
+    {{-- Script Anti-Screenshot Khusus Halaman Token (Item 7) --}}
+    <script>
+    (function() {
+        function setupTokenProtection() {
+            const overlay = document.getElementById('tokenOverlay');
+            const tokenBox = document.getElementById('tokenDisplayBox');
+
+            if (!tokenBox) return;
+
+            // 1. Hide token when window loses focus (e.g. Snipping tool, screen grabber active)
+            window.addEventListener('blur', function() {
+                if (overlay) overlay.classList.remove('d-none');
+                if (tokenBox) tokenBox.style.filter = 'blur(12px)';
+            });
+
+            window.addEventListener('focus', function() {
+                if (overlay) overlay.classList.add('d-none');
+                if (tokenBox) tokenBox.style.filter = 'none';
+            });
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    if (overlay) overlay.classList.remove('d-none');
+                    if (tokenBox) tokenBox.style.filter = 'blur(12px)';
+                } else {
+                    if (overlay) overlay.classList.add('d-none');
+                    if (tokenBox) tokenBox.style.filter = 'none';
+                }
+            });
+
+            // 2. Intercept keyboard screenshot shortcuts (PrintScreen, Ctrl+P, Win+Shift+S)
+            window.addEventListener('keydown', function(e) {
+                if (
+                    e.key === 'PrintScreen' || 
+                    e.keyCode === 44 || 
+                    (e.ctrlKey && e.key === 'p') || 
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'S')) ||
+                    (e.metaKey && e.shiftKey && (e.key === '4' || e.key === '3' || e.key === 's'))
+                ) {
+                    e.preventDefault();
+                    if (overlay) overlay.classList.remove('d-none');
+                    if (tokenBox) tokenBox.style.filter = 'blur(12px)';
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(''); // Clear clipboard
+                    }
+                    setTimeout(function() {
+                        if (overlay) overlay.classList.add('d-none');
+                        if (tokenBox) tokenBox.style.filter = 'none';
+                    }, 2000);
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupTokenProtection);
+        } else {
+            setupTokenProtection();
+        }
+
+        document.addEventListener('livewire:navigated', setupTokenProtection);
+    })();
+    </script>
 </div>
