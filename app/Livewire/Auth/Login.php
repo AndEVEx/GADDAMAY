@@ -24,6 +24,8 @@ class Login extends Component
 
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             session()->regenerate();
+            $user = Auth::user();
+
             // Update last_login on user model
             $user->update([
                 'last_login_at' => \Carbon\Carbon::now('Asia/Jakarta'),
