@@ -183,22 +183,28 @@
                 </div>
             </div>
             <div class="row g-2 mt-3">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <button wire:click="exportRekapGuruBulanan" class="btn btn-outline-light w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="border-radius: 10px;" wire:loading.attr="disabled">
-                        <i class="bi bi-person-check-fill text-primary"></i>
-                        <span>Rekap Jam Kehadiran Guru (.xlsx)</span>
+                        <i class="bi bi-person-check-fill text-warning"></i>
+                        <span>Kehadiran Guru (.xlsx)</span>
                     </button>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <button wire:click="exportRekapPresensiSiswa" class="btn btn-outline-light w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="border-radius: 10px;" wire:loading.attr="disabled">
                         <i class="bi bi-people-fill text-info"></i>
-                        <span>Rekap Absensi Siswa per Mapel (.xlsx)</span>
+                        <span>Absensi Siswa (.xlsx)</span>
                     </button>
                 </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-3">
                     <button wire:click="exportRekapKktpGlobal" class="btn btn-outline-light w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="border-radius: 10px;" wire:loading.attr="disabled">
                         <i class="bi bi-clipboard2-check-fill text-success"></i>
-                        <span>Rekap Capaian KKTP Global (.xlsx)</span>
+                        <span>Capaian KKTP (.xlsx)</span>
+                    </button>
+                </div>
+                <div class="col-12 col-md-3">
+                    <button wire:click="exportSemuaSiswa" class="btn btn-outline-light w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="border-radius: 10px;" wire:loading.attr="disabled">
+                        <i class="bi bi-mortarboard-fill text-primary"></i>
+                        <span>Seluruh Siswa (.xlsx)</span>
                     </button>
                 </div>
             </div>

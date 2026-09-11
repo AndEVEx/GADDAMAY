@@ -382,6 +382,67 @@ class DashboardAdmin extends Component
         return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
     }
 
+    public function exportSemuaSiswa()
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Siswa');
+
+        // Header Title
+        $sheet->setCellValue('A1', 'DATA SELURUH PESERTA DIDIK SMKN 2 INDRAMAYU');
+        $sheet->setCellValue('A2', 'Tanggal Export: ' . Carbon::now('Asia/Jakarta')->translatedFormat('d F Y H:i'));
+        $sheet->mergeCells('A1:E1');
+        $sheet->mergeCells('A2:E2');
+        $sheet->getStyle('A1:A2')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Column Headers
+        $headers = ['No', 'NIS', 'Nama Peserta Didik', 'Tingkat', 'Kelas / Rombel'];
+        $cols = ['A', 'B', 'C', 'D', 'E'];
+        foreach ($headers as $idx => $h) {
+            $sheet->setCellValue($cols[$idx] . '4', $h);
+        }
+        $sheet->getStyle('A4:E4')->getFont()->setBold(true)->getColor()->setRGB('FFFFFF');
+        $sheet->getStyle('A4:E4')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('1A56DB');
+        $sheet->getStyle('A4:E4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $siswas = Siswa::with('rombel')
+            ->join('rombel', 'siswa.rombel_id', '=', 'rombel.id')
+            ->orderBy('rombel.tingkat')
+            ->orderBy('rombel.nama_kelas')
+            ->orderBy('siswa.nama')
+            ->select('siswa.*')
+            ->get();
+
+        $rowNum = 5;
+        $no = 1;
+        foreach ($siswas as $siswa) {
+            $sheet->setCellValue('A' . $rowNum, $no++);
+            $sheet->setCellValue('B' . $rowNum, $siswa->nis ?? '-');
+            $sheet->setCellValue('C' . $rowNum, $siswa->nama);
+            $sheet->setCellValue('D' . $rowNum, $siswa->rombel?->tingkat_label ?? ($siswa->rombel?->tingkat ?? '-'));
+            $sheet->setCellValue('E' . $rowNum, $siswa->rombel?->nama_kelas ?? '-');
+            $rowNum++;
+        }
+
+        $lastRow = max(5, $rowNum - 1);
+        $sheet->getStyle('A4:E' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A5:B' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('D5:E' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        foreach (['A', 'B', 'D', 'E'] as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        $sheet->getColumnDimension('C')->setWidth(35);
+
+        $filename = "Export_Seluruh_Siswa_" . date('Y-m-d') . ".xlsx";
+        $tempPath = storage_path('app/' . $filename);
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempPath);
+
+        return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+    }
+
     public function render()
     {
         $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
