@@ -60,6 +60,11 @@ use App\Livewire\Waka\VerifikasiIzin;
 use App\Livewire\Perizinan\ManajemenPerizinanSiswa;
 use App\Livewire\Perizinan\PengajuanIzinSiswa;
 use App\Livewire\Portal\PortalUtama;
+use App\Livewire\Pkl\Siswa\PresensiPkl;
+use App\Livewire\Pkl\Siswa\JurnalPkl;
+use App\Livewire\Pkl\Dudi\ReviewDudi;
+use App\Livewire\Pkl\Guru\MonitoringPkl;
+use App\Livewire\Pkl\Admin\KelolaPenempatanPkl;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -253,4 +258,18 @@ Route::middleware(['auth', 'role:waka'])->prefix('waka')->group(function () {
 Route::middleware('auth')->prefix('perizinan')->group(function () {
     Route::get('/', ManajemenPerizinanSiswa::class)->name('perizinan.index');
     Route::get('/pengajuan', PengajuanIzinSiswa::class)->name('perizinan.pengajuan');
+});
+
+// ============================================================
+// MODUL JURNAL & ASESMEN PKL VOKASI SMKN 2 INDRAMAYU (FASE 2)
+// ============================================================
+// 1. Rute Publik Akses DUDI Tanpa Password (Magic Link WA)
+Route::get('/pkl/review-dudi/{token}', ReviewDudi::class)->name('pkl.dudi.review');
+
+// 2. Rute Siswa PKL (Presensi GPS & Jurnal Harian)
+Route::prefix('pkl')->group(function () {
+    Route::get('/presensi', PresensiPkl::class)->name('pkl.siswa.presensi');
+    Route::get('/jurnal', JurnalPkl::class)->name('pkl.siswa.jurnal');
+    Route::get('/monitoring', MonitoringPkl::class)->name('pkl.guru.monitoring');
+    Route::get('/penempatan', KelolaPenempatanPkl::class)->name('pkl.admin.penempatan');
 });

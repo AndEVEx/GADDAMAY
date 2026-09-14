@@ -157,25 +157,28 @@
 
             {{-- Modul 4: Jurnal PKL Vokasi --}}
             <div class="col-md-6 col-lg-4">
-                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between">
+                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between border-primary border-2 shadow-sm">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-3">
+                            <div class="bg-primary text-white rounded-3 p-3 shadow-sm">
                                 <i class="bi bi-briefcase-fill fs-3"></i>
                             </div>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 small">
-                                <i class="bi bi-hammer me-1"></i>FASE 2 (RANCANG)
+                            <span class="badge bg-primary text-white px-2 py-1 small">
+                                <i class="bi bi-check-circle-fill me-1"></i>FASE 2 AKTIF
                             </span>
                         </div>
-                        <h5 class="fw-bold text-dark mb-2">4. Jurnal PKL Vokasi</h5>
+                        <h5 class="fw-bold text-primary mb-2">4. Jurnal PKL Vokasi</h5>
                         <p class="text-muted small mb-3">
-                            Presensi Geolocation radius DUDI + selfie liveness, logbook harian 11 elemen CP PPLG 2025, paraf WhatsApp Magic Link mentor industri, dan cetak sertifikat resmi.
+                            Presensi Geolocation radius DUDI + swafoto, logbook harian 11 elemen CP PPLG 2025, paraf WhatsApp Magic Link mentor industri, dan asesmen bobot 5:3:2.
                         </p>
                     </div>
-                    <div class="pt-3 border-top">
-                        <button type="button" class="btn btn-light btn-sm w-100 text-muted" disabled>
-                            Tahap Integrasi Dokumen PPLG 2025
-                        </button>
+                    <div class="pt-3 border-top d-flex gap-2">
+                        <a href="{{ route('pkl.guru.monitoring') }}" class="btn btn-primary btn-sm flex-fill fw-bold shadow-sm">
+                            Monitoring Guru <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a href="{{ route('pkl.siswa.presensi') }}" class="btn btn-outline-primary btn-sm flex-fill fw-semibold">
+                            Presensi Siswa
+                        </a>
                     </div>
                 </div>
             </div>
