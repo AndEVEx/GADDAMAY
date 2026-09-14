@@ -1,0 +1,61 @@
+﻿# CodeIgniter 4 - .gitignore
+
+# Writable directory
+writable/logs/*
+writable/cache/*
+writable/debugbar/*
+writable/session/*
+writable/uploads/*
+!writable/logs/.gitkeep
+!writable/cache/.gitkeep
+!writable/session/.gitkeep
+!writable/uploads/.gitkeep
+
+# Vendor dependencies (use composer install to restore)
+vendor/
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Environment files (contains sensitive data)
+.env
+
+# Composer
+composer.lock
+
+# Node modules (if any)
+node_modules/
+
+# Testing
+phpunit.xml
+.phpunit.result.cache
+
+# Build files
+build/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp

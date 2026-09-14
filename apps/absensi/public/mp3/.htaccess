@@ -1,0 +1,19 @@
+# Allow direct access to MP3 files
+<IfModule mod_rewrite.c>
+    RewriteEngine Off
+</IfModule>
+
+# Allow access to audio files
+<FilesMatch "\.(mp3|wav|ogg)$">
+    Require all granted
+    Allow from all
+</FilesMatch>
+
+# Set correct MIME type
+AddType audio/mpeg .mp3
+
+# Allow cross-origin access for audio
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Cache-Control "public, max-age=86400"
+</IfModule>
