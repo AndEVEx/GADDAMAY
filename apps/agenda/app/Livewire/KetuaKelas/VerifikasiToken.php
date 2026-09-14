@@ -1,0 +1,222 @@
+<?php
+
+namespace App\Livewire\KetuaKelas;
+
+use Livewire\Component;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use App\Models\AgendaHarian;
+use App\Models\Rombel;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+
+#[Layout('components.layouts.app')]
+#[Title('Verifikasi Token')]
+class VerifikasiToken extends Component
+{
+    public string $token = '';
+    public ?AgendaHarian $agenda = null;
+    public ?Rombel $studentRombel = null;
+    public string $errorMessage = '';
+
+    public function mount()
+    {
+        $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $user = Auth::user();
+
+        // 1. Determine student's class explicitly from user relation - NO fragile auto-guessing
+        $this->studentRombel = $user?->rombel;
+
+        // Auto-close any expired past-due agendas for this class or today
+        AgendaHarian::autoCloseExpiredAgendas($this->studentRombel?->id, $today);
+
+        // 2. Find existing active agenda for THIS CLASS ONLY today that still needs photo
+        $query = AgendaHarian::whereIn('status', ['token_terverifikasi', 'berjalan'])
+            ->where('tanggal', $today)
+            ->whereNull('foto_bukti_path')
+            ->with(['jadwalPelajaran.rombel', 'jadwalPelajaran.mataPelajaran', 'guru']);
+
+        if ($this->studentRombel) {
+            $query->whereHas('jadwalPelajaran', function ($q) {
+                $q->where('rombel_id', $this->studentRombel->id);
+            });
+        }
+
+        $this->agenda = $query->latest('updated_at')->first();
+    }
+
+    public function verifikasi()
+    {
+        $this->errorMessage = '';
+        $this->validate(['token' => 'required|digits:6']);
+
+        $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $user = Auth::user();
+
+        // Explicit foreign key connection
+        $this->studentRombel = $user?->rombel;
+
+        if (!$this->studentRombel) {
+            $this->errorMessage = 'Akun Anda belum terhubung dengan kelas manapun. Silakan hubungi Administrator untuk mengatur kelas pada akun Anda.';
+            return;
+        }
+
+        // Build query for matching 6-digit token handshake for THIS CLASS ONLY
+        // Allow matching if status is waiting, already verified, or running
+        $query = AgendaHarian::where('token_handshake', $this->token)
+            ->where('tanggal', $today)
+            ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan']);
+
+        if ($this->studentRombel) {
+            $query->whereHas('jadwalPelajaran', function ($q) {
+                $q->where('rombel_id', $this->studentRombel->id);
+            });
+        }
+
+        $this->agenda = $query->with(['jadwalPelajaran.rombel', 'jadwalPelajaran.mataPelajaran', 'guru'])->first();
+
+        if (!$this->agenda) {
+            // Check if token exists for ANOTHER class to provide helpful diagnostic error
+            $otherClassAgenda = AgendaHarian::where('token_handshake', $this->token)
+                ->where('tanggal', $today)
+                ->with('jadwalPelajaran.rombel')
+                ->first();
+
+            if ($otherClassAgenda) {
+                $otherKelasName = $otherClassAgenda->jadwalPelajaran?->rombel?->nama_kelas ?? 'kelas lain';
+                $myKelasName = $this->studentRombel?->nama_kelas ?? 'kelas Anda';
+                $this->errorMessage = "Token ini adalah untuk kelas {$otherKelasName}, bukan untuk kelas Anda ({$myKelasName}). Mohon minta kode token dari Guru yang mengajar di kelas {$myKelasName}.";
+            } else {
+                $this->errorMessage = 'Token OTP tidak valid atau belum dibuat oleh guru untuk kelas Anda hari ini.';
+            }
+            return;
+        }
+
+        $now = Carbon::now('Asia/Jakarta');
+        $timeNow = $now->format('H:i');
+
+        if ($this->agenda->jadwalPelajaran?->hasPeriodEnded($timeNow)) {
+            $range = $this->agenda->jadwalPelajaran->getEffectiveTimeRange();
+            $this->errorMessage = "Jam pelajaran ini telah berakhir pada pukul {$range['waktu_selesai']}. Handshake hanya dapat dilaksanakan selama jam pelajaran terkait berlangsung.";
+            return;
+        }
+
+        // Auto-close any previous active agendas for this class from earlier hours (exclude same token / same block)
+        if ($this->studentRombel) {
+            AgendaHarian::where('id', '!=', $this->agenda->id)
+                ->where('tanggal', $today)
+                ->where('token_handshake', '!=', $this->token)
+                ->whereIn('status', ['menunggu_token', 'token_terverifikasi', 'berjalan'])
+                ->whereHas('jadwalPelajaran', fn($q) => $q->where('rombel_id', $this->studentRombel->id))
+                ->update([
+                    'status' => 'selesai',
+                    'waktu_selesai' => Carbon::now('Asia/Jakarta'),
+                ]);
+        }
+
+        // Update status to token_terverifikasi if still waiting
+        if ($this->agenda->status === 'menunggu_token') {
+            $this->agenda->update([
+                'status' => 'token_terverifikasi',
+            ]);
+        }
+
+        // Also verify sibling agendas (same block, same token)
+        if ($this->agenda->jadwalPelajaran?->mapel_id) {
+            $jp = $this->agenda->jadwalPelajaran;
+            AgendaHarian::where('tanggal', $today)
+                ->where('token_handshake', $this->token)
+                ->where('status', 'menunggu_token')
+                ->where('id', '!=', $this->agenda->id)
+                ->whereHas('jadwalPelajaran', fn($q) => $q
+                    ->where('rombel_id', $jp->rombel_id)
+                    ->where('mapel_id', $jp->mapel_id)
+                )
+                ->update(['status' => 'token_terverifikasi']);
+        }
+
+        $this->dispatch('show-toast', message: 'Verifikasi berhasil! Mengalihkan ke ambil foto...', type: 'success');
+
+        return redirect()->route('ketua.foto', $this->agenda->id);
+    }
+
+    public function render()
+    {
+        $today = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $dayOfWeek = Carbon::now('Asia/Jakarta')->dayOfWeekIso;
+
+        $jadwalHariIni = collect();
+
+        if ($this->studentRombel) {
+            $rawJadwal = \App\Models\JadwalPelajaran::where('rombel_id', $this->studentRombel->id)
+                ->where('hari', $dayOfWeek)
+                ->with(['mataPelajaran', 'jadwalGuru.guru', 'agendaHarian' => function ($q) use ($today) {
+                    $q->where('tanggal', $today);
+                }])
+                ->orderBy('jam_ke_mulai')
+                ->get();
+
+            $jadwalHariIni = $rawJadwal->map(function ($j) {
+                $agenda = $j->agendaHarian->first();
+                $range = $j->getEffectiveTimeRange();
+
+                $statusLabel = 'Belum Mulai';
+                $statusBadge = 'bg-secondary bg-opacity-10 text-secondary';
+                $statusIcon = 'bi-clock';
+
+                if ($agenda) {
+                    $agendaStatus = $agenda->status;
+                    $isIzin = in_array($agenda->status_kehadiran_guru ?? '', ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar']);
+
+                    if ($isIzin) {
+                        $statusLabel = 'Guru Izin (' . ucfirst($agenda->status_kehadiran_guru) . ')';
+                        $statusBadge = 'text-white';
+                        $statusIcon = 'bi-info-circle-fill';
+                    } elseif ($agendaStatus === 'selesai') {
+                        $statusLabel = 'Selesai';
+                        $statusBadge = 'bg-success bg-opacity-10 text-success';
+                        $statusIcon = 'bi-check-circle-fill';
+                    } elseif ($agendaStatus === 'berjalan') {
+                        $statusLabel = 'Sedang Berlangsung';
+                        $statusBadge = 'bg-primary bg-opacity-10 text-primary';
+                        $statusIcon = 'bi-play-circle-fill';
+                    } elseif (in_array($agendaStatus, ['menunggu_token', 'token_terverifikasi'])) {
+                        $statusLabel = 'Proses Masuk / OTP';
+                        $statusBadge = 'bg-warning bg-opacity-10 text-warning';
+                        $statusIcon = 'bi-hourglass-split';
+                    }
+                } elseif ($j->isKegiatanKhusus()) {
+                    $statusLabel = 'Kegiatan Khusus';
+                    $statusBadge = 'bg-secondary bg-opacity-10 text-secondary';
+                    $statusIcon = 'bi-flag';
+                } elseif ($j->hasPeriodEnded()) {
+                    $statusLabel = 'Sudah Lewat';
+                    $statusBadge = 'bg-light text-muted border';
+                    $statusIcon = 'bi-slash-circle';
+                }
+
+                return (object) [
+                    'id' => $j->id,
+                    'jam_ke_mulai' => $j->jam_ke_mulai,
+                    'jam_ke_selesai' => $j->jam_ke_selesai,
+                    'jam_display' => $j->jam_ke_mulai === $j->jam_ke_selesai ? 'Jam ' . $j->jam_ke_mulai : 'Jam ' . $j->jam_ke_mulai . ' - ' . $j->jam_ke_selesai,
+                    'waktu_mulai' => $range['waktu_mulai'],
+                    'waktu_selesai' => $range['waktu_selesai'],
+                    'waktu_display' => $range['waktu_mulai'] . ' - ' . $range['waktu_selesai'] . ' WIB',
+                    'mapel_nama' => $j->isKegiatanKhusus() ? $j->kegiatan_khusus : ($j->mataPelajaran?->nama_mapel ?? '-'),
+                    'guru_nama' => $j->jadwalGuru->pluck('guru.name')->filter()->join(', ') ?: '-',
+                    'is_kegiatan_khusus' => $j->isKegiatanKhusus(),
+                    'kegiatan_khusus' => $j->kegiatan_khusus,
+                    'status_label' => $statusLabel,
+                    'status_badge' => $statusBadge,
+                    'status_icon' => $statusIcon,
+                    'agenda' => $agenda,
+                ];
+            });
+        }
+
+        return view('livewire.ketua-kelas.verifikasi-token', [
+            'jadwalHariIni' => $jadwalHariIni,
+        ]);
+    }
+}
