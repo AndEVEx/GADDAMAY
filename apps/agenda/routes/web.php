@@ -59,6 +59,7 @@ use App\Http\Controllers\Guru\IkiExportController;
 use App\Livewire\Waka\VerifikasiIzin;
 use App\Livewire\Perizinan\ManajemenPerizinanSiswa;
 use App\Livewire\Perizinan\PengajuanIzinSiswa;
+use App\Livewire\Portal\PortalUtama;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -73,6 +74,7 @@ use App\Livewire\Auth\GantiPassword;
 // ============================================================
 // PUBLIC ROUTES
 // ============================================================
+Route::get('/', PortalUtama::class)->name('portal.home');
 Route::get('/login', Login::class)->name('login')->middleware('guest');
 
 Route::post('/logout', function () {
@@ -118,12 +120,12 @@ Route::post('/api/push/test-notification', [PushSubscriptionController::class, '
     ->middleware(['auth'])
     ->name('api.push.test');
 
-Route::get('/', function () {
-    if (!auth()->check()) return redirect()->route('login');
+Route::middleware('auth')->get('/dashboard', function () {
     return match (auth()->user()->role) {
         'admin' => redirect()->route('admin.dashboard'),
         'kepsek', 'waka' => redirect()->route('monitoring.dashboard'),
         'ketua_mgmp', 'guru' => redirect()->route('guru.dashboard'),
+        'guru_piket' => redirect()->route('perizinan.index'),
         'ketua_kelas' => redirect()->route('ketua.verifikasi'),
         default => redirect()->route('login'),
     };
