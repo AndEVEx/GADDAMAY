@@ -69,14 +69,6 @@
                     </div>
                 </a>
             </div>
-
-            {{-- Right Nav: Text Size Switcher Trigger --}}
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="btn btn-outline-light btn-sm d-flex align-items-center gap-1 px-2 py-1" data-bs-toggle="modal" data-bs-target="#modalTextSize" style="min-height: 38px; border-radius: 8px;" title="Atur Ukuran Teks & Tampilan">
-                    <i class="bi bi-fonts fs-5"></i>
-                    <span class="d-none d-sm-inline fw-semibold small">Ukuran Teks</span>
-                </button>
-            </div>
         </div>
     </nav>
 
@@ -341,7 +333,11 @@
     @endif
 
     {{-- Main Content --}}
-    <main class="container-fluid px-3 py-3">
+    @php
+        $role = Auth::user()?->role;
+        $isMobileLayout = in_array($role, ['guru', 'ketua_kelas', 'ketua_mgmp']);
+    @endphp
+    <main class="container-fluid px-3 py-3" style="{{ $isMobileLayout ? 'max-width: 600px; margin: 0 auto;' : '' }}">
         {{ $slot }}
     </main>
 

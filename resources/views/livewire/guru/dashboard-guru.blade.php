@@ -32,50 +32,10 @@
     </div>
     @endif
 
-    {{-- Quick Access Shortcut Cards --}}
-    <div class="row g-2 mb-3">
-        <div class="col-6 col-md-3">
-            <a href="{{ route('guru.rekap-absensi') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
-                    <i class="bi bi-person-check-fill fs-5"></i>
-                </div>
-                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Rekap Absensi</div>
-                <div class="text-muted" style="font-size: 0.72rem;">Matrix H / S / I / A</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3">
-            <a href="{{ route('guru.performa.siswa-diajar') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
-                    <i class="bi bi-people fs-5"></i>
-                </div>
-                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Siswa Diajar</div>
-                <div class="text-muted" style="font-size: 0.72rem;">Per Kelas & Mapel</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3">
-            <a href="{{ route('guru.performa.jadwal-mingguan') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
-                    <i class="bi bi-calendar-week fs-5"></i>
-                </div>
-                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Jam Mingguan</div>
-                <div class="text-muted" style="font-size: 0.72rem;">Beban Mengajar</div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3">
-            <a href="{{ route('guru.performa.export-iki') }}" class="card border-0 shadow-sm text-decoration-none text-center p-2 h-100 bg-white" style="border-radius: 12px; transition: transform 0.15s;" wire:navigate>
-                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-1" style="width: 40px; height: 40px;">
-                    <i class="bi bi-file-earmark-pdf-fill fs-5"></i>
-                </div>
-                <div class="fw-bold text-dark" style="font-size: 0.85rem;">Export IKI</div>
-                <div class="text-muted" style="font-size: 0.72rem;">Cetak Dokumen PDF</div>
-            </a>
-        </div>
-    </div>
-
     {{-- Jadwal Hari Ini Header --}}
     <h5 class="fw-bold mb-3 d-flex align-items-center justify-content-between">
-        <span><i class="bi bi-journal-check me-2 text-primary"></i>Jadwal Mengajar Hari Ini</span>
-        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3" style="font-size: 0.75rem;">{{ $jadwals->count() }} Sesi</span>
+        <span><i class="bi bi-check-square me-2 text-primary"></i>Jadwal Mengajar Hari Ini</span>
+        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3" style="font-size: 0.8rem;">{{ $jadwals->count() }} Sesi</span>
     </h5>
 
     @forelse($jadwals as $jadwal)
