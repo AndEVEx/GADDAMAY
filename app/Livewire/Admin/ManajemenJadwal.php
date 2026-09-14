@@ -43,32 +43,41 @@ class ManajemenJadwal extends Component
     public string $deleteTitle = '';
 
     public bool $showSwapModal = false;
+    public string $swapTab = 'swap'; // 'swap' | 'history'
     public string $swapRombelA = '';
     public string $swapRombelB = '';
+    public bool $showPreviewModal = false;
+    public string $previewType = ''; // 'all_vocational' | 'custom_pair'
+    public array $previewData = [];
 
     public function openSwapModal()
     {
         $this->showSwapModal = true;
+        $this->showPreviewModal = false;
+        $this->swapTab = 'swap';
     }
 
     public function closeSwapModal()
     {
         $this->showSwapModal = false;
+        $this->showPreviewModal = false;
+        $this->reset(['previewData', 'previewType', 'swapRombelA', 'swapRombelB']);
     }
 
-    public function swapBlockVocational()
+    public function switchSwapTab(string $tab)
     {
-        $res = \App\Services\JadwalSwapService::swapAllVocationalBlockSchedules();
-
-        if ($res['success']) {
-            $this->dispatch('show-toast', message: $res['message'], type: 'success');
-        } else {
-            $this->dispatch('show-toast', message: $res['message'], type: 'warning');
-        }
-        $this->showSwapModal = false;
+        $this->swapTab = $tab;
+        $this->showPreviewModal = false;
     }
 
-    public function swapCustomRombel()
+    public function previewSwapVocational()
+    {
+        $this->previewData = \App\Services\JadwalSwapService::previewSwapAllVocational();
+        $this->previewType = 'all_vocational';
+        $this->showPreviewModal = true;
+    }
+
+    public function previewSwapCustom()
     {
         $this->validate([
             'swapRombelA' => 'required|exists:rombel,id',
@@ -79,14 +88,54 @@ class ManajemenJadwal extends Component
             'swapRombelB.different' => 'Rombel A dan Rombel B harus berbeda.',
         ]);
 
-        $res = \App\Services\JadwalSwapService::swapRombelSchedules($this->swapRombelA, $this->swapRombelB);
+        $this->previewData = \App\Services\JadwalSwapService::previewSwapCustom($this->swapRombelA, $this->swapRombelB);
+        $this->previewType = 'custom_pair';
+        $this->showPreviewModal = true;
+    }
+
+    public function cancelPreview()
+    {
+        $this->showPreviewModal = false;
+        $this->previewData = [];
+    }
+
+    public function confirmExecuteSwap()
+    {
+        if ($this->previewType === 'all_vocational') {
+            $res = \App\Services\JadwalSwapService::swapAllVocationalBlockSchedules();
+        } else {
+            $res = \App\Services\JadwalSwapService::swapRombelSchedules($this->swapRombelA, $this->swapRombelB);
+        }
 
         if ($res['success']) {
             $this->dispatch('show-toast', message: $res['message'], type: 'success');
-            $this->showSwapModal = false;
-            $this->reset(['swapRombelA', 'swapRombelB']);
+            $this->showPreviewModal = false;
+            $this->swapTab = 'history';
+            $this->reset(['swapRombelA', 'swapRombelB', 'previewData', 'previewType']);
         } else {
-            $this->dispatch('show-toast', message: $res['message'], type: 'error');
+            $this->dispatch('show-toast', message: $res['message'], type: 'danger');
+        }
+    }
+
+    public function undoSwap(string $logId)
+    {
+        $res = \App\Services\JadwalSwapService::undoSwap($logId);
+
+        if ($res['success']) {
+            $this->dispatch('show-toast', message: $res['message'], type: 'success');
+        } else {
+            $this->dispatch('show-toast', message: $res['message'], type: 'danger');
+        }
+    }
+
+    public function undoBatch(string $batchId)
+    {
+        $res = \App\Services\JadwalSwapService::undoBatch($batchId);
+
+        if ($res['success']) {
+            $this->dispatch('show-toast', message: $res['message'], type: 'success');
+        } else {
+            $this->dispatch('show-toast', message: $res['message'], type: 'danger');
         }
     }
 
@@ -329,11 +378,16 @@ class ManajemenJadwal extends Component
             ->orderBy('jam_ke_mulai')
             ->paginate(15);
 
+        $swapLogs = \Illuminate\Support\Facades\Schema::hasTable('jadwal_swap_logs')
+            ? \App\Models\JadwalSwapLog::with(['user', 'undoneBy'])->latest()->take(30)->get()
+            : collect();
+
         return view('livewire.admin.manajemen-jadwal', [
             'jadwals' => $jadwals,
             'rombels' => $rombels,
             'mapels' => $mapels,
             'gurus' => $gurus,
+            'swapLogs' => $swapLogs,
         ]);
     }
 }
