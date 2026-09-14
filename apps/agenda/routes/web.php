@@ -65,6 +65,9 @@ use App\Livewire\Pkl\Siswa\JurnalPkl;
 use App\Livewire\Pkl\Dudi\ReviewDudi;
 use App\Livewire\Pkl\Guru\MonitoringPkl;
 use App\Livewire\Pkl\Admin\KelolaPenempatanPkl;
+use App\Livewire\Parenting\LoginParenting;
+use App\Livewire\Parenting\DashboardParenting;
+use App\Livewire\Parenting\Guru\KelolaDisiplinSiswa;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -273,3 +276,10 @@ Route::prefix('pkl')->group(function () {
     Route::get('/monitoring', MonitoringPkl::class)->name('pkl.guru.monitoring');
     Route::get('/penempatan', KelolaPenempatanPkl::class)->name('pkl.admin.penempatan');
 });
+
+// ============================================================
+// MODUL BUKU MONITORING PARENTING DIGITAL (FASE 3)
+// ============================================================
+Route::get('/parenting', LoginParenting::class)->name('parenting.login');
+Route::get('/parenting/dashboard/{token?}', DashboardParenting::class)->name('parenting.dashboard');
+Route::get('/parenting/disiplin-bk', KelolaDisiplinSiswa::class)->name('parenting.guru.disiplin');

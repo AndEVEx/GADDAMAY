@@ -185,25 +185,28 @@
 
             {{-- Modul 5: Buku Parenting Digital --}}
             <div class="col-md-6 col-lg-4">
-                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between">
+                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between border-danger border-2 shadow-sm">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 p-3">
+                            <div class="bg-danger text-white rounded-3 p-3 shadow-sm">
                                 <i class="bi bi-people-fill fs-3"></i>
                             </div>
-                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1 small">
-                                <i class="bi bi-hourglass me-1"></i>FASE 3 (SEGERA)
+                            <span class="badge bg-danger text-white px-2 py-1 small">
+                                <i class="bi bi-check-circle-fill me-1"></i>FASE 3 AKTIF
                             </span>
                         </div>
-                        <h5 class="fw-bold text-dark mb-2">5. Buku Parenting Digital</h5>
+                        <h5 class="fw-bold text-danger mb-2">5. Buku Parenting Digital</h5>
                         <p class="text-muted small mb-3">
-                            Portal monitoring orang tua tanpa kata sandi (login via OTP WhatsApp / Scan QR Kartu Pelajar), feed presensi anak jam-per-jam, dan rekam poin disiplin BK.
+                            Portal pengawasan orang tua tanpa kata sandi (login via NISN / OTP WhatsApp), timeline presensi gerbang & KBM, dan buku poin kedisiplinan BK.
                         </p>
                     </div>
-                    <div class="pt-3 border-top">
-                        <button type="button" class="btn btn-light btn-sm w-100 text-muted" disabled>
-                            Segera Hadir di Fase 3
-                        </button>
+                    <div class="pt-3 border-top d-flex gap-2">
+                        <a href="{{ route('parenting.login') }}" class="btn btn-danger btn-sm flex-fill fw-bold shadow-sm">
+                            Portal Orang Tua <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a href="{{ route('parenting.guru.disiplin') }}" class="btn btn-outline-danger btn-sm flex-fill fw-semibold">
+                            Disiplin & BK
+                        </a>
                     </div>
                 </div>
             </div>

@@ -32,6 +32,11 @@ class KehadiranMurid extends Model
         return $this->belongsTo(AgendaHarian::class);
     }
 
+    public function agenda(): BelongsTo
+    {
+        return $this->belongsTo(AgendaHarian::class, 'agenda_harian_id');
+    }
+
     public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class);
