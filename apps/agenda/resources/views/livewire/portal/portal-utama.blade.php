@@ -67,13 +67,13 @@
         </div>
     </section>
 
-    {{-- 6 Modul Layanan Utama --}}
+    {{-- 8 Modul Layanan Utama --}}
     <section class="container py-5" id="modul-layanan">
         <div class="text-center mb-5">
             <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill text-uppercase">
                 Pusat Navigasi Layanan
             </span>
-            <h2 class="fw-bold mt-2 text-dark">6 Modul Terpadu GADDAMAY</h2>
+            <h2 class="fw-bold mt-2 text-dark">8 Modul Terpadu GADDAMAY</h2>
             <p class="text-muted" style="max-width: 600px; margin: 0 auto;">
                 Satu sistem terintegrasi yang melayani seluruh siklus kegiatan siswa, guru, orang tua, dan mitra industri sekolah.
             </p>

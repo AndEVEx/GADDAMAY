@@ -12,14 +12,24 @@
         <div class="col-3"><div class="card text-center py-2"><div class="fw-bold text-warning">{{ $totalJadwal }}</div><div class="small text-muted">Jadwal</div></div></div>
     </div>
 
-    {{-- Template Info --}}
+    {{-- Template & Export Info --}}
     <div class="card mb-3 border-info animate-fade-in-up">
         <div class="card-body py-3">
-            <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-info-circle text-info fs-4"></i>
-                <div class="flex-fill">
-                    <div class="fw-bold small">Format: aSc Timetables XML</div>
-                    <div class="text-muted small">Export dari aSc Timetables → File → Export → XML format</div>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-info-circle text-info fs-4"></i>
+                    <div>
+                        <div class="fw-bold small">Format: aSc Timetables XML</div>
+                        <div class="text-muted small">Export dari aSc Timetables → File → Export → XML format</div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button wire:click="downloadTemplate" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-download me-1"></i>Panduan Format (.xlsx)
+                    </button>
+                    <button wire:click="exportExcel" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-file-earmark-excel me-1"></i>Export Jadwal (.xlsx)
+                    </button>
                 </div>
             </div>
         </div>

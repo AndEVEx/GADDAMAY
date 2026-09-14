@@ -84,6 +84,79 @@ class ImportSiswa extends Component
         $this->dispatch('show-toast', message: 'Semua data siswa berhasil dihapus!', type: 'success');
     }
 
+    public function exportExcel()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Data Siswa');
+
+        $sheet->setCellValue('A1', 'No');
+        $sheet->setCellValue('B1', 'NIS');
+        $sheet->setCellValue('C1', 'Nama Siswa');
+        $sheet->setCellValue('D1', 'Kelas');
+        
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:D1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('4472C4');
+        $sheet->getStyle('A1:D1')->getFont()->getColor()->setRGB('FFFFFF');
+
+        $siswas = Siswa::with('rombel')->orderBy('nama')->get();
+
+        $row = 2;
+        $no = 1;
+        foreach ($siswas as $siswa) {
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $siswa->nis ?? '-');
+            $sheet->setCellValue('C' . $row, $siswa->nama);
+            $sheet->setCellValue('D' . $row, $siswa->rombel->nama_kelas ?? '-');
+            $row++;
+        }
+
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'export_siswa_' . date('Y-m-d') . '.xlsx';
+        $path = storage_path('app/' . $filename);
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportPdf()
+    {
+        $siswas = Siswa::with('rombel')->orderBy('nama')->get();
+
+        $headers = [
+            ['name' => 'No', 'width' => '6%', 'align' => 'center'],
+            ['name' => 'NIS / NISN', 'width' => '20%', 'align' => 'center'],
+            ['name' => 'Nama Lengkap Peserta Didik', 'width' => '50%', 'align' => 'left'],
+            ['name' => 'Kelas / Rombel', 'width' => '24%', 'align' => 'center'],
+        ];
+
+        $rows = [];
+        $no = 1;
+        foreach ($siswas as $s) {
+            $rows[] = [
+                $no++,
+                e($s->nis ?? '-'),
+                '<strong>' . e($s->nama) . '</strong>',
+                e($s->rombel->nama_kelas ?? '-'),
+            ];
+        }
+
+        $filename = 'Laporan_Data_Siswa_' . date('Y-m-d') . '.pdf';
+        return \App\Services\PdfReportService::download(
+            'LAPORAN DATA PESERTA DIDIK',
+            'Sistem Informasi Agenda Guru SMKN 2 Indramayu',
+            $headers,
+            $rows,
+            $filename,
+            'A4',
+            'portrait',
+            ['Total Siswa Terdaftar' => count($rows) . ' Orang']
+        );
+    }
+
     public function render()
     {
         $totalSiswa = Siswa::count();

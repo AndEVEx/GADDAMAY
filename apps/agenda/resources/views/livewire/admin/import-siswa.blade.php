@@ -44,9 +44,17 @@
                 Format file Excel harus memiliki header kolom: <strong>nama</strong>, <strong>nis</strong>, dan <strong>kelas</strong> (nama kelas harus sesuai dengan data Rombel).
             </div>
 
-            <button wire:click="downloadTemplate" class="btn btn-outline-info mb-3" style="min-height: 48px;">
-                <i class="bi bi-download me-2"></i>Download Template Siswa (.xlsx)
-            </button>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <button wire:click="downloadTemplate" class="btn btn-outline-info" style="min-height: 48px;">
+                    <i class="bi bi-download me-2"></i>Download Template Siswa (.xlsx)
+                </button>
+                <button wire:click="exportExcel" class="btn btn-outline-success" style="min-height: 48px;">
+                    <i class="bi bi-file-earmark-excel me-2"></i>Export Excel (.xlsx)
+                </button>
+                <button wire:click="exportPdf" class="btn btn-outline-danger" style="min-height: 48px;">
+                    <i class="bi bi-file-earmark-pdf me-2"></i>Export PDF (Kop Surat)
+                </button>
+            </div>
 
             <form wire:submit="import">
                 <div class="mb-3">
