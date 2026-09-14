@@ -213,14 +213,14 @@
 
             {{-- Modul 6: Teaching Factory (TEFA) --}}
             <div class="col-md-6 col-lg-4">
-                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between">
+                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between border-dark border-2 shadow-sm">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <div class="bg-dark bg-opacity-10 text-dark rounded-3 p-3">
+                            <div class="bg-dark text-white rounded-3 p-3 shadow-sm">
                                 <i class="bi bi-gear-wide-connected fs-3"></i>
                             </div>
-                            <span class="badge bg-secondary-subtle text-secondary px-2 py-1 small">
-                                <i class="bi bi-hourglass me-1"></i>FASE 4 (SEGERA)
+                            <span class="badge bg-dark text-white px-2 py-1 small">
+                                <i class="bi bi-check-circle-fill me-1"></i>FASE 4 AKTIF
                             </span>
                         </div>
                         <h5 class="fw-bold text-dark mb-2">6. Teaching Factory (TEFA)</h5>
@@ -228,10 +228,13 @@
                             Pencatatan order pesanan konsumen (SPK), pembagian job sheet tim siswa vokasi, log jam kerja mesin produksi, lembar QC instruktur, dan portofolio keahlian.
                         </p>
                     </div>
-                    <div class="pt-3 border-top">
-                        <button type="button" class="btn btn-light btn-sm w-100 text-muted" disabled>
-                            Segera Hadir di Fase 4
-                        </button>
+                    <div class="pt-3 border-top d-flex gap-2">
+                        <a href="{{ route('tefa.admin.orders') }}" class="btn btn-dark btn-sm flex-fill fw-bold shadow-sm">
+                            Manajemen TEFA <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a href="{{ route('tefa.siswa.log') }}" class="btn btn-outline-dark btn-sm flex-fill fw-semibold">
+                            Logsheet Siswa
+                        </a>
                     </div>
                 </div>
             </div>

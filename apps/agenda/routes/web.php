@@ -68,6 +68,9 @@ use App\Livewire\Pkl\Admin\KelolaPenempatanPkl;
 use App\Livewire\Parenting\LoginParenting;
 use App\Livewire\Parenting\DashboardParenting;
 use App\Livewire\Parenting\Guru\KelolaDisiplinSiswa;
+use App\Livewire\Tefa\Admin\ManajemenOrderTefa;
+use App\Livewire\Tefa\Admin\DetailOrderTefa;
+use App\Livewire\Tefa\Siswa\LogProduksiTefa;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -283,3 +286,12 @@ Route::prefix('pkl')->group(function () {
 Route::get('/parenting', LoginParenting::class)->name('parenting.login');
 Route::get('/parenting/dashboard/{token?}', DashboardParenting::class)->name('parenting.dashboard');
 Route::get('/parenting/disiplin-bk', KelolaDisiplinSiswa::class)->name('parenting.guru.disiplin');
+
+// ============================================================
+// MODUL JURNAL TEACHING FACTORY (TEFA) - FASE 4
+// ============================================================
+Route::prefix('tefa')->group(function () {
+    Route::get('/orders', ManajemenOrderTefa::class)->name('tefa.admin.orders');
+    Route::get('/orders/{id}', DetailOrderTefa::class)->name('tefa.admin.detail');
+    Route::get('/log-produksi', LogProduksiTefa::class)->name('tefa.siswa.log');
+});
