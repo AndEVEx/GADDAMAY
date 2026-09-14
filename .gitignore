@@ -1,0 +1,25 @@
+﻿# Root Monorepo Gitignore for GADDAMAY
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment & Secrets
+.env
+.env.backup
+.env.production
+
+# Dependencies
+vendor/
+node_modules/
+
+# Logs & Temp
+*.log
+*.tmp
+*.temp
