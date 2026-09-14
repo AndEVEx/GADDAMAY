@@ -238,6 +238,62 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Modul 7: LMS Vokasi & Pembelajaran Diferensiasi --}}
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between border-info border-2 shadow-sm">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="bg-info text-white rounded-3 p-3 shadow-sm">
+                                <i class="bi bi-mortarboard-fill fs-3"></i>
+                            </div>
+                            <span class="badge bg-info text-white px-2 py-1 small">
+                                <i class="bi bi-stars me-1"></i>LMS DIFERENSIASI
+                            </span>
+                        </div>
+                        <h5 class="fw-bold text-info mb-2">7. LMS Vokasi &amp; Pusat Belajar</h5>
+                        <p class="text-muted small mb-3">
+                            Pembelajaran personalisasi per siswa terkoneksi Capaian Pembelajaran (CP) &amp; TP. Dilengkapi modul intensif bimbingan <strong>LKS</strong> (Lomba Keterampilan Siswa) dan persiapan Ujikom.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex gap-2">
+                        <a href="{{ route('lms.guru.materi') }}" class="btn btn-info text-white btn-sm flex-fill fw-bold shadow-sm">
+                            Kelola Materi &amp; Tugas <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a href="{{ route('lms.siswa.dashboard') }}" class="btn btn-outline-info btn-sm flex-fill fw-semibold">
+                            Portal Siswa
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Modul 8: Pendaftaran & Sertifikasi Ujikom LSP-P1 --}}
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between border-secondary border-2 shadow-sm" style="border-color: #6366f1 !important;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="bg-indigo text-white rounded-3 p-3 shadow-sm" style="background-color: #6366f1;">
+                                <i class="bi bi-patch-check-fill fs-3"></i>
+                            </div>
+                            <span class="badge text-white px-2 py-1 small" style="background-color: #6366f1;">
+                                <i class="bi bi-award-fill me-1"></i>LSP-P1 RESMI
+                            </span>
+                        </div>
+                        <h5 class="fw-bold mb-2" style="color: #6366f1;">8. Pendaftaran &amp; Asesmen Ujikom</h5>
+                        <p class="text-muted small mb-3">
+                            Aplikasi pendaftaran mandiri UKK / LSP-P1. Unggah bukti portofolio APL-01 &amp; APL-02, verifikasi berkas oleh asesor, kartu peserta digital, jadwal TUK, dan penetapan kompetensi.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex gap-2">
+                        <a href="{{ route('ujikom.daftar') }}" class="btn text-white btn-sm flex-fill fw-bold shadow-sm" style="background-color: #6366f1;">
+                            Daftar Asesi <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a href="{{ route('ujikom.admin.verifikasi') }}" class="btn btn-outline-primary btn-sm flex-fill fw-semibold">
+                            Meja Asesor
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

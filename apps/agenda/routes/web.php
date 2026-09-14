@@ -71,6 +71,10 @@ use App\Livewire\Parenting\Guru\KelolaDisiplinSiswa;
 use App\Livewire\Tefa\Admin\ManajemenOrderTefa;
 use App\Livewire\Tefa\Admin\DetailOrderTefa;
 use App\Livewire\Tefa\Siswa\LogProduksiTefa;
+use App\Livewire\Lms\Guru\KelolaMateriLms;
+use App\Livewire\Lms\Siswa\MyLearningDashboard;
+use App\Livewire\Ujikom\Siswa\PendaftaranUjikomSiswa;
+use App\Livewire\Ujikom\Admin\VerifikasiPendaftaranUjikom;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -295,3 +299,20 @@ Route::prefix('tefa')->group(function () {
     Route::get('/orders/{id}', DetailOrderTefa::class)->name('tefa.admin.detail');
     Route::get('/log-produksi', LogProduksiTefa::class)->name('tefa.siswa.log');
 });
+
+// ============================================================
+// MODUL LMS VOKASI DIFERENSIASI, UJIKOM & LKS
+// ============================================================
+Route::prefix('lms')->group(function () {
+    Route::get('/my-learning', MyLearningDashboard::class)->name('lms.siswa.dashboard');
+    Route::get('/kelola-materi', KelolaMateriLms::class)->name('lms.guru.materi');
+});
+
+// ============================================================
+// MODUL PENDAFTARAN & ASESMEN UJIKOM LSP-P1
+// ============================================================
+Route::prefix('ujikom')->group(function () {
+    Route::get('/daftar', PendaftaranUjikomSiswa::class)->name('ujikom.daftar');
+    Route::get('/verifikasi', VerifikasiPendaftaranUjikom::class)->name('ujikom.admin.verifikasi');
+});
+
