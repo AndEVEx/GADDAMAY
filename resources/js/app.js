@@ -130,6 +130,57 @@ function createToastContainer() {
 }
 
 // ============================================================
+// Device Native Notification Helper (Android / iOS PWA / Desktop)
+// ============================================================
+window.showDeviceNotification = async function(title, options = {}) {
+    if (!('Notification' in window)) return false;
+
+    if (Notification.permission !== 'granted') {
+        return false;
+    }
+
+    const defaultOptions = {
+        icon: '/pwa-icons/icon-192.png',
+        badge: '/pwa-icons/icon-192.png',
+        vibrate: [300, 150, 300, 150, 300],
+        requireInteraction: false,
+        data: {
+            url: options.url || '/',
+            timestamp: Date.now()
+        }
+    };
+
+    const finalOptions = Object.assign({}, defaultOptions, options);
+
+    try {
+        // Priority 1: ServiceWorker showNotification (Mandatory for Android Chrome & iOS PWA)
+        if ('serviceWorker' in navigator) {
+            const reg = await navigator.serviceWorker.ready;
+            if (reg && typeof reg.showNotification === 'function') {
+                await reg.showNotification(title, finalOptions);
+                return true;
+            }
+        }
+
+        // Priority 2: Fallback for Desktop browsers without active SW
+        if (typeof Notification === 'function') {
+            const notif = new Notification(title, finalOptions);
+            notif.onclick = function() {
+                window.focus();
+                if (finalOptions.data?.url) {
+                    window.location.href = finalOptions.data.url;
+                }
+                notif.close();
+            };
+            return true;
+        }
+    } catch (err) {
+        console.warn('showDeviceNotification failed:', err);
+    }
+    return false;
+};
+
+// ============================================================
 // Livewire event listeners (Null-safe parameter extraction)
 // ============================================================
 document.addEventListener('livewire:init', () => {
@@ -139,6 +190,28 @@ document.addEventListener('livewire:init', () => {
         const type = data?.type || 'success';
         if (message) {
             window.showToast(message, type);
+
+            // Also show native mobile status bar banner if notification permission is granted
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const cleanMsg = message.replace(/<[^>]*>?/gm, '');
+                window.showDeviceNotification('AgenDAmay', {
+                    body: cleanMsg,
+                    tag: 'toast-' + Date.now(),
+                    renotify: true,
+                });
+            }
+        }
+    });
+
+    Livewire.on('show-device-notif', (event) => {
+        const data = Array.isArray(event) ? event[0] : (event?.detail || event || {});
+        if (data && data.title) {
+            window.showDeviceNotification(data.title, {
+                body: data.body || '',
+                url: data.url || '/',
+                tag: 'notif-' + Date.now(),
+                renotify: true,
+            });
         }
     });
 

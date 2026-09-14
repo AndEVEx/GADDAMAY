@@ -337,6 +337,28 @@
         $role = Auth::user()?->role;
         $isMobileLayout = in_array($role, ['guru', 'ketua_kelas', 'ketua_mgmp']);
     @endphp
+
+    {{-- Device Push Notification Permission Prompt Banner --}}
+    @auth
+    <div id="device-notif-prompt-banner" class="alert border-0 shadow-sm mx-auto mt-2 mb-1 p-2 px-3 d-none align-items-center justify-content-between gap-2 animate-fade-in-up" style="{{ $isMobileLayout ? 'max-width: 600px;' : 'max-width: 1200px;' }} border-radius: 12px; font-size: 0.84rem; background: linear-gradient(135deg, #1e40af, #2563eb); color: white;">
+        <div class="d-flex align-items-center gap-2 min-w-0">
+            <div class="bg-white bg-opacity-20 rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                <i class="bi bi-bell-fill fs-6 text-warning"></i>
+            </div>
+            <div class="min-w-0">
+                <strong class="d-block text-truncate" style="font-size: 0.88rem;">Aktifkan Notifikasi HP</strong>
+                <span class="text-white-50 small d-block text-truncate">Munculkan alarm jadwal KBM & info langsung di status bar HP.</span>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <button type="button" onclick="subscribeToWebPush()" class="btn btn-warning btn-sm text-dark fw-bold px-3 py-1" style="border-radius: 8px; font-size: 0.8rem; min-height: 36px;">
+                Aktifkan
+            </button>
+            <button type="button" onclick="dismissNotifPrompt()" class="btn-close btn-close-white" style="font-size: 0.65rem;" aria-label="Tutup"></button>
+        </div>
+    </div>
+    @endauth
+
     <main class="container-fluid px-3 py-3" style="{{ $isMobileLayout ? 'max-width: 600px; margin: 0 auto;' : '' }}">
         {{ $slot }}
     </main>
@@ -468,13 +490,33 @@
             const subResult = await subResp.json();
 
             if (btnText) btnText.innerText = 'Notifikasi HP Aktif ✅';
+            
+            // Sembunyikan banner ajakan izin jika ada
+            const promptBanner = document.getElementById('device-notif-prompt-banner');
+            if (promptBanner) {
+                promptBanner.classList.add('d-none');
+                promptBanner.classList.remove('d-flex');
+            }
+            sessionStorage.setItem('dismissed_notif_prompt', '1');
+
+            // Tampilkan notifikasi uji coba langsung di status bar HP
+            try {
+                await reg.showNotification('AgenDAmay SMKN 2 Indramayu', {
+                    body: '🔔 Notifikasi HP Berhasil Aktif! Anda akan menerima alarm jadwal mengajar dan info di layar HP.',
+                    icon: '/pwa-icons/icon-192.png',
+                    badge: '/pwa-icons/icon-192.png',
+                    vibrate: [300, 150, 300, 150, 300],
+                    data: { url: '/guru/dashboard' }
+                });
+            } catch (e) {
+                console.warn('Initial test notification error:', e);
+            }
+
             if (window.Livewire) {
                 window.Livewire.dispatch('show-toast', {
                     message: '🔔 Notifikasi Push HP Berhasil Diaktifkan! Anda akan menerima pengingat KBM & notifikasi izin.',
                     type: 'success'
                 });
-            } else {
-                alert('Notifikasi Push HP Berhasil Diaktifkan!');
             }
         } catch (err) {
             console.error('Gagal subscribe Web Push:', err);
@@ -482,6 +524,31 @@
             const btnText = document.getElementById('webpush-btn-text');
             if (btnText) btnText.innerText = 'Aktifkan Notifikasi HP (Web Push)';
         }
+    };
+
+    // Fungsi Pengendali Banner Izin Notifikasi HP
+    window.checkNotificationPermissionBanner = function() {
+        if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+        const banner = document.getElementById('device-notif-prompt-banner');
+        if (!banner) return;
+
+        const dismissed = sessionStorage.getItem('dismissed_notif_prompt');
+        if (Notification.permission === 'default' && !dismissed) {
+            banner.classList.remove('d-none');
+            banner.classList.add('d-flex');
+        } else {
+            banner.classList.add('d-none');
+            banner.classList.remove('d-flex');
+        }
+    };
+
+    window.dismissNotifPrompt = function() {
+        const banner = document.getElementById('device-notif-prompt-banner');
+        if (banner) {
+            banner.classList.add('d-none');
+            banner.classList.remove('d-flex');
+        }
+        sessionStorage.setItem('dismissed_notif_prompt', '1');
     };
 
     // Fungsi Uji Coba Notifikasi HP
@@ -537,6 +604,17 @@
             }).catch(function(err) {
                 console.warn('PWA ServiceWorker registration failed:', err);
             });
+
+            // Periksa apakah banner izin notifikasi HP perlu dimunculkan
+            if (typeof window.checkNotificationPermissionBanner === 'function') {
+                window.checkNotificationPermissionBanner();
+            }
+        });
+
+        document.addEventListener('livewire:navigated', function() {
+            if (typeof window.checkNotificationPermissionBanner === 'function') {
+                window.checkNotificationPermissionBanner();
+            }
         });
     }
 
@@ -649,27 +727,29 @@
             // Play sound chime
             playNotifSound();
 
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                    const notif = new Notification(title, {
+            // Native Device Notification (Android status bar / iOS PWA / Desktop Banner)
+            if (typeof window.showDeviceNotification === 'function') {
+                window.showDeviceNotification(title, {
+                    body: body,
+                    tag: 'teaching-' + type + '-' + block.waktu_mulai,
+                    vibrate: [300, 150, 300, 150, 300],
+                    requireInteraction: true,
+                    url: '/guru/dashboard'
+                });
+            } else if ('serviceWorker' in navigator && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(function(reg) {
+                    reg.showNotification(title, {
                         body: body,
                         icon: '/pwa-icons/icon-192.png',
                         badge: '/pwa-icons/icon-192.png',
                         tag: 'teaching-' + type + '-' + block.waktu_mulai,
-                        renotify: false,
-                        requireInteraction: true,
                         vibrate: [300, 150, 300, 150, 300],
+                        requireInteraction: true,
+                        data: { url: '/guru/dashboard' }
                     });
-
-                    notif.onclick = function() {
-                        window.focus();
-                        notif.close();
-                    };
-
-                    setTimeout(function() { notif.close(); }, 30000);
-                } catch (e) {
-                    console.warn('Notification display failed:', e);
-                }
+                }).catch(function(e) {
+                    console.warn('SW notification display failed:', e);
+                });
             }
 
             // Also show in-app toast banner

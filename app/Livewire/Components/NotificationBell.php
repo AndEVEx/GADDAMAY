@@ -33,8 +33,18 @@ class NotificationBell extends Component
 
                 if ($newNotifs) {
                     $data = $newNotifs->data ?? [];
+                    $title = $data['title'] ?? 'Notifikasi Baru';
+                    $message = $data['message'] ?? '';
+                    $actionUrl = $data['action_url'] ?? null;
+
+                    $this->dispatch('show-device-notif', [
+                        'title' => $title,
+                        'body' => $message,
+                        'url' => $actionUrl,
+                    ]);
+
                     $this->dispatch('show-toast',
-                        message: ($data['title'] ?? 'Notifikasi Baru') . ': ' . ($data['message'] ?? ''),
+                        message: $title . ': ' . $message,
                         type: 'info'
                     );
                 }
