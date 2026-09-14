@@ -61,7 +61,14 @@
             @php $currentStatus = $kehadiran[$siswa->id] ?? 'hadir'; @endphp
             <div class="d-flex align-items-center gap-2 p-3 border-bottom" style="min-height: 60px;">
                 <div class="flex-fill" style="overflow-x: auto; min-width: 0;">
-                    <div class="fw-semibold text-dark small" style="white-space: nowrap;">{{ $index + 1 }}. {{ $siswa->nama }}</div>
+                    <div class="fw-semibold text-dark small" style="white-space: nowrap;">
+                        {{ $index + 1 }}. {{ $siswa->nama }}
+                        @if(in_array($siswa->id, $izinSiswaIds ?? []))
+                            <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size: 0.65rem;">
+                                <i class="bi bi-shield-check me-1"></i>Izin Sah
+                            </span>
+                        @endif
+                    </div>
                     @if($siswa->nis)
                     <div class="text-muted" style="font-size: 0.7rem; white-space: nowrap;">NIS: {{ $siswa->nis }}</div>
                     @endif

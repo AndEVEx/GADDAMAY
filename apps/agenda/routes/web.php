@@ -57,6 +57,8 @@ use App\Livewire\Admin\LiveAbsensiSiswa;
 use App\Livewire\Admin\RekapAbsensiAdmin;
 use App\Http\Controllers\Guru\IkiExportController;
 use App\Livewire\Waka\VerifikasiIzin;
+use App\Livewire\Perizinan\ManajemenPerizinanSiswa;
+use App\Livewire\Perizinan\PengajuanIzinSiswa;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -241,4 +243,12 @@ Route::middleware(['auth', 'role:waka'])->prefix('waka')->group(function () {
     Route::get('/koreksi', KoreksiAgenda::class)->name('waka.koreksi');
     Route::get('/override/{agenda}', OverrideAgenda::class)->name('waka.override');
     Route::get('/verifikasi-izin', VerifikasiIzin::class)->name('waka.verifikasi-izin');
+});
+
+// ============================================================
+// PERIZINAN SISWA TERPADU (GADDAMAY)
+// ============================================================
+Route::middleware('auth')->prefix('perizinan')->group(function () {
+    Route::get('/', ManajemenPerizinanSiswa::class)->name('perizinan.index');
+    Route::get('/pengajuan', PengajuanIzinSiswa::class)->name('perizinan.pengajuan');
 });

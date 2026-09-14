@@ -10,7 +10,9 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Add 'token_terverifikasi' to agenda_harian status enum
-        DB::statement("ALTER TABLE `agenda_harian` MODIFY COLUMN `status` ENUM('menunggu_token', 'token_terverifikasi', 'berjalan', 'selesai', 'dibatalkan') NOT NULL DEFAULT 'menunggu_token'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE `agenda_harian` MODIFY COLUMN `status` ENUM('menunggu_token', 'token_terverifikasi', 'berjalan', 'selesai', 'dibatalkan') NOT NULL DEFAULT 'menunggu_token'");
+        }
 
         // 2. Create kktp_siswa table
         Schema::create('kktp_siswa', function (Blueprint $table) {

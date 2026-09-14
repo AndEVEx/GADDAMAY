@@ -176,7 +176,10 @@
                     <a href="{{ route('admin.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-patch-check-fill me-2 text-warning"></i>Verifikasi Izin Guru
                     </a>
-                @elseif(in_array($role, ['guru', 'ketua_mgmp']))
+                    <a href="{{ route('perizinan.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('perizinan*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-shield-check me-2 text-success"></i>Perizinan Siswa Terpadu
+                    </a>
+                @elseif(in_array($role, ['guru', 'ketua_mgmp', 'guru_piket']))
                     <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-house-fill me-2"></i>Beranda Guru
                     </a>
@@ -206,6 +209,9 @@
                     {{-- Pengajuan Izin Guru --}}
                     <a href="{{ route('guru.izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.izin*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-calendar-x me-2 text-warning"></i>Pengajuan Izin Guru
+                    </a>
+                    <a href="{{ route('perizinan.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('perizinan*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-shield-check me-2 text-success"></i>Perizinan Siswa Terpadu
                     </a>
 
                     {{-- Kelompok Menu "Performa Saya" --}}
@@ -253,7 +259,10 @@
                         <i class="bi bi-bar-chart-line me-2 text-success"></i>Progress KKTP (Analytic)
                     </a>
                     <a href="{{ route('monitoring.izin-guru') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('monitoring.izin-guru') || request()->routeIs('waka.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
-                        <i class="bi bi-patch-check-fill me-2 text-warning"></i>Tabel Manajemen Izin
+                        <i class="bi bi-patch-check-fill me-2 text-warning"></i>Tabel Manajemen Izin Guru
+                    </a>
+                    <a href="{{ route('perizinan.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('perizinan*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-shield-check me-2 text-success"></i>Perizinan Siswa Terpadu
                     </a>
                 @elseif($role === 'ketua_kelas')
                     <div class="text-primary small fw-bold text-uppercase px-2 mt-2 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">

@@ -37,4 +37,9 @@ class Siswa extends Model
     {
         return $this->hasMany(KehadiranMurid::class);
     }
+
+    public function getNamaSiswaAttribute(): string
+    {
+        return $this->nama ?? '';
+    }
 }

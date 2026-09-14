@@ -70,8 +70,9 @@ class User extends Authenticatable
             'waka', 'wakil_kepala_sekolah', 'wakasek' => 'waka',
             'ketua_mgmp', 'mgmp' => 'ketua_mgmp',
             'ketua_kelas', 'km', 'ketua' => 'ketua_kelas',
+            'guru_piket', 'piket', 'petugas', 'petugas_piket' => 'guru_piket',
             'guru', 'pengajar', 'teacher' => 'guru',
-            default => in_array($normalized, ['admin', 'kepsek', 'waka', 'ketua_mgmp', 'guru', 'ketua_kelas']) ? $normalized : 'guru',
+            default => in_array($normalized, ['admin', 'kepsek', 'waka', 'ketua_mgmp', 'guru', 'ketua_kelas', 'guru_piket']) ? $normalized : 'guru',
         };
     }
 
@@ -144,6 +145,16 @@ class User extends Authenticatable
     public function isKetuaKelas(): bool
     {
         return $this->role === 'ketua_kelas';
+    }
+
+    public function isGuruPiket(): bool
+    {
+        return $this->role === 'guru_piket';
+    }
+
+    public function canManagePerizinan(): bool
+    {
+        return in_array($this->role, ['admin', 'waka', 'guru_piket', 'guru']);
     }
 
     public function canOverride(): bool

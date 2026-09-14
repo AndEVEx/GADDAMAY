@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use App\Models\AgendaHarian;
 use App\Models\KehadiranMurid;
 use App\Models\Siswa;
+use App\Models\PerizinanSiswa;
 
 #[Layout('components.layouts.app')]
 #[Title('Input Kehadiran')]
@@ -15,6 +16,7 @@ class InputKehadiran extends Component
 {
     public AgendaHarian $agenda;
     public array $kehadiran = []; // siswa_id => status
+    public array $izinSiswaIds = []; // siswa_id yang izinnya sah
 
     public function mount(AgendaHarian $agenda)
     {
@@ -30,8 +32,22 @@ class InputKehadiran extends Component
             ->pluck('status', 'siswa_id')
             ->toArray();
 
+        // Cek perizinan terverifikasi yang sah untuk siswa rombel ini pada tanggal agenda
+        $izinSah = PerizinanSiswa::whereIn('siswa_id', $siswaList->pluck('id'))
+            ->whereDate('tanggal_mulai', '<=', $agenda->tanggal)
+            ->whereDate('tanggal_selesai', '>=', $agenda->tanggal)
+            ->whereIn('status', ['disetujui_walas', 'disetujui_piket', 'disetujui_bk'])
+            ->get()
+            ->keyBy('siswa_id');
+
+        $this->izinSiswaIds = $izinSah->keys()->toArray();
+
         foreach ($siswaList as $siswa) {
-            $this->kehadiran[$siswa->id] = $existingKehadiran[$siswa->id] ?? 'hadir';
+            if (isset($izinSah[$siswa->id])) {
+                $this->kehadiran[$siswa->id] = ($izinSah[$siswa->id]->kategori === 'sakit') ? 'sakit' : 'izin';
+            } else {
+                $this->kehadiran[$siswa->id] = $existingKehadiran[$siswa->id] ?? 'hadir';
+            }
         }
     }
 
