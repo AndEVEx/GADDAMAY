@@ -18,7 +18,6 @@ use App\Models\KehadiranMurid;
 use Carbon\Carbon;
 use Livewire\WithPagination;
 use App\Models\AuditLog;
-use App\Services\JadwalSwapService;
 use Illuminate\Support\Facades\Cache;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -54,16 +53,6 @@ class DashboardAdmin extends Component
         $this->resetPage();
     }
 
-    public function tukarJadwalBlok()
-    {
-        $res = JadwalSwapService::swapAllVocationalBlockSchedules();
-
-        if ($res['success']) {
-            $this->dispatch('show-toast', message: $res['message'], type: 'success');
-        } else {
-            $this->dispatch('show-toast', message: $res['message'], type: 'warning');
-        }
-    }
 
     public function getOnlineUsersProperty(): array
     {

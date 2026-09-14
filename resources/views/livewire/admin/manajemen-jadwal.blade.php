@@ -3,6 +3,34 @@
         <h1><i class="bi bi-calendar3 me-2"></i>Manajemen Jadwal Pelajaran</h1>
     </div>
 
+    {{-- Block Schedule Swap Banner --}}
+    <div class="card border-0 shadow-sm mb-3 animate-fade-in-up" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); border-radius: 14px; color: white;">
+        <div class="card-body p-3 p-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                        <span class="badge bg-warning text-dark fw-bold px-2 py-1"><i class="bi bi-arrow-left-right me-1"></i>Sistem Blok Rolling</span>
+                        <span class="badge bg-white bg-opacity-25 text-white">TP • APHPi • NKPI • RPL</span>
+                    </div>
+                    <h5 class="fw-bold mb-1 text-white">Tukar Jadwal Blok Mingguan (Teori ↔ Produktif)</h5>
+                    <p class="mb-0 text-white-50 small">
+                        Tukar seluruh sesi jadwal pelajaran antara Rombel 1 dan Rombel 2 untuk jurusan <strong>TP</strong>, <strong>APHP/APHPi</strong>, <strong>NKPI</strong>, dan <strong>RPL</strong> di semua tingkat (X, XI, XII). Dilengkapi dengan preview simulasi, riwayat, dan tombol undo.
+                    </p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" wire:click="openSwapModal" class="btn btn-warning text-dark fw-bold px-3 py-2 shadow-sm d-flex align-items-center gap-2" style="border-radius: 10px; min-height: 44px;">
+                        <i class="bi bi-arrow-repeat fs-5"></i>
+                        <span>Menu Tukar & Riwayat / Undo</span>
+                    </button>
+                    <button type="button" wire:click="previewSwapVocational" class="btn btn-light fw-bold px-3 py-2 shadow-sm d-flex align-items-center gap-2" style="border-radius: 10px; min-height: 44px;" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="previewSwapVocational"><i class="bi bi-eye me-1"></i>Preview Semua Blok</span>
+                        <span wire:loading wire:target="previewSwapVocational"><span class="spinner-border spinner-border-sm me-1"></span>Memuat...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Search & Filter --}}
     <div class="card mb-3 animate-fade-in-up">
         <div class="card-body p-3">

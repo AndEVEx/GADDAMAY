@@ -89,7 +89,7 @@ class Rombel extends Model
         $name = trim($this->nama_kelas);
         $tingkat = $this->tingkat;
 
-        $jurusanKeywords = ['TP', 'TPM', 'APHP', 'APHPi', 'NKPI', 'RPL'];
+        $jurusanKeywords = ['TP', 'TPM', 'APHP', 'APHPi', 'NKPI', 'RPL', 'PPLG'];
         $isBlock = false;
         $matchedJurusan = null;
         foreach ($jurusanKeywords as $kw) {

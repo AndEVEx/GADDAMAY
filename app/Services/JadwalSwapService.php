@@ -21,7 +21,7 @@ class JadwalSwapService
         'TP' => ['TP', 'TPM', 'Pemesinan'],
         'APHP' => ['APHP', 'APHPi', 'Pengolahan'],
         'NKPI' => ['NKPI', 'Nautika'],
-        'RPL' => ['RPL', 'Rekayasa Perangkat Lunak'],
+        'RPL' => ['RPL', 'PPLG', 'Rekayasa Perangkat Lunak'],
     ];
 
     /**

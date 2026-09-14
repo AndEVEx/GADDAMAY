@@ -72,6 +72,8 @@ class ManajemenJadwal extends Component
 
     public function previewSwapVocational()
     {
+        $this->showSwapModal = true;
+        $this->swapTab = 'swap';
         $this->previewData = \App\Services\JadwalSwapService::previewSwapAllVocational();
         $this->previewType = 'all_vocational';
         $this->showPreviewModal = true;
