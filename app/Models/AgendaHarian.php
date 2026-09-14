@@ -89,6 +89,11 @@ class AgendaHarian extends Model
         );
     }
 
+    public function agendaTp(): HasMany
+    {
+        return $this->hasMany(AgendaTp::class, 'agenda_harian_id');
+    }
+
     public function kehadiranMurid(): HasMany
     {
         return $this->hasMany(KehadiranMurid::class);

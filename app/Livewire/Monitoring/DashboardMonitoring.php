@@ -44,12 +44,12 @@ class DashboardMonitoring extends Component
     {
         $rombel = Rombel::find($rombelId);
         $jadwal = $jadwalId ? JadwalPelajaran::with(['mataPelajaran', 'jadwalGuru.guru'])->find($jadwalId) : null;
-        $agenda = $agendaId ? AgendaHarian::with(['guru', 'kehadiranMurid', 'agendaTp.tujuanPembelajaran'])->find($agendaId) : null;
+        $agenda = $agendaId ? AgendaHarian::with(['guru', 'kehadiranMurid', 'tujuanPembelajaran'])->find($agendaId) : null;
 
         if (!$agenda && $jadwal) {
             $agenda = AgendaHarian::where('jadwal_pelajaran_id', $jadwal->id)
                 ->where('tanggal', $this->tanggal)
-                ->with(['guru', 'kehadiranMurid', 'agendaTp.tujuanPembelajaran'])
+                ->with(['guru', 'kehadiranMurid', 'tujuanPembelajaran'])
                 ->first();
         }
 
