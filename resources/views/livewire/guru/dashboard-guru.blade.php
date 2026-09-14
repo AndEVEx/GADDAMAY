@@ -48,8 +48,12 @@
                         @php
                             $boxBg = 'bg-light text-muted border';
                             $statusIcon = 'bi-clock';
+                            $isPkl = !empty($jadwal->is_pkl);
                             
-                            if (!empty($jadwal->agenda)) {
+                            if ($isPkl) {
+                                $boxBg = 'bg-success bg-opacity-10 text-success border border-success border-opacity-25';
+                                $statusIcon = 'bi-building-check';
+                            } elseif (!empty($jadwal->agenda)) {
                                 $agendaStatus = $jadwal->agenda->status;
                                 $isIzin = in_array($jadwal->agenda->status_kehadiran_guru ?? '', ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar']);
                                 
@@ -91,15 +95,25 @@
                                     <div class="d-flex align-items-center gap-1 text-truncate" style="max-width: 100%;">
                                         <i class="bi bi-door-open text-primary flex-shrink-0"></i>
                                         <span class="fw-semibold text-truncate">{{ $jadwal->rombel?->nama_kelas ?? '-' }}</span>
+                                        @if(!empty($jadwal->is_pkl))
+                                            <span class="badge bg-success bg-opacity-15 text-success border border-success fw-bold ms-1" style="font-size: 0.72rem;">
+                                                <i class="bi bi-building-check me-1"></i>PKL
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
+                                @if(!empty($jadwal->is_pkl))
+                                    <div class="small text-success mt-1 fw-medium" style="font-size: 0.78rem;">
+                                        <i class="bi bi-info-circle me-1"></i>Siswa sedang PKL di Industri &bull; Bebas handshake OTP
+                                    </div>
+                                @endif
                             @endif
 
                             @if(!empty($jadwal->keterangan))
                                 <span class="badge bg-light text-muted border mt-1 text-truncate d-inline-block" style="font-size: 0.75rem; max-width: 100%;">{{ $jadwal->keterangan }}</span>
                             @endif
 
-                            @if(!empty($jadwal->otp_time) && empty($jadwal->is_kegiatan_khusus))
+                            @if(!empty($jadwal->otp_time) && empty($jadwal->is_kegiatan_khusus) && empty($jadwal->is_pkl))
                                 <div class="text-muted small mt-1" style="font-size: 0.78rem;">
                                     <i class="bi bi-stopwatch text-primary me-1"></i>Handshake: {{ $jadwal->otp_time }} WIB
                                     @if($jadwal->handshake_on_time === true)
@@ -129,7 +143,27 @@
                 @endif
 
                 {{-- Action Buttons --}}
-                @if(!empty($jadwal->can_start))
+                @if(!empty($jadwal->is_pkl))
+                    @if(empty($jadwal->agenda) || $jadwal->agenda->status !== 'selesai')
+                        <button wire:click="konfirmasiPkl('{{ $jadwal->primary_id ?? $jadwal->id }}')" class="btn btn-success btn-sm w-100 py-2 fw-semibold shadow-sm" style="border-radius: 8px;">
+                            <span wire:loading.remove wire:target="konfirmasiPkl('{{ $jadwal->primary_id ?? $jadwal->id }}')">
+                                <i class="bi bi-stars me-1"></i> ✨ Konfirmasi PKL & Motivasi
+                            </span>
+                            <span wire:loading wire:target="konfirmasiPkl('{{ $jadwal->primary_id ?? $jadwal->id }}')">
+                                <span class="spinner-border spinner-border-sm me-1"></span>Memproses...
+                            </span>
+                        </button>
+                    @else
+                        <div class="d-flex flex-wrap gap-2">
+                            <button wire:click="konfirmasiPkl('{{ $jadwal->primary_id ?? $jadwal->id }}')" class="btn btn-outline-success btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;">
+                                <i class="bi bi-stars me-1"></i> ✨ Refleksi & Motivasi
+                            </button>
+                            <a href="{{ route('guru.detail-agenda', $jadwal->agenda->id) }}" class="btn btn-outline-primary btn-sm flex-fill py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
+                                <i class="bi bi-eye me-1"></i> Detail Agenda
+                            </a>
+                        </div>
+                    @endif
+                @elseif(!empty($jadwal->can_start))
                     <a href="{{ route('guru.mulai', $jadwal->primary_id ?? $jadwal->id) }}" class="btn btn-primary btn-sm w-100 py-2 fw-semibold" style="border-radius: 8px;" wire:navigate>
                         <i class="bi bi-play-fill me-1 fs-6"></i> Mulai Kelas
                     </a>

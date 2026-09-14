@@ -21,7 +21,34 @@ class Rombel extends Model
         'nama_kelas',
         'tingkat',
         'asc_id',
+        'is_pkl',
+        'pkl_keterangan',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'is_pkl' => 'boolean',
+    ];
+
+    /**
+     * Scope a query to only include classes currently on PKL.
+     */
+    public function scopePkl($query)
+    {
+        return $query->where('is_pkl', true);
+    }
+
+    /**
+     * Scope a query to only include regular non-PKL classes.
+     */
+    public function scopeNonPkl($query)
+    {
+        return $query->where('is_pkl', false);
+    }
 
     // =========================================================================
     // Relationships

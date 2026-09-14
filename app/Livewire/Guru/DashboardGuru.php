@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use App\Models\JadwalPelajaran;
 use App\Models\AgendaHarian;
 use App\Models\HariLibur;
+use App\Models\MotivasiPantun;
 use Carbon\Carbon;
 
 #[Layout('components.layouts.app')]
@@ -223,8 +224,9 @@ class DashboardGuru extends Component
                 $displayStartStr = substr($waktuMulaiRaw, 0, 5);
             }
 
-            // Note: Do not prematurely auto-close active class today so teacher can complete materi, foto, presensi, and kktp
+            $isPkl = (bool) ($block['rombel']?->is_pkl ?? false);
 
+            $block['is_pkl'] = $isPkl;
             $block['waktu_mulai_str'] = $displayStartStr;
             $block['time_arrived'] = $timeArrived;
             $block['is_period_over'] = $isPeriodOver;
@@ -244,20 +246,84 @@ class DashboardGuru extends Component
             $block['has_foto'] = !empty($agenda?->foto_bukti_path);
             $block['otp_time'] = $agenda?->waktu_mulai?->setTimezone('Asia/Jakarta')?->format('H:i');
 
-            $block['status_label'] = $this->getStatusLabel($agenda);
+            $block['status_label'] = $this->getStatusLabel($agenda, $isPkl);
             $block['can_start'] = $this->canStart($block, $agenda, $timeArrived, $isPeriodOver);
 
             return (object) $block;
         });
     }
 
-    private function getStatusLabel(?AgendaHarian $agenda): array
+    public function konfirmasiPkl(string $scheduleId)
+    {
+        $user = auth()->user();
+
+        $jadwal = JadwalPelajaran::with('rombel')->find($scheduleId);
+        if (!$jadwal) {
+            $this->dispatch('show-toast', message: 'Jadwal tidak ditemukan.', type: 'danger');
+            return;
+        }
+
+        $rombelName = $jadwal->rombel?->nama_kelas ?? 'Kelas PKL';
+
+        // Find or create AgendaHarian for today
+        $agenda = AgendaHarian::where('jadwal_pelajaran_id', $scheduleId)
+            ->where('tanggal', $this->tanggal)
+            ->where(function($q) use ($user) {
+                $q->where('guru_id', $user->id)
+                  ->orWhere('guru_pengganti_id', $user->id);
+            })
+            ->first();
+
+        if (!$agenda) {
+            $now = Carbon::now('Asia/Jakarta');
+            $agenda = AgendaHarian::create([
+                'jadwal_pelajaran_id' => $scheduleId,
+                'guru_id' => $user->id,
+                'tanggal' => $this->tanggal,
+                'waktu_mulai' => $now,
+                'waktu_selesai' => $now,
+                'status' => 'selesai',
+                'materi_diajarkan' => 'Monitoring & Pembimbingan PKL Industri (' . $rombelName . ')',
+                'refleksi' => 'Kelas sedang melaksanakan Praktik Kerja Lapangan (PKL) di Dunia Usaha / Industri.',
+            ]);
+        }
+
+        // Fetch inspiring motivation / pantun for teacher
+        $motivasi = MotivasiPantun::inRandomOrder()->first();
+        $isiMotivasi = $motivasi?->isi ?? "Pendidikan bukan sekadar mengisi wadah, melainkan menyalakan api semangat belajar dan berkarya. Tetap semangat membimbing siswa generasi emas di dunia industri!";
+        $tipeMotivasi = $motivasi?->tipe ?? 'motivasi';
+
+        // Dispatch show-motivasi popup
+        $this->dispatch('show-motivasi', [
+            'isi' => $isiMotivasi,
+            'tipe' => $tipeMotivasi,
+        ]);
+
+        $this->dispatch('show-toast', message: "✨ Agenda PKL {$rombelName} berhasil dikonfirmasi & terealisasi!", type: 'success');
+    }
+
+    private function getStatusLabel(?AgendaHarian $agenda, bool $isPkl = false): array
     {
         if ($this->todayHoliday && !$agenda) {
             return [
                 'text' => 'Libur: ' . $this->todayHoliday->nama_hari_libur,
                 'class' => 'status-kuning',
                 'icon' => 'bi-brightness-alt-high-fill'
+            ];
+        }
+
+        if ($isPkl) {
+            if ($agenda && $agenda->status === 'selesai') {
+                return [
+                    'text' => 'PKL Terlaksana',
+                    'class' => 'status-hijau',
+                    'icon' => 'bi-building-check'
+                ];
+            }
+            return [
+                'text' => 'PKL (Industri)',
+                'class' => 'status-hijau',
+                'icon' => 'bi-building-check'
             ];
         }
 
@@ -288,6 +354,7 @@ class DashboardGuru extends Component
         $user = auth()->user();
         if ($this->todayHoliday && !$user->canOverride()) return false;
         if ($block['is_kegiatan_khusus']) return false;
+        if (!empty($block['is_pkl'])) return false; // Handled directly via PKL action
         if ($agenda && in_array($agenda->status_kehadiran_guru, ['izin', 'cuti', 'sakit', 'dinas', 'tugas_luar'])) return false;
 
         // Handshake HARUS dilaksanakan selama jam pelajaran terkait berlangsung
