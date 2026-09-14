@@ -1,151 +1,102 @@
-# Panduan Deployment GADDAMAY: Server Lokal + VPS Tunnel
+# Panduan Deployment GADDAMAY: Docker Multi-App & Tunnel VPS
 
-Dokumen ini menjelaskan arsitektur dan langkah-langkah implementasi deployment sistem terpadu **GADDAMAY (SMKN 2 Indramayu)** yang dijalankan pada **Server Fisik Lokal Sekolah** dan dapat diakses dari internet via **Tunneling VPS**.
+Dokumen ini menjelaskan cara menjalankan **GADDAMAY** di server fisik/VPS yang menjalankan **beberapa aplikasi sekaligus menggunakan Docker**.
 
 ---
 
-## 1. Arsitektur Deployment
+## 1. Arsitektur Docker Multi-Container
+
+Di dalam server Anda yang memiliki berbagai aplikasi lain, GADDAMAY diisolasi di dalam network Docker tersendiri (`gaddamay-net`):
 
 ```
-[ Internet / Luar Jaringan ]
-   │
-   ├─ Siswa / Ortu (HP) ─────────┐
-   ├─ Industri / DUDI (Laptop) ──┤
-   └─ Guru / Kepsek (Luar) ──────┤
-                                 ▼
-                    [ VPS Publik (Cloud) ]
-                    Domain: gaddamay.smkn2indramayu.sch.id
-                    Nginx Reverse Proxy / Cloudflare Tunnel
-                                 │
-                     (Encrypted WireGuard / Cloudflared / SSH Tunnel)
-                                 │
-                                 ▼
-[ Jaringan Internal SMKN 2 Indramayu ]
-   │
-   ├─ Mesin Scanner Gerbang (Absensi RFID / QR) ──┐
-   ├─ Komputer Guru Piket / Ruang TU ────────────┼─► [ Server Fisik Lokal ]
-   └─ WhatsApp Gateway (GOWA / WA-AKG) ──────────┘   ├─ Nginx / Apache
-                                                     ├─ PHP 8.3 (Laravel + CI4)
-                                                     ├─ MariaDB / SQLite
-                                                     └─ Redis / Queue Worker
+Server Fisik Sekolah (1 Mesin, Banyak Aplikasi)
+│
+├── [ Aplikasi Lain Anda ] (Moodle, Web Sekolah, CBT, dll)
+│
+└── [ GADDAMAY Docker Stack ] (Jaringan Terisolasi: gaddamay-net)
+    ├── gaddamay_agenda  : Laravel 13 (Portal Utama, Perizinan, Agenda, PKL) -> Port 8000
+    ├── gaddamay_absensi : CodeIgniter 4 (Presensi Gerbang Scanner RFID/QR) -> Port 8080
+    ├── gaddamay_wa      : GOWA WhatsApp Gateway (Sangat ringan, ~40MB RAM) -> Port 3001
+    └── gaddamay_db      : MariaDB 10.11 (Database bersama modul) -> Port 3307
 ```
 
-### Keuntungan Model Ini:
-1. **Kecepatan di Dalam Sekolah**: Fingerprint/QR gate dan guru di kelas mengakses server via LAN (sangat kencang, tidak membebani kuota internet sekolah).
-2. **Keamanan Data**: Database utama tetap berada di server fisik milik sekolah.
-3. **Akses Luar Fleksibel**: Siswa PKL di DUDI dan orang tua di rumah tetap bisa mengakses portal tanpa perlu IP Publik Statis di sekolah.
-4. **Biaya Hemat**: Cukup menggunakan 1 VPS kecil (spesifikasi 1 core, 1 GB RAM) hanya sebagai jembatan tunnel (reverse proxy).
+---
+
+## 2. Cara Menjalankan dengan Docker
+
+### Langkah 1: Clone Repositori di Server
+```bash
+git clone https://github.com/AndEVEx/GADDAMAY.git
+cd GADDAMAY
+```
+
+### Langkah 2: Sesuaikan Port agar Tidak Bentrok dengan Aplikasi Lain
+Salin file `.env.example` ke `.env`:
+```bash
+cp .env.example .env
+```
+Edit file `.env` dan sesuaikan port jika port `8000`, `8080`, atau `3307` sudah dipakai aplikasi Anda yang lain:
+```ini
+AGENDA_PORT=8000      # Ganti misal 8100 jika 8000 sudah dipakai
+ABSENSI_PORT=8080     # Ganti misal 8180 jika 8080 sudah dipakai
+WA_PORT=3001          # Port dashboard WhatsApp Gateway
+DB_HOST_PORT=3307     # Default 3307 agar tidak bentrok dengan MySQL 3306 server Anda
+```
+
+### Langkah 3: Build & Jalankan Container
+```bash
+docker compose up -d --build
+```
+
+### Langkah 4: Setup Awal Database (Pertama Kali Saja)
+Jalankan migrasi di dalam container `gaddamay_agenda`:
+```bash
+docker exec -it gaddamay_agenda php artisan migrate --force
+docker exec -it gaddamay_agenda php artisan key:generate
+```
+
+Selesai! Aplikasi langsung aktif:
+- **Portal Utama & Agenda**: `http://IP-SERVER:8000`
+- **Presensi Gerbang**: `http://IP-SERVER:8080`
+- **WhatsApp Gateway QR Pairing**: `http://IP-SERVER:3001`
 
 ---
 
-## 2. Pilihan Metode Tunneling
+## 3. Integrasi Jika Server Sudah Memakai Reverse Proxy
 
-### Opsi A: Cloudflare Tunnel (Sangat Direkomendasikan - Gratis & Praktis)
-*Tidak memerlukan VPS terpisah dan tidak memerlukan IP publik di sekolah.*
+Jika di server Anda sudah ada **Nginx Proxy Manager**, **Traefik**, atau **Nginx Utama**:
 
-1. Buat akun di [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) (Gratis).
-2. Di Server Lokal Sekolah, pasang program `cloudflared`:
-   ```powershell
-   winget install Cloudflare.cloudflared
-   ```
-3. Login dan sambungkan tunnel ke domain sekolah:
-   ```bash
-   cloudflared tunnel login
-   cloudflared tunnel create gaddamay-tunnel
-   ```
-4. Konfigurasikan file `config.yml`:
-   ```yaml
-   tunnel: <TUNNEL_ID>
-   credentials-file: C:\Users\Server\.cloudflared\<TUNNEL_ID>.json
+### Cara A: Sambungkan Port Host Langsung
+Arahkan Proxy Host di Nginx Proxy Manager Anda ke:
+- `http://172.17.0.1:8000` -> untuk domain `gaddamay.smkn2indramayu.sch.id`
+- `http://172.17.0.1:8080` -> untuk domain `absensi.smkn2indramayu.sch.id`
 
-   ingress:
-     # Portal Utama & Agenda
-     - hostname: gaddamay.smkn2indramayu.sch.id
-       service: http://localhost:8000
-     # Presensi Gate
-     - hostname: absensi.smkn2indramayu.sch.id
-       service: http://localhost:8080
-     - service: http_status:404
-   ```
-5. Jalankan sebagai Windows Service agar otomatis nyala saat PC server dihidupkan:
-   ```powershell
-   cloudflared service install
-   ```
+### Cara B: Sambungkan ke Jaringan Docker Bersama (External Network)
+Jika Anda menggunakan network proxy bersama (misal `proxy-network`):
+Tambahkan di bagian bawah `docker-compose.yml`:
+```yaml
+networks:
+  gaddamay-net:
+    driver: bridge
+  proxy-network:
+    external: true
+```
+Lalu tambahkan `proxy-network` pada service `gaddamay-agenda` dan `gaddamay-absensi`. Anda cukup menggunakan nama container `http://gaddamay_agenda:80` di reverse proxy tanpa perlu mengekspos port ke host!
 
 ---
 
-### Opsi B: VPS Reverse Proxy (FRP / WireGuard)
+## 4. Akses dari Luar via Cloudflare Tunnel (Tanpa Port Forwarding)
 
-Jika menggunakan VPS Linux sendiri dengan IP Publik (misal: `103.xxx.xxx.xxx`):
+Jika server fisik Anda di sekolah tidak memiliki IP Publik statis, pasang Cloudflare Tunnel di Docker compose yang sama.
+Cukup tambahkan service berikut di `docker-compose.yml`:
 
-1. **Gunakan FRP (Fast Reverse Proxy)**:
-   - **Di VPS (Server Linux)**:
-     Unduh `frps`, buat file `frps.ini`:
-     ```ini
-     [common]
-     bind_port = 7000
-     vhost_http_port = 8080
-     token = KATA_KUNCI_RAHASIA_SEKOLAH
-     ```
-     Jalankan: `./frps -c frps.ini`
-   - **Di Server Fisik Sekolah (Client Windows)**:
-     Unduh `frpc.exe`, buat file `frpc.ini`:
-     ```ini
-     [common]
-     server_addr = 103.xxx.xxx.xxx
-     server_port = 7000
-     token = KATA_KUNCI_RAHASIA_SEKOLAH
-
-     [gaddamay-web]
-     type = http
-     local_ip = 127.0.0.1
-     local_port = 8000
-     custom_domains = gaddamay.smkn2indramayu.sch.id
-     ```
-     Jalankan: `frpc.exe -c frpc.ini`
-
-2. **Nginx di VPS** sebagai SSL Terminator (HTTPS Certbot/Let's Encrypt):
-   ```nginx
-   server {
-       server_name gaddamay.smkn2indramayu.sch.id;
-       listen 443 ssl;
-       # SSL Certs ...
-       location / {
-           proxy_pass http://127.0.0.1:8080;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_set_header X-Forwarded-Proto https;
-       }
-   }
-   ```
-
----
-
-## 3. Cara Menjalankan Sistem GADDAMAY
-
-### Di Komputer Lokal / Saat Uji Coba:
-Di folder repositori `c:\Users\User\Downloads\ProjectX`:
-1. Klik ganda file:
-   `scripts\run-all.bat`
-2. Dua terminal akan terbuka otomatis:
-   - **Agenda & Portal**: `http://localhost:8000`
-   - **Absensi Gerbang**: `http://localhost:8080`
-3. Buka browser dan arahkan ke:
-   👉 **`http://localhost:8000`**
-
-### Menjalankan Produksi via Windows Service (NSSM):
-Agar aplikasi otomatis berjalan saat PC dinyalakan tanpa perlu membuka terminal:
-1. Unduh **NSSM (Non-Sucking Service Manager)**.
-2. Daftarkan service untuk Laravel:
-   ```cmd
-   nssm install GaddamayAgenda "php" "artisan serve --host=0.0.0.0 --port=8000"
-   nssm set GaddamayAgenda AppDirectory "C:\GADDAMAY\apps\agenda"
-   nssm start GaddamayAgenda
-   ```
-3. Daftarkan service untuk Absensi CI4:
-   ```cmd
-   nssm install GaddamayAbsensi "php" "spark serve --host=0.0.0.0 --port=8080"
-   nssm set GaddamayAbsensi AppDirectory "C:\GADDAMAY\apps\absensi"
-   nssm start GaddamayAbsensi
-   ```
+```yaml
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: gaddamay_tunnel
+    restart: unless-stopped
+    command: tunnel run --token YOUR_CLOUDFLARE_TUNNEL_TOKEN
+    networks:
+      - gaddamay-net
+```
+Dengan menambahkan 1 blok service di atas, seluruh sistem GADDAMAY langsung terhubung online dengan SSL HTTPS resmi, aman, dan bisa diakses oleh guru, orang tua, serta DUDI dari mana saja.
