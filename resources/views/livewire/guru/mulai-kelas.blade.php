@@ -70,15 +70,21 @@
                 <div class="small text-muted mb-2">Token OTP (Rahasia &bull; Dilarang Screenshot)</div>
 
                 {{-- Anti-Screenshot Protected Token Display (Item 7) --}}
-                <div id="tokenProtectionContainer" class="position-relative mx-auto mb-3" style="max-width: 320px;">
+                <div id="tokenProtectionContainer" class="position-relative mx-auto mb-3" style="width: 100%; max-width: 440px;">
                     <div id="tokenOverlay" class="position-absolute top-0 start-0 w-100 h-100 d-none bg-dark text-white rounded-3 d-flex flex-column align-items-center justify-content-center p-2 text-center" style="z-index: 10; backdrop-filter: blur(8px);">
                         <i class="bi bi-shield-slash-fill text-warning fs-3 mb-1"></i>
                         <span class="fw-bold small">Screenshot Tidak Diizinkan</span>
                         <span class="text-white-50" style="font-size: 0.68rem;">Token bersifat rahasia & realtime</span>
                     </div>
 
-                    <div id="tokenDisplayBox" class="otp-display protected-token" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none;">
-                        {{ $token }}
+                    <div id="tokenDisplayBox" class="otp-display protected-token" style="user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none; white-space: nowrap !important;">
+                        @if(!empty($token))
+                            @foreach(str_split(trim((string)$token)) as $digit)
+                                <span class="otp-digit">{{ $digit }}</span>
+                            @endforeach
+                        @else
+                            <span>------</span>
+                        @endif
                     </div>
                 </div>
 
