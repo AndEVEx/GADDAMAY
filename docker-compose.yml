@@ -1,6 +1,6 @@
 services:
   # -------------------------------------------------------------
-  # 1. Modul Agenda, Portal Utama, Perizinan, PKL (Laravel 13)
+  # 1. Agenda / Portal / Perizinan / PKL (Laravel)
   # -------------------------------------------------------------
   gaddamay-agenda:
     build:
@@ -8,30 +8,27 @@ services:
       dockerfile: docker/agenda/Dockerfile
     container_name: gaddamay_agenda
     restart: unless-stopped
-    ports:
-      - "${AGENDA_PORT:-8000}:80"
     environment:
-      APP_ENV: production
-      APP_DEBUG: "false"
-      APP_URL: "${APP_URL:-http://localhost:8000}"
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_URL: ${APP_URL}
       DB_CONNECTION: mysql
-      DB_HOST: gaddamay-db
-      DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE:-gaddamay}
-      DB_USERNAME: ${DB_USERNAME:-gaddamay_user}
-      DB_PASSWORD: ${DB_PASSWORD:-rahasia123}
-      WA_GATEWAY_DRIVER: ${WA_GATEWAY_DRIVER:-gowa}
-      WA_GATEWAY_URL: "http://gaddamay-wa:3000"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      WA_GATEWAY_DRIVER: ${WA_GATEWAY_DRIVER}
+      WA_GATEWAY_URL: ${WA_GATEWAY_URL}
     volumes:
       - ./apps/agenda/storage:/var/www/html/storage
       - ./apps/agenda/public/uploads:/var/www/html/public/uploads
-    depends_on:
-      - gaddamay-db
     networks:
-      - gaddamay-net
+      - db
+      - net
 
   # -------------------------------------------------------------
-  # 2. Modul Absensi Gate / RFID / QR (CodeIgniter 4)
+  # 2. Absensi Gate / RFID / QR (CodeIgniter 4)
   # -------------------------------------------------------------
   gaddamay-absensi:
     build:
@@ -39,63 +36,25 @@ services:
       dockerfile: docker/absensi/Dockerfile
     container_name: gaddamay_absensi
     restart: unless-stopped
-    ports:
-      - "${ABSENSI_PORT:-8080}:80"
     environment:
-      CI_ENVIRONMENT: production
-      app.baseURL: "${ABSENSI_URL:-http://localhost:8080}"
-      database.default.hostname: gaddamay-db
-      database.default.database: ${DB_DATABASE:-gaddamay}
-      database.default.username: ${DB_USERNAME:-gaddamay_user}
-      database.default.password: ${DB_PASSWORD:-rahasia123}
+      CI_ENVIRONMENT: ${CI_ENVIRONMENT}
+      app.baseURL: ${ABSENSI_URL}
+      database.default.hostname: ${DB_HOST}
+      database.default.port: ${DB_PORT}
+      database.default.database: ${DB_DATABASE}
+      database.default.username: ${DB_USERNAME}
+      database.default.password: ${DB_PASSWORD}
       database.default.DBDriver: MySQLi
     volumes:
       - ./apps/absensi/writable:/var/www/html/writable
-    depends_on:
-      - gaddamay-db
     networks:
-      - gaddamay-net
-
-  # -------------------------------------------------------------
-  # 3. Database MariaDB / MySQL Terisolasi untuk GADDAMAY
-  # -------------------------------------------------------------
-  gaddamay-db:
-    image: mariadb:10.11
-    container_name: gaddamay_db
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpass123}
-      MYSQL_DATABASE: ${DB_DATABASE:-gaddamay}
-      MYSQL_USER: ${DB_USERNAME:-gaddamay_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-rahasia123}
-    ports:
-      # Port MySQL host sengaja default 3307 agar tidak bentrok jika server sudah punya MySQL di 3306
-      - "${DB_HOST_PORT:-3307}:3306"
-    volumes:
-      - gaddamay_db_data:/var/lib/mysql
-    networks:
-      - gaddamay-net
-
-  # -------------------------------------------------------------
-  # 4. WhatsApp Gateway Driver (GOWA Engine)
-  # -------------------------------------------------------------
-  gaddamay-wa:
-    image: devdinu/gowa:latest
-    container_name: gaddamay_wa
-    restart: unless-stopped
-    ports:
-      - "${WA_PORT:-3001}:3000"
-    volumes:
-      - gaddamay_wa_session:/app/session
-    networks:
-      - gaddamay-net
-
-volumes:
-  gaddamay_db_data:
-    driver: local
-  gaddamay_wa_session:
-    driver: local
+      - db
+      - net
 
 networks:
-  gaddamay-net:
-    driver: bridge
+  db:
+    external: true
+    name: ${NET_DB}
+  net:
+    external: true
+    name: ${NET_NET}

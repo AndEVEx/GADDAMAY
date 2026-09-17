@@ -29,7 +29,24 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 WORKDIR /var/www/html
 
-# Salin kode aplikasi agenda
+# ---------------------------------------------------------
+# 1) Copy composer files dulu (biar layer cache efektif)
+# ---------------------------------------------------------
+COPY apps/agenda/composer.json apps/agenda/composer.lock ./
+
+# ---------------------------------------------------------
+# 2) Install dependency (INI YANG HILANG SEBELUMNYA)
+# ---------------------------------------------------------
+RUN composer install \
+        --no-dev \
+        --no-interaction \
+        --prefer-dist \
+        --optimize-autoloader \
+        --no-scripts
+
+# ---------------------------------------------------------
+# 3) Baru copy sisa source code
+# ---------------------------------------------------------
 COPY apps/agenda /var/www/html
 
 # Set permission direktori Laravel
