@@ -64,6 +64,16 @@ class Rombel extends Model
         return $this->hasMany(JadwalPelajaran::class);
     }
 
+    public function tugasTambahan(): HasMany
+    {
+        return $this->hasMany(TugasTambahanGuru::class, 'rombel_id');
+    }
+
+    public function waliKelas()
+    {
+        return $this->hasOne(TugasTambahanGuru::class, 'rombel_id')->where('jenis_tugas', 'wali_kelas')->where('is_active', true);
+    }
+
     // =========================================================================
     // Accessors
     // =========================================================================

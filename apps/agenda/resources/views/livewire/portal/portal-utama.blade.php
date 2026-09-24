@@ -252,13 +252,18 @@
                             </span>
                         </div>
                         <h5 class="fw-bold text-info mb-2">7. LMS Vokasi &amp; Pusat Belajar</h5>
-                        <p class="text-muted small mb-3">
-                            Pembelajaran personalisasi per siswa terkoneksi Capaian Pembelajaran (CP) &amp; TP. Dilengkapi modul intensif bimbingan <strong>LKS</strong> (Lomba Keterampilan Siswa) dan persiapan Ujikom.
+                        <p class="text-muted small mb-2">
+                            Pembelajaran diferensiasi terkoneksi CP &amp; TP, bimbingan intensif <strong>LKS</strong> &amp; Ujikom, <strong>Pendataan Fisik PJOK</strong>, serta <strong>Simulasi Latihan Soal TKA</strong> terintegrasi murid &amp; wali kelas.
                         </p>
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            <span class="badge bg-light text-dark border small"><i class="bi bi-heart-pulse text-danger me-1"></i>Fisik PJOK</span>
+                            <span class="badge bg-light text-dark border small"><i class="bi bi-pencil-square text-warning me-1"></i>Simulasi TKA</span>
+                            <span class="badge bg-light text-dark border small"><i class="bi bi-award text-success me-1"></i>Bimbingan LKS</span>
+                        </div>
                     </div>
                     <div class="pt-3 border-top d-flex gap-2">
                         <a href="{{ route('lms.guru.materi') }}" class="btn btn-info text-white btn-sm flex-fill fw-bold shadow-sm">
-                            Kelola Materi &amp; Tugas <i class="bi bi-arrow-right ms-1"></i>
+                            Kelola LMS <i class="bi bi-arrow-right ms-1"></i>
                         </a>
                         <a href="{{ route('lms.siswa.dashboard') }}" class="btn btn-outline-info btn-sm flex-fill fw-semibold">
                             Portal Siswa

@@ -75,6 +75,11 @@ use App\Livewire\Lms\Guru\KelolaMateriLms;
 use App\Livewire\Lms\Siswa\MyLearningDashboard;
 use App\Livewire\Ujikom\Siswa\PendaftaranUjikomSiswa;
 use App\Livewire\Ujikom\Admin\VerifikasiPendaftaranUjikom;
+use App\Livewire\Admin\ManajemenTugasTambahanGuru;
+use App\Livewire\Lms\Fisik\KelolaTesFisikSiswa;
+use App\Livewire\Lms\Tka\KelolaLatihanTka;
+use App\Livewire\Lms\Tka\SimulasiTkaSiswa;
+use App\Livewire\Guru\WaliKelas\MonitoringWaliKelas;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -228,6 +233,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/verifikasi-izin', VerifikasiIzin::class)->name('admin.verifikasi-izin');
     Route::get('/live-absensi', LiveAbsensiSiswa::class)->name('admin.live-absensi');
     Route::get('/rekap-absensi', RekapAbsensiAdmin::class)->name('admin.rekap-absensi');
+    Route::get('/tugas-tambahan', ManajemenTugasTambahanGuru::class)->name('admin.tugas-tambahan');
 
     // Direct Form Upload Fallbacks (Fail-safe HTTP POST routes)
     Route::post('/direct-import-jadwal', [DirectImportController::class, 'importJadwal'])->name('admin.direct-import-jadwal');
@@ -301,11 +307,25 @@ Route::prefix('tefa')->group(function () {
 });
 
 // ============================================================
-// MODUL LMS VOKASI DIFERENSIASI, UJIKOM & LKS
+// MODUL LMS VOKASI DIFERENSIASI, UJIKOM, LKS, TES FISIK & TKA
 // ============================================================
 Route::prefix('lms')->group(function () {
     Route::get('/my-learning', MyLearningDashboard::class)->name('lms.siswa.dashboard');
     Route::get('/kelola-materi', KelolaMateriLms::class)->name('lms.guru.materi');
+
+    // 1. Fitur Guru Olahraga: Pendataan Kemampuan Fisik Siswa
+    Route::get('/tes-fisik', KelolaTesFisikSiswa::class)->name('lms.fisik.kelola');
+
+    // 2. Fitur Latihan Soal TKA (Bank Soal & CBT Siswa)
+    Route::get('/tka/kelola', KelolaLatihanTka::class)->name('lms.tka.kelola');
+    Route::get('/tka/simulasi', SimulasiTkaSiswa::class)->name('lms.tka.simulasi');
+});
+
+// ============================================================
+// MONITORING WALI KELAS (Fisik, TKA & Presensi Siswa Binaan)
+// ============================================================
+Route::middleware(['auth'])->prefix('wali-kelas')->group(function () {
+    Route::get('/monitoring', MonitoringWaliKelas::class)->name('walikelas.monitoring');
 });
 
 // ============================================================

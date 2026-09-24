@@ -108,10 +108,14 @@ class MyLearningDashboard extends Component
     {
         $summary = $this->siswaId ? LmsPersonalizationService::getStudentLearningSummary($this->siswaId) : [];
         $demoSiswa = Siswa::take(4)->get();
+        $riwayatTesFisik = $this->siswaId ? \App\Models\LmsTesFisikSiswa::with('guruOlahraga')->where('siswa_id', $this->siswaId)->latest('tanggal_tes')->get() : collect();
+        $riwayatTka = $this->siswaId ? \App\Models\LmsTkaHasilSiswa::with('paket')->where('siswa_id', $this->siswaId)->latest()->get() : collect();
 
         return view('livewire.lms.siswa.my-learning-dashboard', [
             'summary' => $summary,
             'demoSiswa' => $demoSiswa,
+            'riwayatTesFisik' => $riwayatTesFisik,
+            'riwayatTka' => $riwayatTka,
         ])->layout('components.layouts.portal', ['title' => 'Portal Belajar Vokasi Siswa - SMKN 2 Indramayu']);
     }
 }

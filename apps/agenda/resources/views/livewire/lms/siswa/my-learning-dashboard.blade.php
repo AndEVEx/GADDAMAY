@@ -172,6 +172,99 @@
         </div>
     </div>
 
+    <!-- Section Kebugaran Jasmani & Hasil Latihan TKA Siswa -->
+    <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Panel 1: Catatan Kebugaran Jasmani Siswa (Dari Guru Olahraga) -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <span class="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    </span>
+                    <div>
+                        <h3 class="font-black text-slate-900 text-base">Kebugaran Fisik Saya</h3>
+                        <p class="text-xs text-slate-400">Dicatat Guru Olahraga &amp; Terhubung ke Wali Kelas</p>
+                    </div>
+                </div>
+                <a href="{{ route('lms.fisik.kelola') }}" class="text-xs font-bold text-emerald-600 hover:underline">Kelola &rarr;</a>
+            </div>
+
+            @forelse($riwayatTesFisik as $f)
+                <div class="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-emerald-800">Semester {{ $f->semester }} ({{ $f->tahun_ajaran }})</span>
+                            <div class="text-[11px] text-slate-400">Penguji: {{ $f->guruOlahraga?->name ?? 'Guru PJOK' }} • {{ $f->tanggal_tes->format('d M Y') }}</div>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-200 text-emerald-900">
+                            {{ $f->predikat }} ({{ $f->skor_kebugaran }})
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                        <div class="p-2 bg-white rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-400 block">TB / BB</span>
+                            <strong>{{ $f->tinggi_badan_cm ?: '-' }}cm / {{ $f->berat_badan_kg ?: '-' }}kg</strong>
+                        </div>
+                        <div class="p-2 bg-white rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-400 block">BMI</span>
+                            <strong>{{ $f->bmi }} ({{ $f->kategori_bmi }})</strong>
+                        </div>
+                        <div class="p-2 bg-white rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-400 block">Push/Sit Up</span>
+                            <strong>{{ $f->push_up_1min ?: 0 }} / {{ $f->sit_up_1min ?: 0 }}</strong>
+                        </div>
+                    </div>
+
+                    @if($f->catatan_guru_olahraga)
+                        <p class="text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-100 italic">"{{ $f->catatan_guru_olahraga }}"</p>
+                    @endif
+                </div>
+            @empty
+                <div class="text-center py-8 text-slate-400 text-xs">
+                    Belum ada rekaman tes fisik dari guru olahraga.
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Panel 2: Simulasi Latihan Soal TKA Siswa -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <span class="p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    </span>
+                    <div>
+                        <h3 class="font-black text-slate-900 text-base">Latihan Soal TKA</h3>
+                        <p class="text-xs text-slate-400">Skolastik &amp; Penalaran Terpantau Wali Kelas</p>
+                    </div>
+                </div>
+                <a href="{{ route('lms.tka.simulasi') }}" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-sm transition">
+                    Mulai Tes &rarr;
+                </a>
+            </div>
+
+            @forelse($riwayatTka as $tka)
+                <div class="p-3.5 rounded-2xl bg-indigo-50/30 border border-indigo-100 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-xs text-slate-900">{{ $tka->paket?->judul_paket }}</h4>
+                        <div class="text-[11px] text-slate-400">
+                            {{ $tka->created_at->format('d M Y H:i') }} • Benar: <strong class="text-emerald-600">{{ $tka->jumlah_benar }}</strong> / Salah: <strong class="text-rose-600">{{ $tka->jumlah_salah }}</strong>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xl font-black text-indigo-700">{{ $tka->nilai_skor }}</span>
+                        <div class="text-[10px] text-slate-400">Skor TKA</div>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-8 text-slate-400 text-xs">
+                    Belum ada riwayat pengerjaan tes TKA. Klik "Mulai Tes" untuk mencoba simulasi.
+                </div>
+            @endforelse
+        </div>
+    </div>
+
     <!-- MODAL KUMPUL PROYEK LATIHAN -->
     @if($showSubmitModal)
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

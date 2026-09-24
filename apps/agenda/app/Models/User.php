@@ -113,6 +113,11 @@ class User extends Authenticatable
         return $this->belongsTo(Rombel::class, 'rombel_id');
     }
 
+    public function tugasTambahan(): HasMany
+    {
+        return $this->hasMany(TugasTambahanGuru::class, 'guru_id');
+    }
+
     // =========================================================================
     // Role Helpers
     // =========================================================================

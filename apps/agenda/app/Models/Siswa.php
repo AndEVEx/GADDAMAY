@@ -38,6 +38,16 @@ class Siswa extends Model
         return $this->hasMany(KehadiranMurid::class);
     }
 
+    public function tesFisik(): HasMany
+    {
+        return $this->hasMany(LmsTesFisikSiswa::class, 'siswa_id');
+    }
+
+    public function tkaHasil(): HasMany
+    {
+        return $this->hasMany(LmsTkaHasilSiswa::class, 'siswa_id');
+    }
+
     public function getNamaSiswaAttribute(): string
     {
         return $this->nama ?? '';

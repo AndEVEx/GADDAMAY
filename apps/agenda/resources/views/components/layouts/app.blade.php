@@ -173,11 +173,28 @@
                     <a href="{{ route('admin.users') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.users') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-person-fill-lock me-2 text-dark"></i>Manajemen User
                     </a>
+                    <a href="{{ route('admin.tugas-tambahan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.tugas-tambahan') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-person-workspace me-2 text-info"></i>Tugas Tambahan Guru
+                    </a>
                     <a href="{{ route('admin.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-patch-check-fill me-2 text-warning"></i>Verifikasi Izin Guru
                     </a>
                     <a href="{{ route('perizinan.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('perizinan*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-shield-check me-2 text-success"></i>Perizinan Siswa Terpadu
+                    </a>
+
+                    {{-- 6. LMS & Kebugaran --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-mortarboard-fill"></i> LMS & Kebugaran
+                    </div>
+                    <a href="{{ route('lms.guru.materi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('lms.guru.materi*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-collection-play-fill me-2 text-primary"></i>Kelola Materi LMS
+                    </a>
+                    <a href="{{ route('lms.tka.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('lms.tka*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-card-checklist me-2 text-warning"></i>Bank Soal TKA (Simulasi)
+                    </a>
+                    <a href="{{ route('lms.fisik.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('lms.fisik*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-heart-pulse-fill me-2 text-danger"></i>Tes Fisik Siswa (PJOK)
                     </a>
                 @elseif(in_array($role, ['guru', 'ketua_mgmp', 'guru_piket']))
                     <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
@@ -231,6 +248,23 @@
                         <i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>Export IKI (PDF)
                     </a>
 
+                    {{-- Kelompok Menu "LMS & Tugas Tambahan" --}}
+                    <div class="text-primary small fw-bold text-uppercase px-2 mt-3 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-award-fill"></i> LMS & Tugas Tambahan
+                    </div>
+                    <a href="{{ route('walikelas.monitoring') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('walikelas.monitoring*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-person-video3 me-2 text-info"></i>Monitoring Wali Kelas
+                    </a>
+                    <a href="{{ route('lms.fisik.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('lms.fisik*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-heart-pulse-fill me-2 text-danger"></i>Kelola Tes Fisik (PJOK)
+                    </a>
+                    <a href="{{ route('lms.tka.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('lms.tka*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-card-checklist me-2 text-warning"></i>Bank Soal & Ujian TKA
+                    </a>
+                    <a href="{{ route('lms.guru.materi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('lms.guru.materi*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-collection-play-fill me-2 text-primary"></i>Modul & Materi LMS
+                    </a>
+
                     @if($role === 'ketua_mgmp')
                         <a href="{{ route('mgmp.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.dashboard') ? 'active' : '' }}" wire:navigate>
                             <i class="bi bi-diagram-3-fill me-2"></i>Dashboard MGMP
@@ -276,6 +310,12 @@
                     </a>
                     <a href="{{ route('ketua.anggota') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ketua.anggota*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-people-fill me-2 text-success"></i>Anggota Kelas
+                    </a>
+                    <a href="{{ route('lms.siswa.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('lms.siswa.dashboard*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>LMS & Kebugaran Saya
+                    </a>
+                    <a href="{{ route('lms.tka.simulasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('lms.tka.simulasi*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-pencil-square me-2 text-warning"></i>Simulasi Ujian TKA
                     </a>
                 @endif
             </div>
