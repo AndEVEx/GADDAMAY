@@ -48,6 +48,11 @@ class Siswa extends Model
         return $this->hasMany(LmsTkaHasilSiswa::class, 'siswa_id');
     }
 
+    public function literasiPresensi(): HasMany
+    {
+        return $this->hasMany(LiterasiPresensiSiswa::class, 'siswa_id');
+    }
+
     public function getNamaSiswaAttribute(): string
     {
         return $this->nama ?? '';

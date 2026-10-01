@@ -71,11 +71,19 @@ class MonitoringWaliKelas extends Component
             ->get()
             ->groupBy('siswa_id');
 
+        // Rekap Ketercapaian Literasi Rabu Pagi Siswa Kelas Ini
+        $literasiHasil = \App\Models\LiterasiPresensiSiswa::with('sesi')
+            ->whereIn('siswa_id', $siswaIds)
+            ->latest('waktu_submit')
+            ->get()
+            ->groupBy('siswa_id');
+
         return view('livewire.guru.wali-kelas.monitoring-wali-kelas', [
             'allRombels' => $allRombels,
             'siswaList' => $siswaList,
             'tesFisik' => $tesFisik,
             'tkaHasil' => $tkaHasil,
+            'literasiHasil' => $literasiHasil,
         ]);
     }
 }

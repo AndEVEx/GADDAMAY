@@ -80,6 +80,9 @@ use App\Livewire\Lms\Fisik\KelolaTesFisikSiswa;
 use App\Livewire\Lms\Tka\KelolaLatihanTka;
 use App\Livewire\Lms\Tka\SimulasiTkaSiswa;
 use App\Livewire\Guru\WaliKelas\MonitoringWaliKelas;
+use App\Livewire\Literasi\KelolaLiterasiSesi;
+use App\Livewire\Literasi\PresenterLiterasiLive;
+use App\Livewire\Literasi\SiswaLiterasiLive;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -335,4 +338,14 @@ Route::prefix('ujikom')->group(function () {
     Route::get('/daftar', PendaftaranUjikomSiswa::class)->name('ujikom.daftar');
     Route::get('/verifikasi', VerifikasiPendaftaranUjikom::class)->name('ujikom.admin.verifikasi');
 });
+
+// ============================================================
+// MODUL LITERASI RABU PAGI (Live Broadcast Presenter & Siswa)
+// ============================================================
+Route::middleware(['auth'])->prefix('literasi')->group(function () {
+    Route::get('/kelola', KelolaLiterasiSesi::class)->name('literasi.kelola');
+    Route::get('/presenter/{id}', PresenterLiterasiLive::class)->name('literasi.presenter');
+    Route::get('/live/{id?}', SiswaLiterasiLive::class)->name('literasi.siswa.live');
+});
+
 

@@ -25,6 +25,11 @@
                 <i class="bi bi-mortarboard-fill me-1"></i> Hasil Latihan Soal TKA
             </button>
         </li>
+        <li class="nav-item">
+            <button wire:click="$set('activeTab', 'literasi')" class="nav-link {{ $activeTab === 'literasi' ? 'active bg-warning text-dark' : 'bg-light text-dark' }} fw-bold rounded-pill px-4">
+                <i class="bi bi-broadcast me-1"></i> Literasi Lapangan (Rabu Pagi)
+            </button>
+        </li>
     </ul>
 
     {{-- Search Bar --}}
@@ -202,6 +207,90 @@
                     @empty
                         <tr>
                             <td colspan="7" class="text-center py-5 text-muted">
+                                Tidak ada data siswa di rombel ini.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- TAB 3: Partisipasi & Ketercapaian Literasi Rabu Pagi -->
+    @if($activeTab === 'literasi')
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-warning text-dark py-3 fw-bold d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-broadcast me-2"></i>Rekap Kehadiran Lapangan &amp; Refleksi Literasi Rabu Pagi</span>
+            <span class="badge bg-dark text-white">{{ $siswaList->count() }} Siswa Terdaftar</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Nama Siswa</th>
+                        <th>NIS</th>
+                        <th>Status Mengikuti</th>
+                        <th>Topik Sesi Terakhir</th>
+                        <th class="text-center">Skor Kuis PG</th>
+                        <th class="pe-4">Rangkuman Refleksi Siswa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($siswaList as $s)
+                        @php
+                            $lit = $literasiHasil->get($s->id)?->first();
+                        @endphp
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-dark">{{ $s->nama }}</div>
+                            </td>
+                            <td><span class="small font-monospace text-muted">{{ $s->nis ?: '-' }}</span></td>
+                            <td>
+                                @if($lit)
+                                    @if($lit->waktu_submit)
+                                        <span class="badge bg-success-subtle text-success fw-bold rounded-pill px-3 py-1">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Hadir &amp; Evaluasi
+                                        </span>
+                                    @else
+                                        <span class="badge bg-warning-subtle text-warning fw-bold rounded-pill px-3 py-1">
+                                            <i class="bi bi-eye-fill me-1"></i>Menyimak di Lapangan
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="badge bg-light text-muted border rounded-pill px-3 py-1">
+                                        Belum Ada Data
+                                    </span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($lit && $lit->sesi)
+                                    <div class="small fw-semibold text-dark">{{ $lit->sesi->judul }}</div>
+                                    <div class="text-muted" style="font-size: 0.72rem;">{{ $lit->sesi->tanggal->format('d/m/Y') }} • Pemateri: {{ $lit->sesi->nama_pemateri }}</div>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
+                                @if($lit && $lit->waktu_submit)
+                                    <span class="badge bg-primary fs-6">{{ $lit->skor_pg }}</span>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
+                            </td>
+                            <td class="pe-4">
+                                @if($lit && $lit->rangkuman_siswa)
+                                    <div class="small text-dark fst-italic text-truncate" style="max-width: 280px;" title="{{ $lit->rangkuman_siswa }}">
+                                        "{{ $lit->rangkuman_siswa }}"
+                                    </div>
+                                @else
+                                    <span class="text-muted small">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 Tidak ada data siswa di rombel ini.
                             </td>
                         </tr>

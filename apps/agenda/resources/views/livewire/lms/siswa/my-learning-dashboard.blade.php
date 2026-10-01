@@ -11,8 +11,12 @@
             <p class="text-sm text-slate-500 mt-1">Jalur materi personal, bimbingan intensif Ujikom (UKK), dan persiapan kontingen LKS.</p>
         </div>
 
-        <div class="flex items-center gap-2">
-            <a href="{{ route('ujikom.siswa.daftar') }}" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="{{ route('literasi.siswa.live') }}" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2">
+                <i class="bi bi-broadcast"></i>
+                <span>Literasi Lapangan (Live)</span>
+            </a>
+            <a href="{{ route('ujikom.daftar') }}" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span>Pendaftaran Ujikom (UKK)</span>
             </a>

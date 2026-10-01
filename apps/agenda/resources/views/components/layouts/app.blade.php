@@ -196,6 +196,9 @@
                     <a href="{{ route('lms.fisik.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('lms.fisik*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-heart-pulse-fill me-2 text-danger"></i>Tes Fisik Siswa (PJOK)
                     </a>
+                    <a href="{{ route('literasi.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('literasi*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-broadcast me-2 text-primary"></i>Literasi Lapangan (Live)
+                    </a>
                 @elseif(in_array($role, ['guru', 'ketua_mgmp', 'guru_piket']))
                     <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-house-fill me-2"></i>Beranda Guru
@@ -264,6 +267,9 @@
                     <a href="{{ route('lms.guru.materi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('lms.guru.materi*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-collection-play-fill me-2 text-primary"></i>Modul & Materi LMS
                     </a>
+                    <a href="{{ route('literasi.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('literasi*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-broadcast me-2 text-danger"></i>Literasi Lapangan (Live)
+                    </a>
 
                     @if($role === 'ketua_mgmp')
                         <a href="{{ route('mgmp.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.dashboard') ? 'active' : '' }}" wire:navigate>
@@ -316,6 +322,9 @@
                     </a>
                     <a href="{{ route('lms.tka.simulasi') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('lms.tka.simulasi*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-pencil-square me-2 text-warning"></i>Simulasi Ujian TKA
+                    </a>
+                    <a href="{{ route('literasi.siswa.live') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('literasi.siswa.live*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-broadcast me-2 text-danger"></i>Literasi Lapangan (Live)
                     </a>
                 @endif
             </div>
