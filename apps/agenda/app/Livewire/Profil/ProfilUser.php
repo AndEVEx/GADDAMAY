@@ -151,11 +151,18 @@ class ProfilUser extends Component
             $riwayatBacaList = PerpusRiwayatBaca::with('buku.kategori')->where('siswa_id', $this->siswa->id)->get();
         }
 
+        // Data Ekstrakurikuler yang Diikuti
+        $ekskulSiswaList = [];
+        if ($this->siswa) {
+            $ekskulSiswaList = $this->siswa->ekskulAnggota()->with('ekskul.pembina')->get();
+        }
+
         return view('livewire.profil.profil-user', [
             'hexagonal' => $hexagonal,
             'tesFisikTerakhir' => $tesFisikTerakhir,
             'tkaHasilList' => $tkaHasilList,
             'riwayatBacaList' => $riwayatBacaList,
+            'ekskulSiswaList' => $ekskulSiswaList,
             'allSiswaList' => $allSiswaList,
         ]);
     }

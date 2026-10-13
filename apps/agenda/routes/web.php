@@ -91,6 +91,7 @@ use App\Livewire\Perpus\BacaBukuDigital;
 use App\Livewire\Profil\ProfilUser;
 use App\Livewire\Profil\KartuIdentitasDigital;
 use App\Livewire\Perduptar\KelolaPoinPerduptar;
+use App\Livewire\Ekskul\PresensiEkskul;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -386,6 +387,13 @@ Route::middleware(['auth'])->prefix('profil')->group(function () {
 // ============================================================
 Route::middleware(['auth'])->prefix('perduptar')->group(function () {
     Route::get('/poin', KelolaPoinPerduptar::class)->name('perduptar.poin');
+});
+
+// ============================================================
+// MODUL EKSTRAKURIKULER & PRESENSI (QR SCAN & MANUAL)
+// ============================================================
+Route::middleware(['auth'])->prefix('ekskul')->group(function () {
+    Route::get('/presensi', PresensiEkskul::class)->name('ekskul.presensi');
 });
 
 

@@ -144,6 +144,13 @@
 
                                     <div class="text-uppercase text-muted fw-bold" style="font-size: 0.62rem;">{{ $isStudentCard ? 'Kelas / Kompetensi Keahlian:' : 'Jabatan / Peran:' }}</div>
                                     <div class="fw-semibold text-dark text-truncate" style="font-size: 0.78rem;">{{ $jabatanAtauKelas }}</div>
+
+                                    @if($isStudentCard)
+                                        <div class="text-uppercase text-muted fw-bold mt-1" style="font-size: 0.60rem;">Ekstrakurikuler:</div>
+                                        <div class="fw-semibold text-primary text-truncate" style="font-size: 0.72rem;" title="{{ $ekskulAktif }}">
+                                            <i class="bi bi-trophy-fill text-warning me-1"></i>{{ $ekskulAktif ?: 'Belum Mengikuti' }}
+                                        </div>
+                                    @endif
                                 </div>
 
                                 {{-- QR Code Depan --}}
@@ -195,6 +202,13 @@
                             <li>Bila kartu hilang atau rusak, segera melapor ke bagian Kesiswaan / Tata Usaha.</li>
                             <li>Barang siapa menemukan kartu ini, harap mengembalikan ke alamat sekolah tertera di bawah.</li>
                         </ol>
+
+                        @if($isStudentCard && $ekskulAktif)
+                            <div class="px-2.5 py-1 mb-2 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 d-flex align-items-center justify-content-between">
+                                <span class="text-dark fw-bold" style="font-size: 0.62rem;"><i class="bi bi-award-fill text-warning me-1"></i>Ekskul Terdaftar:</span>
+                                <span class="badge bg-primary text-wrap text-start" style="font-size: 0.60rem;">{{ $ekskulAktif }}</span>
+                            </div>
+                        @endif
 
                         {{-- Tanda Tangan Digital Kepala Sekolah & QR Code Scanner Besar --}}
                         <div class="d-flex justify-content-between align-items-end pt-2 border-top">
@@ -276,6 +290,12 @@
                                         <div class="fw-bold text-primary mb-1">{{ $nomorInduk }}</div>
                                         <div class="text-muted fw-bold" style="font-size: 0.62rem;">{{ $isStudentCard ? 'KELAS / KOMPETENSI:' : 'JABATAN:' }}</div>
                                         <div class="fw-semibold text-dark text-truncate">{{ $jabatanAtauKelas }}</div>
+                                        @if($isStudentCard)
+                                            <div class="text-muted fw-bold mt-1" style="font-size: 0.60rem;">EKSTRAKURIKULER:</div>
+                                            <div class="fw-semibold text-primary text-truncate" style="font-size: 0.72rem;">
+                                                <i class="bi bi-trophy-fill text-warning me-1"></i>{{ $ekskulAktif ?: 'Belum Mengikuti' }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -297,6 +317,12 @@
                                     <li>Wajib dibawa setiap hari untuk presensi Gate &amp; Perpus.</li>
                                     <li>Dilarang dipinjamkan kepada orang lain.</li>
                                 </ol>
+                                @if($isStudentCard && $ekskulAktif)
+                                    <div class="px-2 py-1 mb-2 rounded bg-light border border-primary border-opacity-25 d-flex align-items-center justify-content-between">
+                                        <span class="text-dark fw-bold" style="font-size: 0.60rem;"><i class="bi bi-award-fill text-warning me-1"></i>Ekskul:</span>
+                                        <span class="badge bg-primary text-wrap" style="font-size: 0.60rem;">{{ $ekskulAktif }}</span>
+                                    </div>
+                                @endif
                                 <div class="text-center pt-3 border-top">
                                     <div class="text-muted" style="font-size: 0.62rem;">Kepala SMKN 2 Indramayu</div>
                                     <div class="fw-bold text-dark text-decoration-underline" style="font-size: 0.68rem;">Dra. Hj. Sri Lestari, M.Pd.</div>

@@ -123,6 +123,16 @@ class User extends Authenticatable
         return $this->hasMany(PenugasanJabatan::class, 'user_id');
     }
 
+    public function ekskulDibina(): HasMany
+    {
+        return $this->hasMany(Ekskul::class, 'pembina_guru_id');
+    }
+
+    public function ekskulDilatih(): HasMany
+    {
+        return $this->hasMany(Ekskul::class, 'pelatih_user_id');
+    }
+
     // =========================================================================
     // Role Helpers
     // =========================================================================

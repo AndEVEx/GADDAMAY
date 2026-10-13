@@ -68,6 +68,29 @@ class Siswa extends Model
         return $this->hasMany(PenugasanJabatan::class, 'siswa_id');
     }
 
+    public function ekskulAnggota(): HasMany
+    {
+        return $this->hasMany(EkskulAnggota::class, 'siswa_id');
+    }
+
+    public function ekskulPresensi(): HasMany
+    {
+        return $this->hasMany(EkskulPresensi::class, 'siswa_id');
+    }
+
+    public function getDaftarEkskulAktifAttribute(): string
+    {
+        $ekskulNames = $this->ekskulAnggota()
+            ->where('status_keanggotaan', 'aktif')
+            ->with('ekskul')
+            ->get()
+            ->pluck('ekskul.nama_ekskul')
+            ->filter()
+            ->toArray();
+
+        return !empty($ekskulNames) ? implode(', ', $ekskulNames) : 'Pramuka Wajib / Paskibra Taruna';
+    }
+
     /**
      * Total Poin Prestasi Kumulatif (Npr)
      */

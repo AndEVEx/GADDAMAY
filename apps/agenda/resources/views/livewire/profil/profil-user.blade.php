@@ -539,6 +539,47 @@
                         <div class="fw-bold text-dark">Jl. Ki Hajar Dewantara, Lemahmekar, Kec. Indramayu, Kabupaten Indramayu, Jawa Barat 45212</div>
                     </div>
                 </div>
+
+                @if($isViewingStudent)
+                    <div class="col-12 mt-3">
+                        <div class="p-3 rounded-3 border bg-white shadow-sm">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold text-dark mb-0">
+                                    <i class="bi bi-trophy-fill text-warning me-1.5"></i>Ekstrakurikuler &amp; Pengembangan Minat Bakat
+                                </h6>
+                                <span class="badge bg-primary rounded-pill">{{ count($ekskulSiswaList) }} Ekskul Diikuti</span>
+                            </div>
+
+                            @if(count($ekskulSiswaList) > 0)
+                                <div class="row g-2 mt-1">
+                                    @foreach($ekskulSiswaList as $agt)
+                                        <div class="col-md-6">
+                                            <div class="p-2.5 rounded-3 border bg-light d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center gap-2.5">
+                                                    <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                                        <i class="bi bi-award-fill"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold text-dark small">{{ $agt->ekskul->nama_ekskul }}</div>
+                                                        <div class="text-muted" style="font-size: 0.72rem;">
+                                                            {{ $agt->jabatan_anggota }} • Pembina: {{ $agt->ekskul->nama_pembina_lengkap }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="badge bg-success-subtle text-success small">{{ $agt->status_keanggotaan }}</span>
+                                                    <div class="text-muted" style="font-size: 0.68rem;">Kehadiran: {{ $agt->persentase_kehadiran }}%</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-muted small mb-0">Siswa belum terdaftar pada cabang ekstrakurikuler manapun semester ini.</p>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     @endif

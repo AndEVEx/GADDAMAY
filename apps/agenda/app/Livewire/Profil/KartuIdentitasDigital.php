@@ -20,6 +20,7 @@ class KartuIdentitasDigital extends Component
     public $nomorInduk;
     public $namaLengkap;
     public $jabatanAtauKelas;
+    public $ekskulAktif = '';
     public $qrCodeValue;
     public $viewMode = 'side-by-side'; // side-by-side or 3d-flip
 
@@ -76,6 +77,7 @@ class KartuIdentitasDigital extends Component
         $this->nomorInduk = $this->siswa->nis ?? '001001';
         $this->namaLengkap = $this->siswa->nama ?? 'Siswa SMKN 2';
         $this->jabatanAtauKelas = $this->siswa->rombel->nama_rombel ?? 'X Vokasi PPLG';
+        $this->ekskulAktif = $this->siswa ? $this->siswa->daftar_ekskul_aktif : 'Paskibraka Korps Taruna';
         // Encoding QR Code: nilai NIS siswa
         $this->qrCodeValue = (string)$this->nomorInduk;
     }
@@ -94,6 +96,7 @@ class KartuIdentitasDigital extends Component
             default => 'Tenaga Pendidik',
         };
         $this->jabatanAtauKelas = $roleLabel;
+        $this->ekskulAktif = 'Pembina / Pembimbing Ketarunaan';
         // Encoding QR Code: nilai NIP pegawai
         $this->qrCodeValue = str_replace(' ', '', $this->nomorInduk);
     }
