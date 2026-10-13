@@ -199,6 +199,9 @@
                     <a href="{{ route('literasi.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('literasi*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-broadcast me-2 text-primary"></i>Literasi Lapangan (Live)
                     </a>
+                    <a href="{{ route('ai.chatbot') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ai.chatbot*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-robot me-2 text-primary"></i>Tanya AI / Chatbot Sekolah
+                    </a>
                 @elseif(in_array($role, ['guru', 'ketua_mgmp', 'guru_piket']))
                     <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-house-fill me-2"></i>Beranda Guru
@@ -270,6 +273,9 @@
                     <a href="{{ route('literasi.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('literasi*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-broadcast me-2 text-danger"></i>Literasi Lapangan (Live)
                     </a>
+                    <a href="{{ route('ai.chatbot') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ai.chatbot*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-robot me-2 text-primary"></i>Tanya AI / Chatbot Sekolah
+                    </a>
 
                     @if($role === 'ketua_mgmp')
                         <a href="{{ route('mgmp.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.dashboard') ? 'active' : '' }}" wire:navigate>
@@ -304,6 +310,9 @@
                     <a href="{{ route('perizinan.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('perizinan*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-shield-check me-2 text-success"></i>Perizinan Siswa Terpadu
                     </a>
+                    <a href="{{ route('ai.chatbot') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('ai.chatbot*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-robot me-2 text-primary"></i>Tanya AI / Chatbot Sekolah
+                    </a>
                 @elseif($role === 'ketua_kelas')
                     <div class="text-primary small fw-bold text-uppercase px-2 mt-2 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
                         <i class="bi bi-mortarboard-fill"></i> Menu Siswa / KM
@@ -325,6 +334,9 @@
                     </a>
                     <a href="{{ route('literasi.siswa.live') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('literasi.siswa.live*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-broadcast me-2 text-danger"></i>Literasi Lapangan (Live)
+                    </a>
+                    <a href="{{ route('ai.chatbot') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('ai.chatbot*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-robot me-2 text-primary"></i>Tanya AI / Chatbot Sekolah
                     </a>
                 @endif
             </div>

@@ -50,4 +50,11 @@ return [
         ],
     ],
 
+    'ai_chatbot' => [
+        'openwebui_url' => env('OPENWEBUI_URL', env('AI_CHATBOT_URL', 'https://ai.smkn2indramayu.sch.id')),
+        'api_key' => env('OPENWEBUI_API_KEY', ''),
+        'timeout_seconds' => env('AI_CHATBOT_TIMEOUT', 4),
+        'enabled' => env('AI_CHATBOT_ENABLED', true),
+    ],
+
 ];

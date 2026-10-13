@@ -83,6 +83,7 @@ use App\Livewire\Guru\WaliKelas\MonitoringWaliKelas;
 use App\Livewire\Literasi\KelolaLiterasiSesi;
 use App\Livewire\Literasi\PresenterLiterasiLive;
 use App\Livewire\Literasi\SiswaLiterasiLive;
+use App\Livewire\Ai\AiChatbotSekolah;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -347,5 +348,13 @@ Route::middleware(['auth'])->prefix('literasi')->group(function () {
     Route::get('/presenter/{id}', PresenterLiterasiLive::class)->name('literasi.presenter');
     Route::get('/live/{id?}', SiswaLiterasiLive::class)->name('literasi.siswa.live');
 });
+
+// ============================================================
+// MODUL TANYA AI / CHATBOT SEKOLAH (PWA Text-Only Edukasi)
+// ============================================================
+Route::middleware(['auth'])->group(function () {
+    Route::get('/tanya-ai', AiChatbotSekolah::class)->name('ai.chatbot');
+});
+
 
 

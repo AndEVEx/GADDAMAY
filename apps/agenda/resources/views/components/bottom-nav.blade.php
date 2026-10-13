@@ -62,5 +62,9 @@
             <i class="bi bi-people-fill"></i>
             <span>Anggota</span>
         </a>
+        <a href="{{ route('ai.chatbot') }}" class="nav-item {{ request()->routeIs('ai.chatbot*') ? 'active' : '' }}" wire:navigate>
+            <i class="bi bi-robot"></i>
+            <span>Tanya AI</span>
+        </a>
     @endif
 </nav>
