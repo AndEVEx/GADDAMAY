@@ -205,6 +205,9 @@
                     <a href="{{ route('perpus.kelola') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('perpus*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-book-half me-2 text-info"></i>Perpus Digital (Katalog & Kelola)
                     </a>
+                    <a href="{{ route('perduptar.poin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('perduptar*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-shield-shaded me-2 text-warning"></i>Buku Saku Taruna (PERDUPTAR)
+                    </a>
                 @elseif(in_array($role, ['guru', 'ketua_mgmp', 'guru_piket']))
                     <a href="{{ route('guru.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('guru.dashboard') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-house-fill me-2"></i>Beranda Guru
@@ -287,6 +290,9 @@
                             <i class="bi bi-gear-fill me-2 text-secondary"></i>Kelola Perpus Digital
                         </a>
                     @endif
+                    <a href="{{ route('perduptar.poin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('perduptar*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-shield-shaded me-2 text-warning"></i>Buku Saku Taruna (PERDUPTAR)
+                    </a>
 
                     @if($role === 'ketua_mgmp')
                         <a href="{{ route('mgmp.dashboard') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('mgmp.dashboard') ? 'active' : '' }}" wire:navigate>
@@ -327,6 +333,9 @@
                     <a href="{{ route('perpus.katalog') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('perpus*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-book-half me-2 text-info"></i>Perpus Digital SMKN 2
                     </a>
+                    <a href="{{ route('perduptar.poin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 {{ request()->routeIs('perduptar*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-shield-shaded me-2 text-warning"></i>Buku Saku Taruna (PERDUPTAR)
+                    </a>
                 @elseif($role === 'ketua_kelas')
                     <div class="text-primary small fw-bold text-uppercase px-2 mt-2 mb-1 d-flex align-items-center gap-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
                         <i class="bi bi-mortarboard-fill"></i> Menu Siswa / KM
@@ -354,6 +363,9 @@
                     </a>
                     <a href="{{ route('perpus.katalog') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('perpus*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-book-half me-2 text-info"></i>Perpus Digital (Offline PDF)
+                    </a>
+                    <a href="{{ route('perduptar.poin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('perduptar*') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-shield-shaded me-2 text-warning"></i>Buku Saku Saya (PERDUPTAR)
                     </a>
                     <a href="{{ route('profil.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('profil.index') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-hexagon-fill me-2 text-warning"></i>Profil &amp; Hexagonal Spektrum

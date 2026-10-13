@@ -89,6 +89,7 @@ use App\Livewire\Perpus\KatalogPerpusDigital;
 use App\Livewire\Perpus\BacaBukuDigital;
 use App\Livewire\Profil\ProfilUser;
 use App\Livewire\Profil\KartuIdentitasDigital;
+use App\Livewire\Perduptar\KelolaPoinPerduptar;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -377,6 +378,14 @@ Route::middleware(['auth'])->prefix('profil')->group(function () {
     Route::get('/', ProfilUser::class)->name('profil.index');
     Route::get('/kartu', KartuIdentitasDigital::class)->name('profil.kartu');
 });
+
+// ============================================================
+// MODUL BUKU SAKU & POIN KEDISIPLINAN PERDUPTAR 2026
+// ============================================================
+Route::middleware(['auth'])->prefix('perduptar')->group(function () {
+    Route::get('/poin', KelolaPoinPerduptar::class)->name('perduptar.poin');
+});
+
 
 
 

@@ -58,6 +58,53 @@ class Siswa extends Model
         return $this->hasMany(PerpusRiwayatBaca::class, 'siswa_id');
     }
 
+    public function perduptarPoin(): HasMany
+    {
+        return $this->hasMany(PerduptarPoinSiswa::class, 'siswa_id');
+    }
+
+    /**
+     * Total Poin Prestasi Kumulatif (Npr)
+     */
+    public function getTotalPoinPrestasi(): int
+    {
+        return (int) $this->perduptarPoin()->where('tipe', 'prestasi')->sum('bobot_poin');
+    }
+
+    /**
+     * Total Poin Pelanggaran Kumulatif (Npl)
+     */
+    public function getTotalPoinPelanggaran(): int
+    {
+        return (int) abs($this->perduptarPoin()->where('tipe', 'pelanggaran')->sum('bobot_poin'));
+    }
+
+    /**
+     * Nilai Kedisiplinan Taruna (Nk = Npr - Npl) Sesuai Pasal 32 Ayat 5 PERDUPTAR 2026
+     */
+    public function getNilaiKedisiplinan(): int
+    {
+        return $this->getTotalPoinPrestasi() - $this->getTotalPoinPelanggaran();
+    }
+
+    /**
+     * Kategori Nilai Kedisiplinan Sesuai Pasal 32 Ayat 6 PERDUPTAR 2026
+     */
+    public function getKategoriKedisiplinan(): array
+    {
+        $nk = $this->getNilaiKedisiplinan();
+
+        if ($nk > 20) {
+            return ['grade' => 'A', 'label' => 'Baik Sekali', 'badge' => 'bg-success', 'status' => 'Aman'];
+        } elseif ($nk >= -5) {
+            return ['grade' => 'B', 'label' => 'Baik', 'badge' => 'bg-primary', 'status' => 'Standar Minimal'];
+        } elseif ($nk >= -20) {
+            return ['grade' => 'C', 'label' => 'Cukup', 'badge' => 'bg-warning text-dark', 'status' => 'Peringatan'];
+        } else {
+            return ['grade' => 'D', 'label' => 'Kurang', 'badge' => 'bg-danger', 'status' => 'Terancam Sanksi Berat'];
+        }
+    }
+
     public function getNamaSiswaAttribute(): string
     {
         return $this->nama ?? '';
