@@ -9,7 +9,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Layout('components.layouts.app')]
-#[Title('Tanya AI / Chatbot Sekolah - SMKN 2 Indramayu')]
+#[Title('DamAI (Digital Assistant Mu berbasis AI) - SMKN 2 Indramayu')]
 class AiChatbotSekolah extends Component
 {
     public string $openWebUiBaseUrl = '';
@@ -92,7 +92,7 @@ class AiChatbotSekolah extends Component
 
         if (empty($this->openWebUiBaseUrl) || !filter_var($this->openWebUiBaseUrl, FILTER_VALIDATE_URL)) {
             $this->isServerOnline = false;
-            $this->errorMessage = 'Alamat URL server Tanya AI belum dikonfigurasi dengan benar.';
+            $this->errorMessage = 'Alamat URL server DamAI belum dikonfigurasi dengan benar.';
             $this->isChecking = false;
             return;
         }
@@ -112,12 +112,12 @@ class AiChatbotSekolah extends Component
                 $this->errorMessage = '';
             } else {
                 $this->isServerOnline = false;
-                $this->errorMessage = 'Layanan Tanya AI sedang beristirahat atau server lokal sedang nonaktif (Kode: ' . $response->status() . ').';
+                $this->errorMessage = 'Layanan DamAI sedang beristirahat atau server lokal sekolah sedang nonaktif (Kode: ' . $response->status() . ').';
             }
         } catch (\Throwable $e) {
             // Server offline, tunnel putus, atau timeout
             $this->isServerOnline = false;
-            $this->errorMessage = 'Layanan Tanya AI sedang beristirahat atau koneksi ke server sekolah terputus.';
+            $this->errorMessage = 'Layanan DamAI sedang beristirahat atau koneksi Cloudflare Tunnel terputus.';
         }
 
         $this->isChecking = false;
@@ -131,7 +131,7 @@ class AiChatbotSekolah extends Component
         $this->checkServerHealth();
         if ($this->isServerOnline) {
             $this->dispatch('iframe-reload');
-            session()->flash('status', 'Koneksi ke Layanan Tanya AI berhasil terhubung kembali!');
+            session()->flash('status', 'Koneksi ke DamAI berhasil terhubung kembali!');
         }
     }
 

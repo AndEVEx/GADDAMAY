@@ -300,7 +300,7 @@
                 </div>
             </div>
 
-            {{-- Modul 9: Tanya AI / Chatbot Sekolah (Open-WebUI Text Only) --}}
+            {{-- Modul 9: DamAI (Digital Assistant Mu berbasis AI) --}}
             <div class="col-md-6 col-lg-4">
                 <div class="module-card p-4 h-100 d-flex flex-column justify-content-between border-primary border-2 shadow-sm" style="border-color: #0284c7 !important;">
                     <div>
@@ -309,17 +309,17 @@
                                 <i class="bi bi-robot fs-3"></i>
                             </div>
                             <span class="badge bg-primary text-white px-2 py-1 small">
-                                <i class="bi bi-chat-quote-fill me-1"></i>AI TEKS EDUKASI
+                                <i class="bi bi-chat-quote-fill me-1"></i>DAMAI EDUKASI
                             </span>
                         </div>
-                        <h5 class="fw-bold mb-2 text-primary">9. Tanya AI / Chatbot Sekolah</h5>
+                        <h5 class="fw-bold mb-2 text-primary">9. DamAI (Chatbot Sekolah)</h5>
                         <p class="text-muted small mb-3">
-                            Teman belajar digital interaktif untuk tanya jawab materi, penjelasan konsep sulit, dan ringkasan teks pelajaran secara privat &amp; aman berbasis Open-WebUI lokal.
+                            <strong>Digital Assistant Mu berbasis AI</strong> untuk tanya jawab materi, penjelasan konsep sulit, dan ringkasan teks pelajaran secara privat &amp; aman berbasis Open-WebUI lokal.
                         </p>
                     </div>
                     <div class="pt-3 border-top d-flex gap-2">
                         <a href="{{ route('ai.chatbot') }}" class="btn btn-primary text-white btn-sm flex-fill fw-bold shadow-sm">
-                            Buka Tanya AI <i class="bi bi-arrow-right ms-1"></i>
+                            Buka DamAI <i class="bi bi-arrow-right ms-1"></i>
                         </a>
                     </div>
                 </div>

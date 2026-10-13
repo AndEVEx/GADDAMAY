@@ -9,14 +9,14 @@
                     </div>
                     <div>
                         <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <h5 class="fw-bold mb-0 text-dark">Tanya AI / Chatbot Sekolah</h5>
+                            <h5 class="fw-bold mb-0 text-dark">DamAI <span class="fw-semibold text-primary" style="font-size: 0.88rem;">(Digital Assistant Mu berbasis AI)</span></h5>
                             <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small">
                                 <i class="bi bi-chat-quote-fill me-1"></i>Text-Only Edukasi
                             </span>
                             @if($isServerOnline)
                                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 small d-flex align-items-center gap-1">
                                     <span class="spinner-grow spinner-grow-sm text-success" style="width: 6px; height: 6px;" role="status"></span>
-                                    Server AI Online
+                                    DamAI Online
                                 </span>
                             @else
                                 <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2.5 py-1 small">
@@ -25,7 +25,7 @@
                             @endif
                         </div>
                         <p class="text-muted small mb-0 mt-1">
-                            Teman belajar digital interaktif untuk tanya jawab materi, penjelasan konsep, dan ringkasan teks pelajaran.
+                            Sahabat digital interaktif SMKN 2 Indramayu untuk tanya jawab materi, penjelasan konsep, dan ringkasan teks pelajaran.
                         </p>
                     </div>
                 </div>
@@ -62,10 +62,10 @@
         <div class="bg-light border-top px-3 py-2">
             <div class="d-flex align-items-center gap-2 overflow-x-auto no-scrollbar py-1">
                 <span class="small fw-bold text-muted text-nowrap" style="font-size: 0.75rem;">
-                    <i class="bi bi-stars text-warning me-1"></i>Ide Tanya Teks:
+                    <i class="bi bi-stars text-warning me-1"></i>Tanya DamAI:
                 </span>
                 @foreach($quickPrompts as $prompt)
-                    <button type="button" onclick="navigator.clipboard.writeText('{{ $prompt['text'] }}'); alert('Teks disalin! Silakan tempelkan (paste) di kolom percakapan chatbot.');" class="btn btn-white bg-white border border-secondary border-opacity-25 btn-sm rounded-pill py-1 px-2.5 text-nowrap d-flex align-items-center gap-1.5 shadow-2xs hover-shadow" style="font-size: 0.75rem;">
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ $prompt['text'] }}'); alert('Teks disalin! Silakan tempelkan (paste) di kolom percakapan DamAI.');" class="btn btn-white bg-white border border-secondary border-opacity-25 btn-sm rounded-pill py-1 px-2.5 text-nowrap d-flex align-items-center gap-1.5 shadow-2xs hover-shadow" style="font-size: 0.75rem;">
                         <i class="bi {{ $prompt['icon'] }} text-primary"></i>
                         <span class="text-secondary fw-semibold">{{ $prompt['title'] }}</span>
                     </button>
@@ -85,7 +85,7 @@
                         <i class="bi bi-shield-lock-fill text-success"></i>
                         <span>Koneksi Aman Cloudflare Tunnel &bull; Khusus Obrolan Teks Edukatif (Unduhan & Eksekusi Kode Dibatasi)</span>
                     </div>
-                    <a href="javascript:void(0)" onclick="document.getElementById('openwebui-frame').src += ''" class="text-decoration-none text-muted" title="Muat ulang halaman chat">
+                    <a href="javascript:void(0)" onclick="document.getElementById('openwebui-frame').src += ''" class="text-decoration-none text-muted" title="Muat ulang layar DamAI">
                         <i class="bi bi-arrow-repeat"></i> Refresh Layar
                     </a>
                 </div>
@@ -95,7 +95,7 @@
                     <div class="spinner-border text-primary mb-3" style="width: 2.5rem; height: 2.5rem;" role="status">
                         <span class="visually-hidden">Memuat...</span>
                     </div>
-                    <h6 class="fw-bold text-dark mb-1">Membuka Ruang Tanya AI Sekolah...</h6>
+                    <h6 class="fw-bold text-dark mb-1">Membuka Ruang Diskusi bersama DamAI...</h6>
                     <p class="text-muted small mb-0">Menyinkronkan sesi privat {{ Auth::user()->name }} via server AI lokal</p>
                 </div>
 
@@ -108,7 +108,7 @@
                     sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                     allow="clipboard-write"
                     onload="document.getElementById('iframe-skeleton').style.display='none';"
-                    title="Open-WebUI Chatbot Sekolah">
+                    title="DamAI - Digital Assistant Mu berbasis AI">
                 </iframe>
             </div>
         @else
@@ -123,7 +123,7 @@
                     </span>
                 </div>
 
-                <h4 class="fw-bold text-dark mb-2">Layanan Tanya AI Sedang Beristirahat</h4>
+                <h4 class="fw-bold text-dark mb-2">DamAI Sedang Beristirahat</h4>
                 <p class="text-muted small mb-4 mx-auto" style="max-width: 520px; line-height: 1.6;">
                     {{ $errorMessage ?: 'Koneksi ke server AI sekolah saat ini terputus. Mungkin komputer server lokal di lab sekolah sedang dinonaktifkan di luar jam belajar, atau jaringan Cloudflare Tunnel sedang dalam pemeliharaan berkala.' }}
                 </p>
