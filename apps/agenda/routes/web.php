@@ -84,6 +84,9 @@ use App\Livewire\Literasi\KelolaLiterasiSesi;
 use App\Livewire\Literasi\PresenterLiterasiLive;
 use App\Livewire\Literasi\SiswaLiterasiLive;
 use App\Livewire\Ai\AiChatbotSekolah;
+use App\Livewire\Perpus\KelolaPerpusDigital;
+use App\Livewire\Perpus\KatalogPerpusDigital;
+use App\Livewire\Perpus\BacaBukuDigital;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -355,6 +358,16 @@ Route::middleware(['auth'])->prefix('literasi')->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/tanya-ai', AiChatbotSekolah::class)->name('ai.chatbot');
 });
+
+// ============================================================
+// MODUL PERPUSTAKAAN DIGITAL (PWA Offline PDF & 3D Page Flip)
+// ============================================================
+Route::middleware(['auth'])->prefix('perpus')->group(function () {
+    Route::get('/katalog', KatalogPerpusDigital::class)->name('perpus.katalog');
+    Route::get('/kelola', KelolaPerpusDigital::class)->name('perpus.kelola');
+    Route::get('/baca/{id}', BacaBukuDigital::class)->name('perpus.baca');
+});
+
 
 
 

@@ -73,7 +73,7 @@
             <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill text-uppercase">
                 Pusat Navigasi Layanan
             </span>
-            <h2 class="fw-bold mt-2 text-dark">8 Modul Terpadu GADDAMAY</h2>
+            <h2 class="fw-bold mt-2 text-dark">10 Modul Terpadu GADDAMAY</h2>
             <p class="text-muted" style="max-width: 600px; margin: 0 auto;">
                 Satu sistem terintegrasi yang melayani seluruh siklus kegiatan siswa, guru, orang tua, dan mitra industri sekolah.
             </p>
@@ -320,6 +320,34 @@
                     <div class="pt-3 border-top d-flex gap-2">
                         <a href="{{ route('ai.chatbot') }}" class="btn btn-primary text-white btn-sm flex-fill fw-bold shadow-sm">
                             Buka DamAI <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Modul 10: Perpustakaan Digital Vokasi (Offline PDF & 3D Page-Flip) --}}
+            <div class="col-md-6 col-lg-4">
+                <div class="module-card p-4 h-100 d-flex flex-column justify-content-between border-teal border-2 shadow-sm" style="border-color: #0d9488 !important;">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="rounded-3 p-3 shadow-sm text-white" style="background: linear-gradient(135deg, #0d9488, #0284c7);">
+                                <i class="bi bi-book-half fs-3"></i>
+                            </div>
+                            <span class="badge text-white px-2 py-1 small" style="background-color: #0d9488;">
+                                <i class="bi bi-cloud-arrow-down-fill me-1"></i>PWA OFFLINE
+                            </span>
+                        </div>
+                        <h5 class="fw-bold mb-2" style="color: #0d9488;">10. Perpustakaan Digital</h5>
+                        <p class="text-muted small mb-3">
+                            Koleksi e-book modul kurikulum &amp; literasi dengan <strong>efek lipatan buku 3D (*page-flip*)</strong>, <strong>simpan offline di HP (IndexedDB)</strong>, auto-resume penanda halaman, dan panel Kepala Perpustakaan.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-top d-flex gap-2">
+                        <a href="{{ route('perpus.katalog') }}" class="btn text-white btn-sm flex-fill fw-bold shadow-sm" style="background-color: #0d9488;">
+                            Katalog Buku <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                        <a href="{{ route('perpus.kelola') }}" class="btn btn-outline-teal btn-sm flex-fill fw-semibold" style="border-color: #0d9488; color: #0d9488;">
+                            Panel Perpus
                         </a>
                     </div>
                 </div>

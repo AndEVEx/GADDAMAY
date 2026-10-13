@@ -53,6 +53,11 @@ class Siswa extends Model
         return $this->hasMany(LiterasiPresensiSiswa::class, 'siswa_id');
     }
 
+    public function riwayatBacaPerpus(): HasMany
+    {
+        return $this->hasMany(PerpusRiwayatBaca::class, 'siswa_id');
+    }
+
     public function getNamaSiswaAttribute(): string
     {
         return $this->nama ?? '';

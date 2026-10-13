@@ -147,6 +147,11 @@ class User extends Authenticatable
         return $this->role === 'admin' || $this->tugasTambahan()->where('jenis_tugas', 'koordinator_literasi')->where('is_active', true)->exists();
     }
 
+    public function isKepalaPerpustakaan(): bool
+    {
+        return $this->role === 'admin' || $this->tugasTambahan()->whereIn('jenis_tugas', ['kepala_perpustakaan', 'petugas_perpustakaan'])->where('is_active', true)->exists();
+    }
+
     public function isKetuaMgmp(): bool
     {
         return $this->role === 'ketua_mgmp';
