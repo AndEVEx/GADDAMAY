@@ -87,6 +87,8 @@ use App\Livewire\Ai\AiChatbotSekolah;
 use App\Livewire\Perpus\KelolaPerpusDigital;
 use App\Livewire\Perpus\KatalogPerpusDigital;
 use App\Livewire\Perpus\BacaBukuDigital;
+use App\Livewire\Profil\ProfilUser;
+use App\Livewire\Profil\KartuIdentitasDigital;
 
 // ============================================================
 // LIVEWIRE FILE UPLOAD OVERRIDE ROUTES (Catch all livewire upload paths)
@@ -367,6 +369,15 @@ Route::middleware(['auth'])->prefix('perpus')->group(function () {
     Route::get('/kelola', KelolaPerpusDigital::class)->name('perpus.kelola');
     Route::get('/baca/{id}', BacaBukuDigital::class)->name('perpus.baca');
 });
+
+// ============================================================
+// MODUL PROFIL LENGKAP & KARTU IDENTITAS DIGITAL (2 MUKA QR)
+// ============================================================
+Route::middleware(['auth'])->prefix('profil')->group(function () {
+    Route::get('/', ProfilUser::class)->name('profil.index');
+    Route::get('/kartu', KartuIdentitasDigital::class)->name('profil.kartu');
+});
+
 
 
 

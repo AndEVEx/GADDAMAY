@@ -355,6 +355,12 @@
                     <a href="{{ route('perpus.katalog') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('perpus*') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-book-half me-2 text-info"></i>Perpus Digital (Offline PDF)
                     </a>
+                    <a href="{{ route('profil.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('profil.index') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-hexagon-fill me-2 text-warning"></i>Profil &amp; Hexagonal Spektrum
+                    </a>
+                    <a href="{{ route('profil.kartu') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('profil.kartu') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-qr-code-scan me-2 text-success"></i>Kartu Pelajar (2 Muka QR)
+                    </a>
                 @endif
             </div>
 
@@ -378,6 +384,14 @@
                     </div>
 
                     <div class="list-group list-group-flush">
+                        <a href="{{ route('profil.index') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2 {{ request()->routeIs('profil.index') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-person-badge-fill text-primary me-2 fs-6"></i>
+                            <span class="small fw-semibold">Profil &amp; Hexagonal Spektrum</span>
+                        </a>
+                        <a href="{{ route('profil.kartu') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2 {{ request()->routeIs('profil.kartu') ? 'active' : '' }}" wire:navigate>
+                            <i class="bi bi-qr-code-scan text-success me-2 fs-6"></i>
+                            <span class="small fw-semibold">Kartu Siswa / Pegawai (2 Muka)</span>
+                        </a>
                         <button type="button" class="list-group-item list-group-item-action border-0 rounded mb-1 d-flex align-items-center py-2" data-bs-toggle="modal" data-bs-target="#modalTextSize">
                             <i class="bi bi-fonts text-primary me-2 fs-6"></i>
                             <span class="small">Ukuran Teks / Tampilan</span>
