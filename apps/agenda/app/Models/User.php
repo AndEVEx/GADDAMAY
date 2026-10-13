@@ -118,6 +118,11 @@ class User extends Authenticatable
         return $this->hasMany(TugasTambahanGuru::class, 'guru_id');
     }
 
+    public function penugasanJabatan(): HasMany
+    {
+        return $this->hasMany(PenugasanJabatan::class, 'user_id');
+    }
+
     // =========================================================================
     // Role Helpers
     // =========================================================================

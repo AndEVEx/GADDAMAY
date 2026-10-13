@@ -63,6 +63,11 @@ class Siswa extends Model
         return $this->hasMany(PerduptarPoinSiswa::class, 'siswa_id');
     }
 
+    public function penugasanJabatan(): HasMany
+    {
+        return $this->hasMany(PenugasanJabatan::class, 'siswa_id');
+    }
+
     /**
      * Total Poin Prestasi Kumulatif (Npr)
      */

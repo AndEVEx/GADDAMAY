@@ -76,6 +76,7 @@ use App\Livewire\Lms\Siswa\MyLearningDashboard;
 use App\Livewire\Ujikom\Siswa\PendaftaranUjikomSiswa;
 use App\Livewire\Ujikom\Admin\VerifikasiPendaftaranUjikom;
 use App\Livewire\Admin\ManajemenTugasTambahanGuru;
+use App\Livewire\Admin\ManajemenJabatanTerpadu;
 use App\Livewire\Lms\Fisik\KelolaTesFisikSiswa;
 use App\Livewire\Lms\Tka\KelolaLatihanTka;
 use App\Livewire\Lms\Tka\SimulasiTkaSiswa;
@@ -244,6 +245,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/live-absensi', LiveAbsensiSiswa::class)->name('admin.live-absensi');
     Route::get('/rekap-absensi', RekapAbsensiAdmin::class)->name('admin.rekap-absensi');
     Route::get('/tugas-tambahan', ManajemenTugasTambahanGuru::class)->name('admin.tugas-tambahan');
+    Route::get('/jabatan-terpadu', ManajemenJabatanTerpadu::class)->name('admin.jabatan-terpadu');
 
     // Direct Form Upload Fallbacks (Fail-safe HTTP POST routes)
     Route::post('/direct-import-jadwal', [DirectImportController::class, 'importJadwal'])->name('admin.direct-import-jadwal');

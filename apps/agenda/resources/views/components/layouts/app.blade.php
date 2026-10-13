@@ -176,6 +176,9 @@
                     <a href="{{ route('admin.tugas-tambahan') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.tugas-tambahan') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-person-workspace me-2 text-info"></i>Tugas Tambahan Guru
                     </a>
+                    <a href="{{ route('admin.jabatan-terpadu') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.jabatan-terpadu') ? 'active' : '' }}" wire:navigate>
+                        <i class="bi bi-diagram-3-fill me-2 text-primary"></i>Jabatan Guru &amp; Siswa (Delegasi)
+                    </a>
                     <a href="{{ route('admin.verifikasi-izin') }}" class="list-group-item list-group-item-action border-0 rounded mb-1 py-2 {{ request()->routeIs('admin.verifikasi-izin') ? 'active' : '' }}" wire:navigate>
                         <i class="bi bi-patch-check-fill me-2 text-warning"></i>Verifikasi Izin Guru
                     </a>
